@@ -7,69 +7,148 @@ Imports System.Runtime.InteropServices
 Imports System.ComponentModel
 Imports System.IO
 
+Public Structure HeroInfo
+    Public Rec As Rectangle
+    Public Color As Color
+    Public OutlineColor As Color
+    Public MoveLeft As Boolean
+    Public MoveRight As Boolean
+    Public MoveUp As Boolean
+    Public MoveDown As Boolean
+    Public Speed As Integer
+    Public Life As Integer
+    Public MaxLife As Integer
+    Public Attack As Integer
+    Public Initiative As Boolean
+    Public CastMagic As Boolean
+    Public Magic As Integer
+    Public MaxMagic As Integer
+    Public MapColor As Color
+    Public MapOutlineColor As Color
+    Public Hit As Boolean
+    Public HitTimer As Integer
+End Structure
+Public Structure MonsterInfo
+    Public Rec As Rectangle
+    Public Color As Color
+    Public OutlineColor As Color
+    Public Speed As Integer
+    Public Life As Integer
+    Public MaxLife As Integer
+    Public Attack As Integer
+    Public Hit As Boolean
+End Structure
+Public Structure WallInfo
+    Public Rec As Rectangle
+    Public Color As Color
+    Public Revealed As Boolean 'If true the wall will be seen on the map.
+    Public MapColor As Color
+    Public MapOutlineColor As Color
+End Structure
+Public Structure PotionInfo
+    Public Rec As Rectangle
+    Public Color As Color
+    Public OutlineColor As Color
+    Public Active As Boolean 'If true the potion will be seen and can be used in the level.
+    Public Life As Integer
+End Structure
+Public Enum LootEnum As Integer
+    None = 0
+    LifePotion = 1 'Restores the heros life points. Keeps the hero alive.
+    Elixir = 2 'Adds to max life points of hero. Make the hero tougher.
+    MagicPotion = 3 'Restores the heros magic points. Keep the hero casting.
+    SpellBook = 4 'Adds to max magic points of hero. Makes casting more powerful.
+    Armor = 5 'Adds to armor points of hero. Makes the hero tougher.
+    Weapon = 6 'Adds to attack points of hero. Makes the hero more deadly.
+    Chest = 7
+    Gold = 8
+End Enum
+
+Public Enum DirectionEnum As Integer
+    None = 0
+    Right = 1
+    Left = 2
+    Up = 3
+    Down = 4
+    RightUP = 5
+    RightDown = 6
+    LeftUp = 7
+    LeftDown = 8
+End Enum
 Public Enum MCI_NOTIFY As Integer
     SUCCESSFUL = &H1
     SUPERSEDED = &H2
     ABORTED = &H4
     FAILURE = &H8
 End Enum
-
-
-
 Public Class Form1
+
+    'Set up Game Sound
     Private WithEvents GS As New GameSounds
 
+    'Public Enum DirectionEnum As Integer
+    '    None = 0
+    '    Right = 1
+    '    Left = 2
+    '    Up = 3
+    '    Down = 4
+    '    RightUP = 5
+    '    RightDown = 6
+    '    LeftUp = 7
+    '    LeftDown = 8
+    'End Enum
 
-    Public Structure HeroInfo
-        Public Rec As Rectangle
-        Public Color As Color
-        Public OutlineColor As Color
-        Public MoveLeft As Boolean
-        Public MoveRight As Boolean
-        Public MoveUp As Boolean
-        Public MoveDown As Boolean
-        Public Speed As Integer
-        Public Life As Integer
-        Public MaxLife As Integer
-        Public Attack As Integer
-        Public Initiative As Boolean
-        Public CastMagic As Boolean
-        Public Magic As Integer
-        Public MaxMagic As Integer
-        Public MapColor As Color
-        Public MapOutlineColor As Color
-        Public Hit As Boolean
-        Public HitTimer As Integer
-    End Structure
+
+    'Public Structure HeroInfo
+    '    Public Rec As Rectangle
+    '    Public Color As Color
+    '    Public OutlineColor As Color
+    '    Public MoveLeft As Boolean
+    '    Public MoveRight As Boolean
+    '    Public MoveUp As Boolean
+    '    Public MoveDown As Boolean
+    '    Public Speed As Integer
+    '    Public Life As Integer
+    '    Public MaxLife As Integer
+    '    Public Attack As Integer
+    '    Public Initiative As Boolean
+    '    Public CastMagic As Boolean
+    '    Public Magic As Integer
+    '    Public MaxMagic As Integer
+    '    Public MapColor As Color
+    '    Public MapOutlineColor As Color
+    '    Public Hit As Boolean
+    '    Public HitTimer As Integer
+    'End Structure
 
     Private OurHero As HeroInfo
 
-    Public Structure MonsterInfo
-        Public Rec As Rectangle
-        Public Color As Color
-        Public OutlineColor As Color
-        Public Speed As Integer
-        Public Life As Integer
-        Public MaxLife As Integer
-        Public Attack As Integer
-        Public Hit As Boolean
-    End Structure
-    Public Structure WallInfo
-        Public Rec As Rectangle
-        Public Color As Color
-        Public Revealed As Boolean 'If true the wall will be seen on the map.
-        Public MapColor As Color
-        Public MapOutlineColor As Color
-    End Structure
+    'Public Structure MonsterInfo
+    '    Public Rec As Rectangle
+    '    Public Color As Color
+    '    Public OutlineColor As Color
+    '    Public Speed As Integer
+    '    Public Life As Integer
+    '    Public MaxLife As Integer
+    '    Public Attack As Integer
+    '    Public Hit As Boolean
+    'End Structure
+    'Public Structure WallInfo
+    '    Public Rec As Rectangle
+    '    Public Color As Color
+    '    Public Revealed As Boolean 'If true the wall will be seen on the map.
+    '    Public MapColor As Color
+    '    Public MapOutlineColor As Color
+    'End Structure
 
     Private Wall As WallInfo
-    Public Structure PotionInfo
-        Public Rec As Rectangle
-        Public Color As Color
-        Public OutlineColor As Color
-        Public Active As Boolean 'If true the potion will be seen and can be used in the level.
-        Public Life As Integer
-    End Structure
+    'Public Structure PotionInfo
+    '    Public Rec As Rectangle
+    '    Public Color As Color
+    '    Public OutlineColor As Color
+    '    Public Active As Boolean 'If true the potion will be seen and can be used in the level.
+    '    Public Life As Integer
+    'End Structure
 
     Private Potion As PotionInfo
 
@@ -108,10 +187,10 @@ Public Class Form1
     Private Monster_Life As Integer = Monster_LifeMAX
     Private Monster_Attack As Integer = 2
     Private Monster_Hit As Boolean = False
-    Private Monster_Speed As Integer = 3
+    Private Monster_Speed As Integer = 2
+    Private Monster_AttackTimer As Integer = 0
 
-
-
+    Private Monster_Font As New Font("Arial", 10)
 
 
 
@@ -131,11 +210,11 @@ Public Class Form1
     Private Projectile As New Rectangle(0, 0, 75, 75)
     Private ProjectileInflight As Boolean = False
     Private Projectile_Brush As New SolidBrush(Color.Yellow)
-    Private Projectile_Max_Distance As Integer = 200
-    Private Projectile_Attack As Integer = 2
+    Private Projectile_Max_Distance As Integer = 300
+    Private Projectile_Attack As Integer = 12
     Private Projectile_Speed As Integer = 50
 
-
+    Private Projectile_Direction As DirectionEnum
 
 
 
@@ -228,6 +307,16 @@ Public Class Form1
     Dim media2 As New Media.SoundPlayer(sound)
 
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+
+
+        'Dim ms As New MemoryStream
+        'My.Resources.level_music.CopyTo(ms)
+        'Write_AudioFile_to_Path(ms, Application.StartupPath & "\Test_music.wav")
+        'ms.Dispose()
+
+
+
+
         'media.Load()
         'media2.Load()
 
@@ -274,10 +363,12 @@ Public Class Form1
 
         GS.AddSound("Music", Application.StartupPath & "level_music.mp3") 'adds and open a Background music file
         GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3") 'adds and open a Laser Gun sound
+        GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3") 'adds and open a Laser Gun sound
+        'Monster Alien Roar Aggressive
 
-
-        GS.SetVolume("Music", 300)
+        GS.SetVolume("Music", 400)
         GS.SetVolume("Magic", 900)
+        GS.SetVolume("Monster", 900)
 
         GS.Play("Music") 'play the Music
 
@@ -293,8 +384,8 @@ Public Class Form1
 
 
 
-        Wall.Rec.X = 1100
-        Wall.Rec.Y = 600
+        Wall.Rec.X = 900
+        Wall.Rec.Y = 300
         Wall.Rec.Width = 100
         Wall.Rec.Height = 100
         Wall.Color = Color.FromArgb(255, 164, 164, 164)
@@ -333,9 +424,8 @@ Public Class Form1
 
         'Frame rate for the display timer.
         Timer1.Interval = 35
-        'start the game loop
 
-        'Frame rate for the display timer.
+        'Frame rate for the game timer.
         Timer2.Interval = 18
 
         'start the game loop.
@@ -398,6 +488,13 @@ Public Class Form1
 
                     If Monster_Life > 0 Then
                         goBuf1.FillRectangle(Monster_Brush, Monster)
+
+
+                        goBuf1.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
+
+
+
+
                     End If
 
                     If ProjectileInflight = True Then
@@ -440,11 +537,19 @@ Public Class Form1
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
 
-                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "     Undead - Attack:" & Monster_Attack.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                    'goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "     Undead - Attack:" & Monster_Attack.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+
+                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - 10000 : Gold ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+
 
                     'To fix DrawString error: "Parameters not valid." I had to set the compositing mode to source over.
 
                     goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport_Size.Height - 30)
+
+                    If OurHero.Life < 1 And Timer2.Enabled = True Then
+                        goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport_Size.Width, Viewport_Size.Height)
+                        goBuf1.DrawString("Died", PauseFont, drawBrush, Viewport_Size.Width \ 2, Viewport_Size.Height \ 2, Center_String)
+                    End If
 
 
                     If Timer2.Enabled = False Then
@@ -481,7 +586,14 @@ Public Class Form1
                     End If
 
                     If Monster_Life > 0 Then
+
+
                         goBuf2.FillRectangle(Monster_Brush, Monster)
+
+                        goBuf2.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
+
+                        'Monster_Font
+
                     End If
 
                     If ProjectileInflight = True Then
@@ -532,11 +644,26 @@ Public Class Form1
 
                     Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
 
-                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "     Undead - Attack:" & Monster_Attack.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                    'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "     Undead - Attack:" & Monster_Attack.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
                     'To fix draw string error: "Parameters not valid." I had to set the compositing mode to source over.
+
+
+
+
+                    'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+
+                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - 10000 : Gold ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+
+
 
                     'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
                     goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport_Size.Height - 30)
+
+
+                    If OurHero.Life < 1 And Timer2.Enabled = True Then
+                        goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport_Size.Width, Viewport_Size.Height)
+                        goBuf2.DrawString("Died", PauseFont, drawBrush, Viewport_Size.Width \ 2, Viewport_Size.Height \ 2, Center_String)
+                    End If
 
                     If Timer2.Enabled = False Then
                         goBuf2.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport_Size.Width, Viewport_Size.Height)
@@ -686,6 +813,47 @@ Public Class Form1
                 End If
             End If
 
+            ''Hero Shots********************************************************* 
+            ''ShootLeft
+
+            ''Projectile_Direction
+            'If CtrlDown = True And MoveLeft = True And ProjectileInflight = False Then
+            '    Projectile = OurHero.Rec
+            '    ProjectileInflight = True
+            '    GS.Play("Magic")
+            'End If
+            'If ProjectileInflight = True Then
+            '    If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+            '        'Move projectile to the left.
+            '        Projectile.X -= Projectile_Speed
+            '        'Is the monster alive?
+            '        If Monster_Life > 0 Then
+            '            'Yes, the monster is alive.
+            '            'Is the hero touching the monster?
+            '            If Projectile.IntersectsWith(Monster) = True Then
+            '                'Yes, the hero is touching the monster.
+            '                Monster_Hit = True
+            '                'ProjectileInflight = False
+            '                'Attack the monsters life points directly.
+            '                Monster_Life -= Projectile_Attack
+            '                If Monster_Life < 0 Then
+            '                    Monster_Life = 0
+            '                End If
+            '                'Knock monster to the left of hero.
+            '                Monster.X -= CInt(Projectile_Speed / 3)
+            '            End If
+            '        End If
+            '    Else
+            '        ProjectileInflight = False
+            '    End If
+            'End If
+            ''*************************************************************************
+
+
+
+
+
+
             If MoveRight = True Then
                 'Move hero to the right.
                 OurHero.Rec.X += OurHero.Speed
@@ -717,38 +885,38 @@ Public Class Form1
                 End If
             End If
 
-            'Hero Shots********************************************************* 
-            'ShootRight
-            If CtrlDown = True And MoveRight = True And ProjectileInflight = False Then
-                Projectile = OurHero.Rec
-                ProjectileInflight = True
-                GS.Play("Magic")
-            End If
-            If ProjectileInflight = True Then
-                If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
-                    Projectile.X += Projectile_Speed
-                    'Is the monster alive?
-                    If Monster_Life > 0 Then
-                        'Yes, the monster is alive.
-                        'Is the hero touching the monster?
-                        If Projectile.IntersectsWith(Monster) = True Then
-                            'Yes, the hero is touching the monster.
-                            Monster_Hit = True
-                            'ProjectileInflight = False
-                            'Attack the monsters life points directly.
-                            Monster_Life -= Projectile_Attack
-                            If Monster_Life < 0 Then
-                                Monster_Life = 0
-                            End If
-                            'Knock monster to the right of hero.
-                            Monster.X += CInt(Projectile_Speed / 3)
-                        End If
-                    End If
-                Else
-                    ProjectileInflight = False
-                End If
-            End If
-            '*************************************************************************
+            ''Hero Shots********************************************************* 
+            ''ShootRight
+            'If CtrlDown = True And MoveRight = True And ProjectileInflight = False Then
+            '    Projectile = OurHero.Rec
+            '    ProjectileInflight = True
+            '    GS.Play("Magic")
+            'End If
+            'If ProjectileInflight = True Then
+            '    If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+            '        Projectile.X += Projectile_Speed
+            '        'Is the monster alive?
+            '        If Monster_Life > 0 Then
+            '            'Yes, the monster is alive.
+            '            'Is the hero touching the monster?
+            '            If Projectile.IntersectsWith(Monster) = True Then
+            '                'Yes, the hero is touching the monster.
+            '                Monster_Hit = True
+            '                'ProjectileInflight = False
+            '                'Attack the monsters life points directly.
+            '                Monster_Life -= Projectile_Attack
+            '                If Monster_Life < 0 Then
+            '                    Monster_Life = 0
+            '                End If
+            '                'Knock monster to the right of hero.
+            '                Monster.X += CInt(Projectile_Speed / 3)
+            '            End If
+            '        End If
+            '    Else
+            '        ProjectileInflight = False
+            '    End If
+            'End If
+            ''*************************************************************************
 
             If MoveUp = True Then
                 'Move hero up.
@@ -813,6 +981,9 @@ Public Class Form1
                 End If
             End If
 
+
+            Do_Hero_Shots()
+
         End If
 
 
@@ -823,9 +994,7 @@ Public Class Form1
 
             'Proximity Based Chase Behavior
             'Is the monster near the hero?
-            'If Distance_Between_Points(Monster.Location, Hero.Location) < Viewport_Size.Height \ 2 Then
             If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < Viewport_Size.Width Then
-
                 'Yes, the monster is near the hero.
 
                 Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
@@ -840,7 +1009,7 @@ Public Class Form1
                     If Monster_Center_X < Hero_Center_X Then
                         'Yes, the monster is to the left of the hero.
 
-                        'Move monster to the right.
+                        'Move Monster Right*****************************************************************************
                         'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
                         'Is the monster close to the hero?
                         If Horizontal_Distance(Monster_Center_X, Hero_Center_X) > 8 Then
@@ -852,9 +1021,9 @@ Public Class Form1
                             'Move the monster to the right slowly.
                             Monster.X += 1
                         End If
+                        '***********************************************************************************************
 
-
-                        'Attack Right
+                        'Attack Right***********************************************************************************
                         'Is the monster touching the hero?
                         If Monster.IntersectsWith(OurHero.Rec) = True Then
                             'Yes, the monster is touching the hero.
@@ -864,29 +1033,55 @@ Public Class Form1
 
                             If OurHero.Initiative = False Then
 
+                                'GS.Play("Monster") 'play the Music
+
                                 'Attack the heros life points directly.
                                 OurHero.Life -= Monster_Attack
+
+                                OurHero.Hit = True
+
+
+                                If GS.IsPlaying("Monster") = False Then
+                                    GS.Play("Monster") 'play the Music
+                                End If
+                                'If Monster_AttackTimer = 0 Then
+                                '        GS.Play("Monster") 'play the Music
+                                '        Monster_AttackTimer += 1
+                                '    ElseIf Monster_AttackTimer < 4 Then
+                                '        Monster_AttackTimer += 1
+                                '    Else
+                                '        Monster_AttackTimer = 0
+                                '    End If
+
+
+
 
                                 'Knock hero to the right of monster.
                                 OurHero.Rec.X = Monster.X + Monster.Width + 16
 
-                                'is the hero in a wall?
+                                'Is the hero touching a wall?
                                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the hero is touching a wall.
 
                                     'Knock hero to the left of wall.
                                     OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 16
 
+                                    'Knock the monster to the left of the hero.
+                                    Monster.X = OurHero.Rec.X - OurHero.Rec.Width - 8
+
                                 End If
 
                             End If
+
                         End If
 
-
-
+                        '********************************************************************************
                     Else
+
                         'No, the monster is to the right of the hero.
 
                         'Move the monster to the left.
+                        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
                         'Is the monster close to the hero?
                         If Math.Abs(Monster.X + (Monster.Width \ 2) - (OurHero.Rec.X + OurHero.Rec.Width \ 2)) > 8 Then
                             'No, the monster is not close to the hero.
@@ -897,15 +1092,9 @@ Public Class Form1
                             'Move the monster to the left slowly.
                             Monster.X -= 1
                         End If
+                        '***********************************************************************************************
 
-
-
-
-                        'If Monster.IntersectsWith(Hero) = True Then
-                        '    Monster.X = Hero.X + Hero.Width + 1
-                        'End If
-
-                        'Attack Left
+                        'Attack Left************************************************************************************
                         'Is the monster touching the hero?
                         If Monster.IntersectsWith(OurHero.Rec) = True Then
                             'Yes, the monster is touching the hero.
@@ -923,30 +1112,20 @@ Public Class Form1
                                 'Knock hero to the left of monster.
                                 OurHero.Rec.X = Monster.X - Monster.Width - 16
 
-                                'is the hero in a wall?
+                                'Is the hero touching a wall?
                                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the hero is touching a wall.
 
                                     'Knock hero to the right of wall.
                                     OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 16
 
+                                    'Knock the monster to the right of the hero.
                                     Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 8
 
-                                    'Monster_Hit = True
-
-                                    'Monster_Life -= 1
-
                                 End If
-
                             End If
                         End If
-
-
-
-
-
-
-
-
+                        '*********************************************************************
                     End If
                 End If
                 'Is the monster centered with the hero vertically?
@@ -1147,6 +1326,266 @@ Public Class Form1
     Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
         GS.Dispose() 'make sure you call dispose on the new GameSounds class when closing form
     End Sub
+
+
+    Private Sub Do_Hero_Shots()
+
+        If CtrlDown = True And ProjectileInflight = False Then
+            If MoveRight = True Then
+                If MoveUp = True Then
+                    Projectile_Direction = DirectionEnum.RightUP
+                ElseIf MoveDown = True Then
+                    Projectile_Direction = DirectionEnum.RightDown
+                Else
+                    Projectile_Direction = DirectionEnum.Right
+                End If
+            ElseIf MoveLeft = True Then
+                If MoveUp = True Then
+                    Projectile_Direction = DirectionEnum.LeftUp
+                ElseIf MoveDown = True Then
+                    Projectile_Direction = DirectionEnum.LeftDown
+                Else
+                    Projectile_Direction = DirectionEnum.Left
+                End If
+            ElseIf MoveUp = True Then
+                Projectile_Direction = DirectionEnum.Up
+            ElseIf MoveDown = True Then
+                Projectile_Direction = DirectionEnum.Down
+            Else
+                Projectile_Direction = DirectionEnum.None
+            End If
+
+            If Projectile_Direction <> DirectionEnum.None Then
+                Projectile = OurHero.Rec
+                ProjectileInflight = True
+                GS.Play("Magic")
+
+                'If GS.IsPlaying("Magic") = False Then
+                '    GS.Play("Magic") 'play the Music
+                'End If
+            End If
+        End If
+
+
+        If ProjectileInflight = True Then
+            'Is the projectile within range?
+            If Distance_Between_Points(Projectile.Location, OurHero.Rec.Location) < Projectile_Max_Distance Then
+                Select Case Projectile_Direction
+                    Case DirectionEnum.Right
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.X += Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.X += CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.Left
+                        'Move projectile to the left.
+                        Projectile.X -= Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the hero touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the left of hero.
+                                Monster.X -= CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.Up
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.Y -= Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.Y -= CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.Down
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.Y += Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.Y += CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.RightUP
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.X += Projectile_Speed
+                        Projectile.Y -= Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.X += CInt(Projectile_Speed / 3)
+                                Monster.Y -= CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.RightDown
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.X += Projectile_Speed
+                        Projectile.Y += Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.X += CInt(Projectile_Speed / 3)
+                                Monster.Y += CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.LeftUp
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.X -= Projectile_Speed
+                        Projectile.Y -= Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.X -= CInt(Projectile_Speed / 3)
+                                Monster.Y -= CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                    Case DirectionEnum.LeftDown
+                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        Projectile.X -= Projectile_Speed
+                        Projectile.Y += Projectile_Speed
+                        'Is the monster alive?
+                        If Monster_Life > 0 Then
+                            'Yes, the monster is alive.
+                            'Is the projectile touching the monster?
+                            If Projectile.IntersectsWith(Monster) = True Then
+                                'Yes, the hero is touching the monster.
+                                Monster_Hit = True
+                                'ProjectileInflight = False
+                                'Attack the monsters life points directly.
+                                Monster_Life -= Projectile_Attack
+                                If Monster_Life < 0 Then
+                                    Monster_Life = 0
+                                End If
+                                'Knock monster to the right of hero.
+                                Monster.X -= CInt(Projectile_Speed / 3)
+                                Monster.Y += CInt(Projectile_Speed / 3)
+                            End If
+                        End If
+                End Select
+            Else
+                ProjectileInflight = False
+            End If
+        End If
+    End Sub
+    Private Sub Write_AudioFile_to_Path(MStream As MemoryStream, Path As String)
+        'This sub procedure takes a memory stream from an audio resource
+        'and saves it as an audio file at the path.
+        'A example call would look like this.
+        '  Dim ms As New MemoryStream
+        '  My.Resources.level_music.CopyTo(ms)
+        '  Write_AudioFile_to_Path(ms, Application.StartupPath & "\level_music.wav")
+        '
+
+        'Dim ms As New MemoryStream
+        'My.Resources.level_music.CopyTo(ms)
+        Dim AudioFile() As Byte = MStream.ToArray
+        File.WriteAllBytes(Path, AudioFile)
+        'ms.Dispose()
+
+        'A example call would look like this.
+        '  Dim ms As New MemoryStream
+        '  My.Resources.level_music.CopyTo(ms)
+        '  Write_AudioFile_to_Path(ms, Application.StartupPath & "\Test_music.wav")
+        '  ms.Dispose()
+
+
+
+
+        'Create a level music file in the apps start up path.
+        'Dim ms As New MemoryStream
+        'My.Resources.level_music.CopyTo(ms)
+        'Dim AudioFile() As Byte = ms.ToArray
+        'File.WriteAllBytes(Application.StartupPath & "\level_music.wav", AudioFile)
+        'ms.Dispose()
+
+
+        'Dim ms2 As New MemoryStream
+        'My.Resources.machine_gun.CopyTo(ms2)
+        'Dim AudioFile2() As Byte = ms2.ToArray
+        'File.WriteAllBytes(Application.StartupPath & "\machine_gun.wav", AudioFile2)
+        'ms2.Dispose()
+
+
+    End Sub
+
 
 
 End Class
