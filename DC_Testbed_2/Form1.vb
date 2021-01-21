@@ -188,79 +188,16 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
 
-
-        'Dim ms As New MemoryStream
-        'My.Resources.level_music.CopyTo(ms)
-        'Write_AudioFile_to_Path(ms, Application.StartupPath & "\Test_music.wav")
-        'ms.Dispose()
-
-
-
-
-        'media.Load()
-        'media2.Load()
-
-        'Dim ms As New MemoryStream
-        'My.Resources.level_music.CopyTo(ms)
-        'Dim AudioFile() As Byte = ms.ToArray
-        'File.WriteAllBytes(Application.StartupPath & "\level_music.wav", AudioFile)
-        'ms.Dispose()
-
-
-        'Dim ms2 As New MemoryStream
-        'My.Resources.machine_gun.CopyTo(ms2)
-        'Dim AudioFile2() As Byte = ms2.ToArray
-        'File.WriteAllBytes(Application.StartupPath & "\machine_gun.wav", AudioFile2)
-        'ms2.Dispose()
-
-
-        'Dim test As String = Application.StartupPath & "level_music.wav"
-
-        'Private Hero As New Rectangle(0, 0, 75, 75)
-        'Private Hero_Brush As New SolidBrush(Color.FromArgb(255, 11, 182, 255))
-        'Private OurHero.Life As Integer = 100
-        'Private OurHero.LifeMAX As Integer = 100
-        'Private Hero_Attack As Integer = 2
-        'Private Hero_Initiative As Boolean = False
-        'Private Hero_Speed As Integer = 5
-        'Private Hero_Hit As Boolean = False
-
         OurHero.Rec = New Rectangle(0, 0, 75, 75)
         OurHero.Color = Color.FromArgb(255, 11, 182, 255)
         OurHero.Life = 100
         OurHero.MaxLife = 100
-        OurHero.Attack = 2
+        OurHero.Attack = 3
         OurHero.Initiative = False
-        OurHero.Speed = 5
+        OurHero.Speed = 4
         OurHero.Hit = False
         OurHero.HitTimer = 0
         OurHero.Life = 100
-
-
-
-
-
-
-        GS.AddSound("Music", Application.StartupPath & "level_music.mp3") 'adds and open a Background music file
-        GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3") 'adds and open a Laser Gun sound
-        GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3") 'adds and open a Laser Gun sound
-        'Monster Alien Roar Aggressive
-
-        GS.SetVolume("Music", 400)
-        GS.SetVolume("Magic", 900)
-        GS.SetVolume("Monster", 900)
-
-        GS.Play("Music") 'play the Music
-
-
-
-        'media.PlayLooping() ' Async, creates a new thread
-
-
-
-        'media2.PlaySync() ' Sync, locks the current thread
-
-
 
 
 
@@ -271,17 +208,10 @@ Public Class Form1
         Wall.Color = Color.FromArgb(255, 164, 164, 164)
         Wall.MapColor = Color.FromArgb(128, 164, 164, 164)
 
-
-        'Potion
-        'Private Elixir As New Rectangle(0, 0, 50, 50)
-        'Private Elixir_Active As Boolean = False
-
         Potion.Rec = New Rectangle(0, 0, 50, 50)
         Potion.Active = False
         Potion.Color = Color.FromArgb(255, 255, 19, 19)
         Potion.OutlineColor = Color.FromArgb(255, 255, 255, 255)
-
-
 
         cm(3, 3) = 0.6   'draw with 60% alpha
         atr.SetColorMatrix(cm)
@@ -290,9 +220,7 @@ Public Class Form1
         Center_String.Alignment = StringAlignment.Center
         Center_String.LineAlignment = StringAlignment.Center
 
-
         MinimumSize = New Size(600, 480)
-
 
         drawFormat.Alignment = StringAlignment.Center
 
@@ -302,42 +230,50 @@ Public Class Form1
 
         WindowState = FormWindowState.Maximized
 
-        'Frame rate for the display timer.
-        Timer1.Interval = 35
 
-        'Frame rate for the game timer.
+
+        'Load sound files
+        GS.AddSound("Music", Application.StartupPath & "level_music.mp3") 'adds and open a Background music file
+        GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3") 'adds and open a Laser Gun sound
+        GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3") 'adds and open a Laser Gun sound
+
+        'Set set volume 
+        GS.SetVolume("Music", 400)
+        GS.SetVolume("Magic", 900)
+        GS.SetVolume("Monster", 900)
+
+        'Set frame rate for the display timer.
+        Timer1.Interval = 33
+
+        'Set frame rate for the game timer.
         Timer2.Interval = 18
 
-        'start the game loop.
-        Timer2.Start()
-        'Start display loop.
+        'Start display timer.
         Timer1.Start()
 
-        'PlayLoopingBackgroundSoundResource()
-
-
-
+        'Update the display.
         PictureBox1.Invalidate()
 
+        GS.Play("Music") 'play the Music
+
+        'Start the game timer.
+        Timer2.Start()
+
+
     End Sub
-    Sub PlayLoopingBackgroundSoundResource()
-        'My.Computer.Audio.Play(My.Resources.level_music, AudioPlayMode.BackgroundLoop)
-        Dim LoopPlayer As New System.Media.SoundPlayer(My.Resources.level_music)
-        LoopPlayer.PlayLooping()
-    End Sub
+    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+        'Display timer
 
-    Private Sub GS_SoundEnded(ByVal SndName As String) Handles GS.SoundEnded
-        If SndName = "Music" Then GS.Play("Music") 'if the Music has reached the end then you can keep replaying it for a loop effect
+        'Swap Buffers
+        If _BufferFlag = True Then
+            _BufferFlag = False
+        Else
+            _BufferFlag = True
+        End If
 
-        'If GS.IsPlaying("Music") = False Then
+        'Update the display.
+        PictureBox1.Invalidate()
 
-        'GS.Play("Music" )
-        'GS.
-
-
-        'End If
-
-        'mciSendString("close FirstSound", String.Empty, 0, 0)
     End Sub
     Private Sub PictureBox1_Paint(ByVal sender As System.Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles PictureBox1.Paint
 
@@ -366,30 +302,48 @@ Public Class Form1
 
                     End If
 
-                    If Monster_Life > 0 Then
-                        goBuf1.FillRectangle(Monster_Brush, Monster)
 
 
-                        goBuf1.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
-
+                    Draw_Monster(goBuf1, Monster)
 
 
 
-                    End If
+
+
+
+                    'If Monster_Life > 0 Then
+                    '    goBuf1.FillRectangle(Monster_Brush, Monster)
+
+
+                    '    goBuf1.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
+
+
+
+
+                    'End If
 
                     If ProjectileInflight = True Then
                         goBuf1.FillRectangle(Projectile_Brush, Projectile)
                     End If
 
-                    If OurHero.Life > 0 Then
 
-                        If OurHero.Hit = False Then
-                            goBuf1.FillRectangle(New SolidBrush(OurHero.Color), OurHero.Rec)
-                        Else
-                            goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), OurHero.Rec)
-                            OurHero.HitTimer += 1
-                        End If
-                    End If
+
+
+
+
+
+                    Draw_Hero(goBuf1, OurHero.Rec)
+
+                    'If OurHero.Life > 0 Then
+
+                    '    If OurHero.Hit = False Then
+                    '        'goBuf1.FillRectangle(New SolidBrush(OurHero.Color), OurHero.Rec)
+                    '        Draw_Hero(goBuf1, OurHero.Rec)
+                    '    Else
+                    '        goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), OurHero.Rec)
+                    '        OurHero.HitTimer += 1
+                    '    End If
+                    'End If
 
 
                     If Monster_Life > 0 And Monster_Hit = True Then
@@ -406,6 +360,14 @@ Public Class Form1
                         'Draw wall.
                         goBuf1.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
                     End If
+
+
+                    'Draw_Hero(goBuf1, OurHero.Rec)
+
+
+
+
+
 
                     'Draw hero.
                     goBuf1.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
@@ -465,39 +427,47 @@ Public Class Form1
 
                     End If
 
-                    If Monster_Life > 0 Then
+
+                    Draw_Monster(goBuf2, Monster)
 
 
-                        goBuf2.FillRectangle(Monster_Brush, Monster)
+                    'If Monster_Life > 0 Then
 
-                        goBuf2.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
 
-                        'Monster_Font
+                    '    goBuf2.FillRectangle(Monster_Brush, Monster)
 
-                    End If
+                    '    goBuf2.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
+
+                    '    'Monster_Font
+
+                    'End If
 
                     If ProjectileInflight = True Then
                         goBuf2.FillRectangle(Projectile_Brush, Projectile)
                     End If
 
-                    If OurHero.Life > 0 Then
-                        'goBuf2.FillRectangle(Hero_Brush, Hero)
+
+                    Draw_Hero(goBuf2, OurHero.Rec)
+
+                    'If OurHero.Life > 0 Then
+                    '    'goBuf2.FillRectangle(Hero_Brush, Hero)
 
 
-                        If OurHero.Hit = False Then
-                            goBuf2.FillRectangle(New SolidBrush(OurHero.Color), OurHero.Rec)
-                        Else
-                            goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), OurHero.Rec)
+                    '    If OurHero.Hit = False Then
+                    '        'goBuf2.FillRectangle(New SolidBrush(OurHero.Color), OurHero.Rec)
+                    '        Draw_Hero(goBuf2, OurHero.Rec)
+                    '    Else
+                    '        goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), OurHero.Rec)
 
-                            If OurHero.HitTimer > 1 Then
-                                OurHero.HitTimer = 0
-                                OurHero.Hit = False
-                            End If
+                    '        If OurHero.HitTimer > 1 Then
+                    '            OurHero.HitTimer = 0
+                    '            OurHero.Hit = False
+                    '        End If
 
 
 
-                        End If
-                    End If
+                    '    End If
+                    'End If
 
                     If Monster_Life > 0 And Monster_Hit = True Then
                         goBuf2.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
@@ -514,6 +484,12 @@ Public Class Form1
                         'Draw wall.
                         goBuf2.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
                     End If
+
+
+
+
+
+
 
                     'Draw hero.
                     goBuf2.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
@@ -557,84 +533,116 @@ Public Class Form1
             End Using
         End If
     End Sub
-    Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
+    Private Sub Draw_HeroLife_Bar(g As Graphics, Bar As Rectangle)
 
-        'Swap Buffers
-        If _BufferFlag = True Then
-            _BufferFlag = False
+
+        'Draw hero life bar frame.
+        g.FillRectangle(Life_Frame_Brush, Bar)
+
+
+
+        Dim test As Double = (Bar.Width - 4) / OurHero.MaxLife * OurHero.Life
+
+
+        'Is the heros life points critically low?
+        If OurHero.Life > OurHero.MaxLife \ 4 Then
+            'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt(((Bar.Width - 4) \ OurHero.LifeMAX) * OurHero.Life), Bar.Height - 4)
+            g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
         Else
-            _BufferFlag = True
+            'Yes, the heros life points are critically low?
+
+            Select Case Blink_Counter
+                Case 0 To 1
+                    g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    Blink_Counter += 1
+                Case 2 To 4
+                    g.FillRectangle(Life_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    Blink_Counter += 1
+                Case Else
+                    g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    Blink_Counter = 0
+            End Select
+        End If
+    End Sub
+    Private Sub Draw_Potion(g As Graphics, Rec As Rectangle)
+
+        ''Create a path
+        'Dim path As New GraphicsPath()
+        ''path.AddEllipse(Elixir.X, Elixir.Y, Elixir.Width + 25, Elixir.Height + 25)
+        'path.AddRectangle(New Rectangle(Rec.X - 10, Rec.Y - 10, Rec.Width + 20, Potion.Rec.Height + 20))
+
+        ''path.AddEllipse(10, 10, 50, 50)
+        ''Create a path gradient brush
+        'Dim pgBrush As New PathGradientBrush(path)
+        'pgBrush.CenterColor = Color.White
+        'Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+        'pgBrush.SurroundColors = list
+        ''Create a Bitmap and ghraphics object
+        ''Dim curBitmap As New Bitmap(500, 300)
+        ''Dim g As Graphics = Graphics.FromImage(curBitmap)
+        ''g.SmoothingMode = SmoothingMode.AntiAlias
+        'g.FillPath(pgBrush, path)
+        ''g.FillRectangle(lgBrush, 250, 20, 100, 100)
+
+
+        g.FillRectangle(Life_Brush, Rec.X, Rec.Y, Rec.Width, Rec.Height)
+
+        g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
+
+        g.DrawRectangle(New Pen(Color.DarkRed, 1), Rec)
+
+    End Sub
+
+
+    Private Sub Draw_Monster(g As Graphics, Rec As Rectangle)
+
+        If Monster_Life > 0 Then
+            g.FillRectangle(Monster_Brush, Monster)
+            g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
+            g.DrawRectangle(New Pen(Color.Green, 1), Rec)
+
         End If
 
-        PictureBox1.Invalidate()
-
     End Sub
 
-    Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles MyBase.KeyDown
 
-        Select Case e.KeyValue
-            Case Keys.Left
-                MoveLeft = True
+    Private Sub Draw_Hero(g As Graphics, Rec As Rectangle)
 
-            Case Keys.Right
+        If OurHero.Life > 0 Then
+            If OurHero.Hit = False Then
+                'Draw hero.
+                g.FillRectangle(New SolidBrush(OurHero.Color), Rec)
 
-                MoveRight = True
+                g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
 
-            Case Keys.Up
-                MoveUp = True
+                g.DrawRectangle(New Pen(Color.White, 1), Rec)
 
-            Case Keys.Down
-                MoveDown = True
 
-            Case Keys.ControlKey
+            Else
+                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), Rec)
 
-                CtrlDown = True
+                g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
 
-            Case Keys.P
-                'Pause game timer.
-                If Timer2.Enabled = True Then
-                    Timer2.Stop()
-                    If Timer3.Enabled = True Then
-                        Timer3.Stop()
-                    End If
-                Else
-                    Timer2.Start()
-                    If Monster_Life = -1 Then
-                        Timer3.Start()
-                    End If
+                g.DrawRectangle(New Pen(Color.Black, 2), Rec)
+
+                OurHero.HitTimer += 1
+                If OurHero.HitTimer > 2 Then
+                    OurHero.HitTimer = 0
+                    OurHero.Hit = False
+
                 End If
-        End Select
+            End If
+        End If
 
     End Sub
 
-    Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
-
-        Select Case e.KeyValue
-            Case Keys.Left
-                MoveLeft = False
-
-            Case Keys.Right
-                MoveRight = False
-
-            Case Keys.Up
-                MoveUp = False
-
-            Case Keys.Down
-                MoveDown = False
-
-            Case Keys.ControlKey
 
 
-                CtrlDown = False
-
-            Case Keys.P
 
 
-        End Select
-
-    End Sub
 
     Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+        'Game timer
 
         Viewport.Width = PictureBox1.Width
         Viewport.Height = PictureBox1.Height
@@ -721,8 +729,19 @@ Public Class Form1
                             Monster_Hit = True
                             'Attack the monsters life points directly.
                             Monster_Life -= OurHero.Attack
+                            If Monster_Life < 0 Then
+                                Monster_Life = 0
+                            End If
+
+
+
                             'Knock monster to the left of hero.
                             Monster.X = OurHero.Rec.X - Monster.Width - 32
+
+
+
+
+
                         End If
                     End If
                 End If
@@ -795,10 +814,42 @@ Public Class Form1
                         OurHero.Rec.X = Monster.X - Monster.Width - 1
                         If OurHero.Initiative = True Then
                             Monster_Hit = True
+
+
                             'Attack the monsters life points directly.
                             Monster_Life -= OurHero.Attack
+                            If Monster_Life < 0 Then
+                                Monster_Life = 0
+                            End If
+
+
                             'Knock monster to the right of hero.
                             Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 32
+
+                            'Is the monster touching a wall?
+                            If Monster.IntersectsWith(Wall.Rec) = True Then
+                                'Yes, the monster is touching a wall.
+
+                                'Knock monster to the left of wall.
+                                Monster.X = Wall.Rec.X - OurHero.Rec.Width - 16
+
+                                'Knock the hero to the left of the monster.
+                                OurHero.Rec.X = Monster.X - Monster.Width - 8
+
+                            End If
+
+
+                            ''Wall Collision Handler - Moving Right*****************
+                            ''Is the monster touching the wall?
+                            'If Monster.IntersectsWith(Wall.Rec) = True Then
+                            '    'Yes, the monster is touching the wall.
+
+                            '    'Push monster to the left of wall.
+                            '    Monster.X = Wall.Rec.X - Monster.Width - 16
+
+                            'End If
+                            ''************************************************
+
                         End If
                     End If
                 End If
@@ -862,6 +913,10 @@ Public Class Form1
                             Monster_Hit = True
                             'Attack the monsters life points directly.
                             Monster_Life -= OurHero.Attack
+
+                            If Monster_Life < 0 Then
+                                Monster_Life = 0
+                            End If
                             'Knock monster above the hero.
                             Monster.Y = OurHero.Rec.Y - Monster.Height - 32
                         End If
@@ -897,12 +952,29 @@ Public Class Form1
                             Monster_Hit = True
                             'Attack the monsters life points directly.
                             Monster_Life -= OurHero.Attack
+
+                            If Monster_Life < 0 Then
+                                Monster_Life = 0
+                            End If
                             'Knock monster below the hero.
                             Monster.Y = OurHero.Rec.Y + Monster.Height + 32
+
+                            'Wall Collision Handler - Moving Down ********************************************************
+                            'Is the monster touching the wall?
+                            If Monster.IntersectsWith(Wall.Rec) = True Then
+                                'Yes, the monster is touching the wall.
+
+                                'Push the monster above the wall.
+                                Monster.Y = Wall.Rec.Y - (Monster.Height - 1)
+
+                            End If
+                            '************************************************
                         End If
                     End If
                 End If
             End If
+
+
 
 
             Do_Hero_Shots()
@@ -933,7 +1005,7 @@ Public Class Form1
                     If Monster_Center_X < Hero_Center_X Then
                         'Yes, the monster is to the left of the hero.
 
-                        'Move Monster Right*****************************************************************************
+                        'Move Monster Right**************************************************************
                         'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
                         'Is the monster close to the hero?
                         If Horizontal_Distance(Monster_Center_X, Hero_Center_X) > 8 Then
@@ -945,15 +1017,29 @@ Public Class Form1
                             'Move the monster to the right slowly.
                             Monster.X += 1
                         End If
-                        '***********************************************************************************************
+                        '*********************************************************************************
 
-                        'Attack Right***********************************************************************************
+                        'Wall Collision Handler - Moving Right*****************
+                        'Is the monster touching the wall?
+                        If Monster.IntersectsWith(Wall.Rec) = True Then
+                            'Yes, the monster is touching the wall.
+
+                            'Push monster to the left of wall.
+                            Monster.X = Wall.Rec.X - Monster.Width - 1
+
+                        End If
+                        '************************************************
+
+                        'Attack Right**************************************************
                         'Is the monster touching the hero?
                         If Monster.IntersectsWith(OurHero.Rec) = True Then
                             'Yes, the monster is touching the hero.
 
                             'Push the monster to the left of the hero.
                             Monster.X = OurHero.Rec.X - Monster.Width - 1
+
+
+
 
                             If OurHero.Initiative = False Then
 
@@ -982,6 +1068,8 @@ Public Class Form1
 
                                 'Knock hero to the right of monster.
                                 OurHero.Rec.X = Monster.X + Monster.Width + 16
+
+
 
                                 'Is the hero touching a wall?
                                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
@@ -1017,6 +1105,20 @@ Public Class Form1
                             Monster.X -= 1
                         End If
                         '***********************************************************************************************
+
+
+
+                        'Wall Collision Handler*************************
+                        'Is the monster touching the wall?
+                        If Monster.IntersectsWith(Wall.Rec) = True Then
+                            'Yes, the monster is touching the wall.
+
+                            'Push monster to the right of wall.
+                            Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+                        End If
+                        '************************************************
+
 
                         'Attack Left************************************************************************************
                         'Is the monster touching the hero?
@@ -1060,16 +1162,33 @@ Public Class Form1
                     If Monster.Y + Monster.Height \ 2 < OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
                         'Yes, the monster is above the hero.
 
+
+                        'Move monster down.
+                        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
                         'Is the monster close to the hero?
                         If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
                             'No, the monster is not close to the hero.
+
                             'Move the monster down fast.
                             Monster.Y += Monster_Speed
                         Else
                             'Yes, the monster is close to the hero.
                             'Move the monster down slowly.
                             Monster.Y += 1
+
                         End If
+                        '***********************************************************************************************
+
+                        'Wall Collision Handler - Moving Down ********************************************************
+                        'Is the monster touching the wall?
+                        If Monster.IntersectsWith(Wall.Rec) = True Then
+                            'Yes, the monster is touching the wall.
+
+                            'Push the monster above the wall.
+                            Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+                        End If
+                        '************************************************
 
 
                         If Monster.IntersectsWith(OurHero.Rec) = True Then
@@ -1078,6 +1197,8 @@ Public Class Form1
 
                     Else
                         'No, the monster is below the hero.
+
+
 
                         'Move the monster up.
                         'Is the monster close to the hero?
@@ -1091,7 +1212,16 @@ Public Class Form1
                             Monster.Y -= 1
                         End If
 
+                        'Wall Collision Handler*************************
+                        'Is the monster touching the wall?
+                        If Monster.IntersectsWith(Wall.Rec) = True Then
+                            'Yes, the monster is touching the wall.
 
+                            'Push the hero below the wall.
+                            Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+
+                        End If
+                        '************************************************
 
 
 
@@ -1109,13 +1239,21 @@ Public Class Form1
         Else
             If Monster_Life = 0 Then
 
+                'Drop loot
+                'Potion.Rec.Location = Monster.Location
+                Potion.Rec.Size = New Size(65, 65)
+                Potion.Rec.X = Monster.X + (Monster.Width - Potion.Rec.Width) \ 2
+                Potion.Rec.Y = Monster.Y + (Monster.Height - Potion.Rec.Height) \ 2
                 Potion.Active = True
-                Potion.Rec.X = Viewport_Size.Width \ 2
-                Potion.Rec.Y = Viewport_Size.Height \ 2
+
+                'Play loot drop sound.
+
                 Monster_Life = -1
+
             End If
 
-            Timer3.Interval = 5000
+            'Start respawn timer.
+            Timer3.Interval = 5000 'Set timer for 5 seconds - 1000 miliseconds = 1 second
             Timer3.Start()
         End If
 
@@ -1135,174 +1273,6 @@ Public Class Form1
         End If
 
     End Sub
-
-    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
-
-        If Monster_Life = -1 Then
-
-            'Repawn monster.
-            Monster_Life = Monster_LifeMAX
-
-            Monster_Hit = False
-
-        End If
-
-        If OurHero.Life = 0 Then
-
-            'Repawn hero.
-            OurHero.Life = OurHero.MaxLife
-
-
-        End If
-
-        Timer3.Stop()
-
-
-    End Sub
-
-    Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
-
-        Viewport_Size.Width = PictureBox1.Width
-        Viewport_Size.Height = PictureBox1.Height
-
-        Life_Bar_Frame.X = 10
-        Life_Bar_Frame.Y = 10
-        Life_Bar_Frame.Width = Viewport_Size.Width \ 4
-        Life_Bar_Frame.Height = 20
-
-    End Sub
-
-    Private Function Distance_Between_Points(Point1 As Point, Point2 As Point) As Double
-
-        'Returns the distance between two points.
-        Distance_Between_Points = Sqrt((Abs(Point2.X - Point1.X) ^ 2) + (Abs(Point2.Y - Point1.Y) ^ 2))
-
-
-        'd = √((x2 - x1)² + (y2 - y1)²) Distance Formula - khanacademy.org
-        'Distance = Sqr((Abs(x2 - x1) ^ 2) + (Abs(y2 - y1) ^ 2)) Killer42 - bytes.com
-        'Application of the Pythagorean Theorem. - Analytic Geometry
-
-    End Function
-
-    Private Function Horizontal_Distance(X1 As Integer, X2 As Integer) As Double
-
-        Horizontal_Distance = Abs(X1 - X2)
-
-    End Function
-    Private Function Vertical_Distance(Y1 As Integer, Y2 As Integer) As Double
-
-        Vertical_Distance = Abs(Y1 - Y2)
-
-    End Function
-
-    Private Sub Draw_HeroLife_Bar(g As Graphics, Bar As Rectangle)
-
-
-        'Draw hero life bar frame.
-        g.FillRectangle(Life_Frame_Brush, Bar)
-
-
-
-        Dim test As Double = (Bar.Width - 4) / OurHero.MaxLife * OurHero.Life
-
-
-        'Is the heros life points critically low?
-        If OurHero.Life > OurHero.MaxLife \ 4 Then
-            'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt(((Bar.Width - 4) \ OurHero.LifeMAX) * OurHero.Life), Bar.Height - 4)
-            g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
-        Else
-            'Yes, the heros life points are critically low?
-
-            Select Case Blink_Counter
-                Case 0 To 1
-                    g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
-                    Blink_Counter += 1
-                Case 2 To 4
-                    g.FillRectangle(Life_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
-                    Blink_Counter += 1
-                Case Else
-                    g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
-                    Blink_Counter = 0
-            End Select
-        End If
-    End Sub
-    Private Sub Draw_Potion(g As Graphics, Rec As Rectangle)
-
-        'Create a path
-        Dim path As New GraphicsPath()
-        'path.AddEllipse(Elixir.X, Elixir.Y, Elixir.Width + 25, Elixir.Height + 25)
-        path.AddRectangle(New Rectangle(Rec.X - 5, Rec.Y - 5, Rec.Width + 10, Potion.Rec.Height + 10))
-
-        'path.AddEllipse(10, 10, 50, 50)
-        'Create a path gradient brush
-        Dim pgBrush As New PathGradientBrush(path)
-        pgBrush.CenterColor = Color.White
-        Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
-        pgBrush.SurroundColors = list
-        'Create a Bitmap and ghraphics object
-        'Dim curBitmap As New Bitmap(500, 300)
-        'Dim g As Graphics = Graphics.FromImage(curBitmap)
-        g.SmoothingMode = SmoothingMode.AntiAlias
-        g.FillPath(pgBrush, path)
-        'g.FillRectangle(lgBrush, 250, 20, 100, 100)
-
-
-        g.FillRectangle(Life_Brush, Rec.X, Rec.Y, Rec.Width, Rec.Height)
-
-    End Sub
-
-
-
-
-
-    Private Sub Form1_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
-        Me.Form1_Resize(sender, e)
-
-    End Sub
-
-
-    Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
-        GS.Dispose() 'make sure you call dispose on the new GameSounds class when closing form
-    End Sub
-
-    Private Function Get_Hero_Direction() As DirectionEnum
-
-
-        If MoveRight = True Then
-            If MoveUp = True Then
-                Get_Hero_Direction = DirectionEnum.RightUP
-                Exit Function
-            ElseIf MoveDown = True Then
-                Get_Hero_Direction = DirectionEnum.RightDown
-                Exit Function
-            Else
-                Get_Hero_Direction = DirectionEnum.Right
-                Exit Function
-            End If
-        ElseIf MoveLeft = True Then
-            If MoveUp = True Then
-                Get_Hero_Direction = DirectionEnum.LeftUp
-                Exit Function
-            ElseIf MoveDown = True Then
-                Get_Hero_Direction = DirectionEnum.LeftDown
-                Exit Function
-            Else
-                Get_Hero_Direction = DirectionEnum.Left
-                Exit Function
-            End If
-        ElseIf MoveUp = True Then
-            Get_Hero_Direction = DirectionEnum.Up
-            Exit Function
-        ElseIf MoveDown = True Then
-            Get_Hero_Direction = DirectionEnum.Down
-            Exit Function
-        Else
-            Get_Hero_Direction = DirectionEnum.None
-            Exit Function
-        End If
-
-
-    End Function
     Private Sub Do_Hero_Shots()
 
 
@@ -1378,6 +1348,17 @@ Public Class Form1
                                 End If
                                 'Knock monster to the right of hero.
                                 Monster.X += CInt(Projectile_Speed / 3)
+
+                                'Wall Collision Handler - Moving Right*****************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push monster to the left of wall.
+                                    Monster.X = Wall.Rec.X - Monster.Width - 1
+
+                                End If
+                                '************************************************
                             End If
                         End If
                     Case DirectionEnum.Left
@@ -1551,6 +1532,168 @@ Public Class Form1
 
 
     End Sub
+    Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
+
+        If Monster_Life = -1 Then
+
+            'Repawn monster.
+            Monster_Life = Monster_LifeMAX
+
+            Monster_Hit = False
+
+        End If
+
+        If OurHero.Life = 0 Then
+
+            'Repawn hero.
+            OurHero.Life = OurHero.MaxLife
+
+
+        End If
+
+        Timer3.Stop()
+
+
+    End Sub
+    Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles MyBase.KeyDown
+
+        Select Case e.KeyValue
+            Case Keys.Left
+                MoveLeft = True
+
+            Case Keys.Right
+
+                MoveRight = True
+
+            Case Keys.Up
+                MoveUp = True
+
+            Case Keys.Down
+                MoveDown = True
+
+            Case Keys.ControlKey
+
+                CtrlDown = True
+
+            Case Keys.P
+                'Pause game timer.
+                If Timer2.Enabled = True Then
+                    Timer2.Stop()
+                    If Timer3.Enabled = True Then
+                        Timer3.Stop()
+                    End If
+                Else
+                    Timer2.Start()
+                    If Monster_Life = -1 Then
+                        Timer3.Start()
+                    End If
+                End If
+        End Select
+
+    End Sub
+    Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
+
+        Select Case e.KeyValue
+            Case Keys.Left
+                MoveLeft = False
+
+            Case Keys.Right
+                MoveRight = False
+
+            Case Keys.Up
+                MoveUp = False
+
+            Case Keys.Down
+                MoveDown = False
+
+            Case Keys.ControlKey
+
+
+                CtrlDown = False
+
+            Case Keys.P
+
+
+        End Select
+
+    End Sub
+    Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
+
+        Viewport_Size.Width = PictureBox1.Width
+        Viewport_Size.Height = PictureBox1.Height
+
+        Life_Bar_Frame.X = 10
+        Life_Bar_Frame.Y = 10
+        Life_Bar_Frame.Width = Viewport_Size.Width \ 4
+        Life_Bar_Frame.Height = 20
+
+    End Sub
+    Private Function Distance_Between_Points(Point1 As Point, Point2 As Point) As Double
+
+        'Returns the distance between two points.
+        Distance_Between_Points = Sqrt((Abs(Point2.X - Point1.X) ^ 2) + (Abs(Point2.Y - Point1.Y) ^ 2))
+
+
+        'd = √((x2 - x1)² + (y2 - y1)²) Distance Formula - khanacademy.org
+        'Distance = Sqr((Abs(x2 - x1) ^ 2) + (Abs(y2 - y1) ^ 2)) Killer42 - bytes.com
+        'Application of the Pythagorean Theorem. - Analytic Geometry
+
+    End Function
+    Private Function Horizontal_Distance(X1 As Integer, X2 As Integer) As Double
+
+        Horizontal_Distance = Abs(X1 - X2)
+
+    End Function
+    Private Function Vertical_Distance(Y1 As Integer, Y2 As Integer) As Double
+
+        Vertical_Distance = Abs(Y1 - Y2)
+
+    End Function
+    Private Sub Form1_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
+        Me.Form1_Resize(sender, e)
+
+    End Sub
+    Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+        GS.Dispose() 'make sure you call dispose on the new GameSounds class when closing form
+    End Sub
+    Private Function Get_Hero_Direction() As DirectionEnum
+
+
+        If MoveRight = True Then
+            If MoveUp = True Then
+                Get_Hero_Direction = DirectionEnum.RightUP
+                Exit Function
+            ElseIf MoveDown = True Then
+                Get_Hero_Direction = DirectionEnum.RightDown
+                Exit Function
+            Else
+                Get_Hero_Direction = DirectionEnum.Right
+                Exit Function
+            End If
+        ElseIf MoveLeft = True Then
+            If MoveUp = True Then
+                Get_Hero_Direction = DirectionEnum.LeftUp
+                Exit Function
+            ElseIf MoveDown = True Then
+                Get_Hero_Direction = DirectionEnum.LeftDown
+                Exit Function
+            Else
+                Get_Hero_Direction = DirectionEnum.Left
+                Exit Function
+            End If
+        ElseIf MoveUp = True Then
+            Get_Hero_Direction = DirectionEnum.Up
+            Exit Function
+        ElseIf MoveDown = True Then
+            Get_Hero_Direction = DirectionEnum.Down
+            Exit Function
+        Else
+            Get_Hero_Direction = DirectionEnum.None
+            Exit Function
+        End If
+
+
+    End Function
     Private Sub MoveHero(Direction As DirectionEnum)
 
         Select Case Direction
@@ -1597,7 +1740,6 @@ Public Class Form1
         End Select
 
     End Sub
-
     Private Sub Write_AudioFile_to_Path(MStream As MemoryStream, Path As String)
         'This sub procedure takes a memory stream from an audio resource
         'and saves it as an audio file at the path.
@@ -1619,8 +1761,25 @@ Public Class Form1
         'ms.Dispose()
 
     End Sub
-End Class
+    Sub PlayLoopingBackgroundSoundResource()
+        'My.Computer.Audio.Play(My.Resources.level_music, AudioPlayMode.BackgroundLoop)
+        Dim LoopPlayer As New System.Media.SoundPlayer(My.Resources.level_music)
+        LoopPlayer.PlayLooping()
+    End Sub
+    Private Sub GS_SoundEnded(ByVal SndName As String) Handles GS.SoundEnded
+        If SndName = "Music" Then GS.Play("Music") 'if the Music has reached the end then you can keep replaying it for a loop effect
 
+        'If GS.IsPlaying("Music") = False Then
+
+        'GS.Play("Music" )
+        'GS.
+
+
+        'End If
+
+        'mciSendString("close FirstSound", String.Empty, 0, 0)
+    End Sub
+End Class
 Public Class GameSounds
     Inherits NativeWindow
 
