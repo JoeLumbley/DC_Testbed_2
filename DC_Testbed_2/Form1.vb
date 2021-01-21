@@ -83,102 +83,18 @@ Public Enum MCI_NOTIFY As Integer
 End Enum
 Public Class Form1
 
-    'Set up Game Sound
-    Private WithEvents GS As New GameSounds
-
-    'Public Enum DirectionEnum As Integer
-    '    None = 0
-    '    Right = 1
-    '    Left = 2
-    '    Up = 3
-    '    Down = 4
-    '    RightUP = 5
-    '    RightDown = 6
-    '    LeftUp = 7
-    '    LeftDown = 8
-    'End Enum
-
-
-    'Public Structure HeroInfo
-    '    Public Rec As Rectangle
-    '    Public Color As Color
-    '    Public OutlineColor As Color
-    '    Public MoveLeft As Boolean
-    '    Public MoveRight As Boolean
-    '    Public MoveUp As Boolean
-    '    Public MoveDown As Boolean
-    '    Public Speed As Integer
-    '    Public Life As Integer
-    '    Public MaxLife As Integer
-    '    Public Attack As Integer
-    '    Public Initiative As Boolean
-    '    Public CastMagic As Boolean
-    '    Public Magic As Integer
-    '    Public MaxMagic As Integer
-    '    Public MapColor As Color
-    '    Public MapOutlineColor As Color
-    '    Public Hit As Boolean
-    '    Public HitTimer As Integer
-    'End Structure
+    Private Level_Background_Color As Color = Color.FromArgb(255, 82, 82, 104)
 
     Private OurHero As HeroInfo
 
-    'Public Structure MonsterInfo
-    '    Public Rec As Rectangle
-    '    Public Color As Color
-    '    Public OutlineColor As Color
-    '    Public Speed As Integer
-    '    Public Life As Integer
-    '    Public MaxLife As Integer
-    '    Public Attack As Integer
-    '    Public Hit As Boolean
-    'End Structure
-    'Public Structure WallInfo
-    '    Public Rec As Rectangle
-    '    Public Color As Color
-    '    Public Revealed As Boolean 'If true the wall will be seen on the map.
-    '    Public MapColor As Color
-    '    Public MapOutlineColor As Color
-    'End Structure
-
     Private Wall As WallInfo
-    'Public Structure PotionInfo
-    '    Public Rec As Rectangle
-    '    Public Color As Color
-    '    Public OutlineColor As Color
-    '    Public Active As Boolean 'If true the potion will be seen and can be used in the level.
-    '    Public Life As Integer
-    'End Structure
 
     Private Potion As PotionInfo
 
-
     Private Viewport As New Rectangle(0, 0, 640, 480)
-
-
-
-
-
-
 
     Private Viewport_Size As New Drawing.Size(640, 480)
     Private _BufferFlag As Boolean = True
-
-    'Private Hero As New Rectangle(0, 0, 75, 75)
-    'Private Hero_Brush As New SolidBrush(Color.FromArgb(255, 11, 182, 255))
-    'Private OurHero.Life As Integer = 100
-    'Private OurHero.LifeMAX As Integer = 100
-    'Private Hero_Attack As Integer = 2
-    'Private Hero_Initiative As Boolean = False
-    'Private Hero_Speed As Integer = 5
-    'Private Hero_Hit As Boolean = False
-
-
-
-
-
-
-
 
 
     Private Monster As New Rectangle(500, 500, 75, 75)
@@ -189,23 +105,12 @@ Public Class Form1
     Private Monster_Hit As Boolean = False
     Private Monster_Speed As Integer = 2
     Private Monster_AttackTimer As Integer = 0
-
     Private Monster_Font As New Font("Arial", 10)
-
-
-
-
-
-
 
     Private MoveLeft As Boolean = False
     Private MoveRight As Boolean = False
     Private MoveUp As Boolean = False
     Private MoveDown As Boolean = False
-
-
-
-
 
     Private Projectile As New Rectangle(0, 0, 75, 75)
     Private ProjectileInflight As Boolean = False
@@ -213,10 +118,7 @@ Public Class Form1
     Private Projectile_Max_Distance As Integer = 300
     Private Projectile_Attack As Integer = 12
     Private Projectile_Speed As Integer = 50
-
     Private Projectile_Direction As DirectionEnum
-
-
 
     Private ShootLeft As Boolean = False
     Private ShootRight As Boolean = False
@@ -225,21 +127,11 @@ Public Class Form1
 
     Private CtrlDown As Boolean = False
 
-
-
-    'Private Life_Brush As New SolidBrush(Color.DarkRed)
     Private Life_Brush As New SolidBrush(Color.FromArgb(255, 255, 19, 19))
     Private Life_Blink_Brush As New SolidBrush(Color.Red)
-    'Private Life_Frame_Brush As New SolidBrush(Color.LightGray)
     Private Life_Frame_Brush As New SolidBrush(Color.FromArgb(255, 153, 0, 0))
-    'Private Life_Bar_Frame As New Rectangle(10, Viewport_Size.Height - 25, CInt(CLng(Viewport_Size.Width / 4) / OurHero.LifeMAX * OurHero.Life) + 4, 14)
-    'Private Life_Bar_Frame As New Rectangle(10, 10, CInt(CLng(Viewport_Size.Width / 4) / OurHero.MaxLife * OurHero.Life) + 4, 14)
     Private Life_Bar_Frame As Rectangle
-
     Private Life_Bar_Font As New Font("Arial", 15)
-
-    'Private Elixir As New Rectangle(0, 0, 50, 50)
-    'Private Elixir_Active As Boolean = False
 
     Private Instruction_Text As String = "Use arrow keys to move hero. Bump monsters to attack. Use Ctrl and use arrow keys to cast spells. Press P to pause game."
     Private Instruction_Font As New Font("Arial", 14)
@@ -254,40 +146,28 @@ Public Class Form1
 
     Dim Blink_Counter As Integer = 0
 
+
+    Private Map_Border_Pen As New Pen(Color.Black, 3)
+
+
+    'Set up Game Sound
+    Private WithEvents GS As New GameSounds
+
+
+
     ' Create font and brush.
     Private drawFont As New Font("Arial", 16)
     Private drawBrush As New SolidBrush(Color.White)
     Dim drawString As String = "Sample Text"
 
-
-
-
-
     Private Blur_BMP1 As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
     Private goBlur1 As Graphics = Graphics.FromImage(Blur_BMP1)
-
 
     Private Blur_BMP2 As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
     Private goBlur2 As Graphics = Graphics.FromImage(Blur_BMP2)
 
-
-
-
-
-
     Dim cm As New Drawing.Imaging.ColorMatrix
     Dim atr As New Drawing.Imaging.ImageAttributes
-
-    Private Level_Background_Color As Color = Color.FromArgb(255, 82, 82, 104)
-
-
-
-    Private Map_Border_Pen As New Pen(Color.Black, 3)
-
-
-
-
-
 
 
     Private Intersection_REC As New Rectangle(0, 0, 1, 1)
@@ -759,10 +639,10 @@ Public Class Form1
         Viewport.Width = PictureBox1.Width
         Viewport.Height = PictureBox1.Height
 
-        If Wall.Rec.IntersectsWith(Viewport) Then
+        'If Wall.Rec.IntersectsWith(Viewport) Then
 
-            Wall.Revealed = True
-        End If
+        '    Wall.Revealed = True
+        'End If
 
         If RandomNumber.Next(1, 3) = 1 Then
             OurHero.Initiative = True
@@ -774,24 +654,59 @@ Public Class Form1
 
         If OurHero.Life > 0 Then
 
-            If Potion.Active = True Then
-                If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
+            ''Do Controls
+            'Select Case Get_Hero_Direction()
+            '    Case DirectionEnum.Right
+            '        MoveHero(DirectionEnum.Right)
+            '        Exit Select
+            '    Case DirectionEnum.Left
+            '        MoveHero(DirectionEnum.Left)
+            '        Exit Select
+            '    Case DirectionEnum.Up
+            '        MoveHero(DirectionEnum.Up)
+            '        Exit Select
+            '    Case DirectionEnum.Down
+            '        MoveHero(DirectionEnum.Down)
+            '        Exit Select
+            '    Case DirectionEnum.RightUP
+            '        MoveHero(DirectionEnum.RightUP)
+            '        Exit Select
+            '    Case DirectionEnum.RightDown
+            '        MoveHero(DirectionEnum.RightDown)
+            '        Exit Select
+            '    Case DirectionEnum.LeftUp
+            '        MoveHero(DirectionEnum.LeftUp)
+            '        Exit Select
+            '    Case DirectionEnum.LeftDown
+            '        MoveHero(DirectionEnum.LeftDown)
+            'End Select
 
-                    OurHero.Life = OurHero.MaxLife
-                    Potion.Active = False
+            'If Potion.Active = True Then
+            '    If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
 
-                End If
-            End If
+            '        OurHero.Life = OurHero.MaxLife
+            '        Potion.Active = False
+
+            '    End If
+            'End If
+
+
+
+
+
+
 
             If MoveLeft = True Then
                 'Move hero to the left.
-                OurHero.Rec.X -= OurHero.Speed
+                'OurHero.Rec.X -= OurHero.Speed
+
+                MoveHero(DirectionEnum.Left)
 
                 'Is the hero touching the wall?
                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
                     'Yes, the hero is touching the wall.
                     'Push hero to the right of wall.
-                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 1
+                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width
                 End If
 
                 'Is the monster alive?
@@ -856,7 +771,11 @@ Public Class Form1
 
             If MoveRight = True Then
                 'Move hero to the right.
-                OurHero.Rec.X += OurHero.Speed
+                'OurHero.Rec.X += OurHero.Speed
+
+                MoveHero(DirectionEnum.Right)
+
+
 
                 'Is the hero touching the wall?
                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
@@ -920,13 +839,15 @@ Public Class Form1
 
             If MoveUp = True Then
                 'Move hero up.
-                OurHero.Rec.Y -= OurHero.Speed
+                'OurHero.Rec.Y -= OurHero.Speed
+
+                MoveHero(DirectionEnum.Up)
 
                 'Is the hero touching the wall?
                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
                     'Yes, the hero is touching the wall.
                     'Push the hero below the wall.
-                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
+                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height
                 End If
 
                 'Is the monster alive?
@@ -958,7 +879,9 @@ Public Class Form1
 
 
             If MoveDown = True Then
-                OurHero.Rec.Y += OurHero.Speed
+                'OurHero.Rec.Y += OurHero.Speed
+
+                MoveHero(DirectionEnum.Down)
 
 
                 If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
@@ -983,6 +906,7 @@ Public Class Form1
 
 
             Do_Hero_Shots()
+
 
         End If
 
@@ -1196,6 +1120,20 @@ Public Class Form1
         End If
 
 
+        If Potion.Active = True Then
+            If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
+
+                OurHero.Life = OurHero.MaxLife
+                Potion.Active = False
+
+            End If
+        End If
+
+        If Wall.Rec.IntersectsWith(Viewport) Then
+
+            Wall.Revealed = True
+        End If
+
     End Sub
 
     Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
@@ -1327,10 +1265,51 @@ Public Class Form1
         GS.Dispose() 'make sure you call dispose on the new GameSounds class when closing form
     End Sub
 
+    Private Function Get_Hero_Direction() As DirectionEnum
 
+
+        If MoveRight = True Then
+            If MoveUp = True Then
+                Get_Hero_Direction = DirectionEnum.RightUP
+                Exit Function
+            ElseIf MoveDown = True Then
+                Get_Hero_Direction = DirectionEnum.RightDown
+                Exit Function
+            Else
+                Get_Hero_Direction = DirectionEnum.Right
+                Exit Function
+            End If
+        ElseIf MoveLeft = True Then
+            If MoveUp = True Then
+                Get_Hero_Direction = DirectionEnum.LeftUp
+                Exit Function
+            ElseIf MoveDown = True Then
+                Get_Hero_Direction = DirectionEnum.LeftDown
+                Exit Function
+            Else
+                Get_Hero_Direction = DirectionEnum.Left
+                Exit Function
+            End If
+        ElseIf MoveUp = True Then
+            Get_Hero_Direction = DirectionEnum.Up
+            Exit Function
+        ElseIf MoveDown = True Then
+            Get_Hero_Direction = DirectionEnum.Down
+            Exit Function
+        Else
+            Get_Hero_Direction = DirectionEnum.None
+            Exit Function
+        End If
+
+
+    End Function
     Private Sub Do_Hero_Shots()
 
+
+        'Does the player want to cast a spell and isn't already casting a spell.
         If CtrlDown = True And ProjectileInflight = False Then
+            'Yes, the player wants to cast a spell and isn't already casting a spell.
+            'Determine the hero's direction of fire.**************************
             If MoveRight = True Then
                 If MoveUp = True Then
                     Projectile_Direction = DirectionEnum.RightUP
@@ -1354,25 +1333,36 @@ Public Class Form1
             Else
                 Projectile_Direction = DirectionEnum.None
             End If
-
+            '*************************************************************
+            'Fire**************************************************
             If Projectile_Direction <> DirectionEnum.None Then
+
+                'Position the projectile under the hero. Make the projectile the same size as the hero.
                 Projectile = OurHero.Rec
+
+                'Loose the projectile.
                 ProjectileInflight = True
+
+                'Play projectile in flight sound.
                 GS.Play("Magic")
 
-                'If GS.IsPlaying("Magic") = False Then
-                '    GS.Play("Magic") 'play the Music
-                'End If
             End If
+            '******************************************************
         End If
 
 
+        'Move projectile and attack the monster when hit.*****************************************************************************
+        'Has the player cast a spell?
         If ProjectileInflight = True Then
-            'Is the projectile within range?
+            'Yes the player has cast a spell.
+            'Is the projectile within it's range?
             If Distance_Between_Points(Projectile.Location, OurHero.Rec.Location) < Projectile_Max_Distance Then
+                'Yes, the projectile is within it's range.
+                'What direction is the player casting in?
                 Select Case Projectile_Direction
                     Case DirectionEnum.Right
-                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        'The player is casting to the right.
+                        'Move the projectile to the right.
                         Projectile.X += Projectile_Speed
                         'Is the monster alive?
                         If Monster_Life > 0 Then
@@ -1381,7 +1371,6 @@ Public Class Form1
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
                                 Monster_Hit = True
-                                'ProjectileInflight = False
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
@@ -1518,56 +1507,109 @@ Public Class Form1
                             End If
                         End If
                     Case DirectionEnum.LeftDown
-                        'If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
+                        'The player is casting to the left and down.
+
+                        'Move projectile to the left.
                         Projectile.X -= Projectile_Speed
+                        'Move projectile down.
                         Projectile.Y += Projectile_Speed
+
                         'Is the monster alive?
                         If Monster_Life > 0 Then
                             'Yes, the monster is alive.
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
                                 Monster_Hit = True
-                                'ProjectileInflight = False
+
+                                'Play monster hit sound
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
-                                'Knock monster to the right of hero.
+
+                                'Knock the monster to the right of hero.
                                 Monster.X -= CInt(Projectile_Speed / 3)
+                                'Knock the monster below the hero.
                                 Monster.Y += CInt(Projectile_Speed / 3)
+
                             End If
                         End If
                 End Select
             Else
+                'No, the projectile is outside it's range.
+
+                'Stop the projectile.
                 ProjectileInflight = False
+
             End If
         End If
+
+
+
     End Sub
+    Private Sub MoveHero(Direction As DirectionEnum)
+
+        Select Case Direction
+            Case DirectionEnum.Right
+                'Move hero to the right.
+                OurHero.Rec.X += OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.Left
+                'Move hero to the left.
+                OurHero.Rec.X -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.Up
+                'Move hero up.
+                OurHero.Rec.Y -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.Down
+                'Move hero down.
+                OurHero.Rec.Y += OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.RightUP
+                'Move hero to the right.
+                OurHero.Rec.X += OurHero.Speed
+                'Move hero up.
+                OurHero.Rec.Y -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.RightDown
+                'Move hero to the right.
+                OurHero.Rec.X += OurHero.Speed
+                'Move hero down.
+                OurHero.Rec.Y += OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.LeftUp
+                'Move hero to the left.
+                OurHero.Rec.X -= OurHero.Speed
+                'Move hero up.
+                OurHero.Rec.Y -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.LeftDown
+                'Move hero to the left.
+                OurHero.Rec.X -= OurHero.Speed
+                'Move hero down.
+                OurHero.Rec.Y += OurHero.Speed
+                Exit Sub
+        End Select
+
+    End Sub
+
     Private Sub Write_AudioFile_to_Path(MStream As MemoryStream, Path As String)
         'This sub procedure takes a memory stream from an audio resource
         'and saves it as an audio file at the path.
-        'A example call would look like this.
-        '  Dim ms As New MemoryStream
-        '  My.Resources.level_music.CopyTo(ms)
-        '  Write_AudioFile_to_Path(ms, Application.StartupPath & "\level_music.wav")
         '
-
-        'Dim ms As New MemoryStream
-        'My.Resources.level_music.CopyTo(ms)
-        Dim AudioFile() As Byte = MStream.ToArray
-        File.WriteAllBytes(Path, AudioFile)
-        'ms.Dispose()
-
         'A example call would look like this.
-        '  Dim ms As New MemoryStream
-        '  My.Resources.level_music.CopyTo(ms)
-        '  Write_AudioFile_to_Path(ms, Application.StartupPath & "\Test_music.wav")
-        '  ms.Dispose()
+        '
+        'Dim ms As New MemoryStream 'Create memory stream.
+        'My.Resources.level_music.CopyTo(ms) 'Copy audio resource into memory stream.
+        'Write_AudioFile_to_Path(ms, Application.StartupPath & "\level_music.wav")
 
-
-
+        Dim AudioFile() As Byte = MStream.ToArray 'Copy memory stream into byte array.
+        File.WriteAllBytes(Path, AudioFile) 'Write the byte array to the drive path.
 
         'Create a level music file in the apps start up path.
         'Dim ms As New MemoryStream
@@ -1576,18 +1618,7 @@ Public Class Form1
         'File.WriteAllBytes(Application.StartupPath & "\level_music.wav", AudioFile)
         'ms.Dispose()
 
-
-        'Dim ms2 As New MemoryStream
-        'My.Resources.machine_gun.CopyTo(ms2)
-        'Dim AudioFile2() As Byte = ms2.ToArray
-        'File.WriteAllBytes(Application.StartupPath & "\machine_gun.wav", AudioFile2)
-        'ms2.Dispose()
-
-
     End Sub
-
-
-
 End Class
 
 Public Class GameSounds
