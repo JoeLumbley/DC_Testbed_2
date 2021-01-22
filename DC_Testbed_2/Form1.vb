@@ -237,16 +237,26 @@ Public Class Form1
         GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3") 'adds and open a Laser Gun sound
         GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3") 'adds and open a Laser Gun sound
 
+        GS.AddSound("Undead_Move", Application.StartupPath & "undead_move.mp3") 'adds and open a Laser Gun sound
+
+        GS.AddSound("Undead_Attack", Application.StartupPath & "undead_attack.mp3") 'adds and open a Laser Gun sound
+
+        GS.AddSound("Potion_Pickup", Application.StartupPath & "potion_pickup.mp3") 'adds and open a Laser Gun sound
+
         'Set set volume 
-        GS.SetVolume("Music", 400)
-        GS.SetVolume("Magic", 900)
+        GS.SetVolume("Music", 200)
+        GS.SetVolume("Magic", 600)
         GS.SetVolume("Monster", 900)
+        GS.SetVolume("Undead_Move", 900)
+        GS.SetVolume("Undead_Attack", 900)
+        GS.SetVolume("Potion_Pickup", 1000)
+
 
         'Set frame rate for the display timer.
         Timer1.Interval = 33
 
         'Set frame rate for the game timer.
-        Timer2.Interval = 18
+        Timer2.Interval = 20
 
         'Start display timer.
         Timer1.Start()
@@ -615,7 +625,7 @@ Public Class Form1
 
                 g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
 
-                g.DrawRectangle(New Pen(Color.White, 1), Rec)
+                g.DrawRectangle(New Pen(Color.DarkBlue, 1), Rec)
 
 
             Else
@@ -652,57 +662,50 @@ Public Class Form1
         '    Wall.Revealed = True
         'End If
 
-        If RandomNumber.Next(1, 3) = 1 Then
-            OurHero.Initiative = True
-        Else
-            OurHero.Initiative = False
+        'If RandomNumber.Next(1, 3) = 1 Then
+        '    OurHero.Initiative = True
+        'Else
+        '    OurHero.Initiative = False
+        'End If
+
+
+        ''Roll for initative.
+        'If RandomNumber.Next(1, 20) > 10 Then
+        '    OurHero.Initiative = True
+        'Else
+        '    OurHero.Initiative = False
+        'End If
+
+
+
+
+
+
+
+        Do_Hero_Moves()
+
+        Do_Monster_Moves()
+
+
+
+
+        If Wall.Rec.IntersectsWith(Viewport) Then
+
+            Wall.Revealed = True
         End If
 
+    End Sub
 
+    Private Sub Do_Hero_Moves()
 
         If OurHero.Life > 0 Then
 
-            ''Do Controls
-            'Select Case Get_Hero_Direction()
-            '    Case DirectionEnum.Right
-            '        MoveHero(DirectionEnum.Right)
-            '        Exit Select
-            '    Case DirectionEnum.Left
-            '        MoveHero(DirectionEnum.Left)
-            '        Exit Select
-            '    Case DirectionEnum.Up
-            '        MoveHero(DirectionEnum.Up)
-            '        Exit Select
-            '    Case DirectionEnum.Down
-            '        MoveHero(DirectionEnum.Down)
-            '        Exit Select
-            '    Case DirectionEnum.RightUP
-            '        MoveHero(DirectionEnum.RightUP)
-            '        Exit Select
-            '    Case DirectionEnum.RightDown
-            '        MoveHero(DirectionEnum.RightDown)
-            '        Exit Select
-            '    Case DirectionEnum.LeftUp
-            '        MoveHero(DirectionEnum.LeftUp)
-            '        Exit Select
-            '    Case DirectionEnum.LeftDown
-            '        MoveHero(DirectionEnum.LeftDown)
-            'End Select
-
-            'If Potion.Active = True Then
-            '    If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
-
-            '        OurHero.Life = OurHero.MaxLife
-            '        Potion.Active = False
-
-            '    End If
-            'End If
-
-
-
-
-
-
+            'Roll for initative.
+            If RandomNumber.Next(1, 20) > 5 Then
+                OurHero.Initiative = True
+            Else
+                OurHero.Initiative = False
+            End If
 
             If MoveLeft = True Then
                 'Move hero to the left.
@@ -725,6 +728,10 @@ Public Class Form1
                         'Yes, the hero is touching the monster.
                         'Push hero to the right of monster.
                         OurHero.Rec.X = Monster.X + Monster.Width + 1
+
+
+
+
                         If OurHero.Initiative = True Then
                             Monster_Hit = True
                             'Attack the monsters life points directly.
@@ -741,52 +748,27 @@ Public Class Form1
 
 
 
+                            'Wall Collision Handler Monster moing left*************************
+                            'Is the monster touching the wall?
+                            If Monster.IntersectsWith(Wall.Rec) = True Then
+                                'Yes, the monster is touching the wall.
+
+                                'Push monster to the right of wall.
+                                Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+                            End If
+                            '************************************************
+
+
+
+
+
+
 
                         End If
                     End If
                 End If
             End If
-
-            ''Hero Shots********************************************************* 
-            ''ShootLeft
-
-            ''Projectile_Direction
-            'If CtrlDown = True And MoveLeft = True And ProjectileInflight = False Then
-            '    Projectile = OurHero.Rec
-            '    ProjectileInflight = True
-            '    GS.Play("Magic")
-            'End If
-            'If ProjectileInflight = True Then
-            '    If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
-            '        'Move projectile to the left.
-            '        Projectile.X -= Projectile_Speed
-            '        'Is the monster alive?
-            '        If Monster_Life > 0 Then
-            '            'Yes, the monster is alive.
-            '            'Is the hero touching the monster?
-            '            If Projectile.IntersectsWith(Monster) = True Then
-            '                'Yes, the hero is touching the monster.
-            '                Monster_Hit = True
-            '                'ProjectileInflight = False
-            '                'Attack the monsters life points directly.
-            '                Monster_Life -= Projectile_Attack
-            '                If Monster_Life < 0 Then
-            '                    Monster_Life = 0
-            '                End If
-            '                'Knock monster to the left of hero.
-            '                Monster.X -= CInt(Projectile_Speed / 3)
-            '            End If
-            '        End If
-            '    Else
-            '        ProjectileInflight = False
-            '    End If
-            'End If
-            ''*************************************************************************
-
-
-
-
-
 
             If MoveRight = True Then
                 'Move hero to the right.
@@ -824,7 +806,7 @@ Public Class Form1
 
 
                             'Knock monster to the right of hero.
-                            Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 32
+                            Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
 
                             'Is the monster touching a wall?
                             If Monster.IntersectsWith(Wall.Rec) = True Then
@@ -854,39 +836,6 @@ Public Class Form1
                     End If
                 End If
             End If
-
-            ''Hero Shots********************************************************* 
-            ''ShootRight
-            'If CtrlDown = True And MoveRight = True And ProjectileInflight = False Then
-            '    Projectile = OurHero.Rec
-            '    ProjectileInflight = True
-            '    GS.Play("Magic")
-            'End If
-            'If ProjectileInflight = True Then
-            '    If Horizontal_Distance(Projectile.X, OurHero.Rec.X) < Projectile_Max_Distance Then
-            '        Projectile.X += Projectile_Speed
-            '        'Is the monster alive?
-            '        If Monster_Life > 0 Then
-            '            'Yes, the monster is alive.
-            '            'Is the hero touching the monster?
-            '            If Projectile.IntersectsWith(Monster) = True Then
-            '                'Yes, the hero is touching the monster.
-            '                Monster_Hit = True
-            '                'ProjectileInflight = False
-            '                'Attack the monsters life points directly.
-            '                Monster_Life -= Projectile_Attack
-            '                If Monster_Life < 0 Then
-            '                    Monster_Life = 0
-            '                End If
-            '                'Knock monster to the right of hero.
-            '                Monster.X += CInt(Projectile_Speed / 3)
-            '            End If
-            '        End If
-            '    Else
-            '        ProjectileInflight = False
-            '    End If
-            'End If
-            ''*************************************************************************
 
             If MoveUp = True Then
                 'Move hero up.
@@ -923,15 +872,6 @@ Public Class Form1
                     End If
                 End If
             End If
-
-
-
-
-
-
-
-
-
 
             If MoveDown = True Then
                 'OurHero.Rec.Y += OurHero.Speed
@@ -980,9 +920,27 @@ Public Class Form1
             Do_Hero_Shots()
 
 
+            If Potion.Active = True Then
+                If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
+
+                    OurHero.Life = OurHero.MaxLife
+                    Potion.Active = False
+
+                    'Play potion pickupsound.
+                    If GS.IsPlaying("Potion_Pickup") = False Then
+                        GS.Play("Potion_Pickup")
+                    End If
+
+                End If
+            End If
+
+
         End If
 
 
+    End Sub
+
+    Private Sub Do_Monster_Moves()
         'Monster Moves **********************************************************************************************************
         'Is the monster and the hero alive?
         If Monster_Life > 0 And OurHero.Life > 0 Then
@@ -1017,7 +975,13 @@ Public Class Form1
                             'Move the monster to the right slowly.
                             Monster.X += 1
                         End If
+
+                        'Play undead moveing sound.
+                        If GS.IsPlaying("Undead_Move") = False Then
+                            GS.Play("Undead_Move")
+                        End If
                         '*********************************************************************************
+
 
                         'Wall Collision Handler - Moving Right*****************
                         'Is the monster touching the wall?
@@ -1027,12 +991,17 @@ Public Class Form1
                             'Push monster to the left of wall.
                             Monster.X = Wall.Rec.X - Monster.Width - 1
 
+                            If GS.IsPlaying("Undead_Move") = True Then
+                                GS.Pause("Undead_Move")
+                            End If
+
                         End If
                         '************************************************
 
                         'Attack Right**************************************************
                         'Is the monster touching the hero?
                         If Monster.IntersectsWith(OurHero.Rec) = True Then
+
                             'Yes, the monster is touching the hero.
 
                             'Push the monster to the left of the hero.
@@ -1041,7 +1010,9 @@ Public Class Form1
 
 
 
+
                             If OurHero.Initiative = False Then
+
 
                                 'GS.Play("Monster") 'play the Music
 
@@ -1050,10 +1021,11 @@ Public Class Form1
 
                                 OurHero.Hit = True
 
-
-                                If GS.IsPlaying("Monster") = False Then
-                                    GS.Play("Monster") 'play the Music
+                                'Play undead attack sound.
+                                If GS.IsPlaying("Undead_Attack") = False Then
+                                    GS.Play("Undead_Attack") 'play the Music
                                 End If
+
                                 'If Monster_AttackTimer = 0 Then
                                 '        GS.Play("Monster") 'play the Music
                                 '        Monster_AttackTimer += 1
@@ -1096,6 +1068,7 @@ Public Class Form1
                         'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
                         'Is the monster close to the hero?
                         If Math.Abs(Monster.X + (Monster.Width \ 2) - (OurHero.Rec.X + OurHero.Rec.Width \ 2)) > 8 Then
+
                             'No, the monster is not close to the hero.
                             'Move the monster to the left fast.
                             Monster.X -= Monster_Speed
@@ -1104,17 +1077,26 @@ Public Class Form1
                             'Move the monster to the left slowly.
                             Monster.X -= 1
                         End If
+
+                        'Play undead moveing sound.
+                        If GS.IsPlaying("Undead_Move") = False Then
+                            GS.Play("Undead_Move")
+                        End If
                         '***********************************************************************************************
 
 
 
-                        'Wall Collision Handler*************************
+                        'Wall Collision Handler Monster moing left*************************
                         'Is the monster touching the wall?
                         If Monster.IntersectsWith(Wall.Rec) = True Then
                             'Yes, the monster is touching the wall.
 
                             'Push monster to the right of wall.
                             Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+                            If GS.IsPlaying("Undead_Move") = True Then
+                                GS.Pause("Undead_Move")
+                            End If
 
                         End If
                         '************************************************
@@ -1134,6 +1116,11 @@ Public Class Form1
                                 OurHero.Life -= Monster_Attack
 
                                 OurHero.Hit = True
+
+                                'Play undead attack sound.
+                                If GS.IsPlaying("Undead_Attack") = False Then
+                                    GS.Play("Undead_Attack") 'play the Music
+                                End If
 
                                 'Knock hero to the left of monster.
                                 OurHero.Rec.X = Monster.X - Monster.Width - 16
@@ -1177,6 +1164,11 @@ Public Class Form1
                             Monster.Y += 1
 
                         End If
+
+                        'Play undead moveing sound.
+                        If GS.IsPlaying("Undead_Move") = False Then
+                            GS.Play("Undead_Move")
+                        End If
                         '***********************************************************************************************
 
                         'Wall Collision Handler - Moving Down ********************************************************
@@ -1186,6 +1178,10 @@ Public Class Form1
 
                             'Push the monster above the wall.
                             Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+                            If GS.IsPlaying("Undead_Move") = True Then
+                                GS.Pause("Undead_Move")
+                            End If
 
                         End If
                         '************************************************
@@ -1212,6 +1208,11 @@ Public Class Form1
                             Monster.Y -= 1
                         End If
 
+                        'Play undead moveing sound.
+                        If GS.IsPlaying("Undead_Move") = False Then
+                            GS.Play("Undead_Move")
+                        End If
+
                         'Wall Collision Handler*************************
                         'Is the monster touching the wall?
                         If Monster.IntersectsWith(Wall.Rec) = True Then
@@ -1219,6 +1220,10 @@ Public Class Form1
 
                             'Push the hero below the wall.
                             Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+
+                            If GS.IsPlaying("Undead_Move") = True Then
+                                GS.Pause("Undead_Move")
+                            End If
 
                         End If
                         '************************************************
@@ -1258,21 +1263,11 @@ Public Class Form1
         End If
 
 
-        If Potion.Active = True Then
-            If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
-
-                OurHero.Life = OurHero.MaxLife
-                Potion.Active = False
-
-            End If
-        End If
-
-        If Wall.Rec.IntersectsWith(Viewport) Then
-
-            Wall.Revealed = True
-        End If
 
     End Sub
+
+
+
     Private Sub Do_Hero_Shots()
 
 
@@ -1379,6 +1374,24 @@ Public Class Form1
                                 End If
                                 'Knock monster to the left of hero.
                                 Monster.X -= CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler Monster moing left*************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push monster to the right of wall.
+                                    Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+                                End If
+                                '************************************************
+
+
+
+
+
+
                             End If
                         End If
                     Case DirectionEnum.Up
