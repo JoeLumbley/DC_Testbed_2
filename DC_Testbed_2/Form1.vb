@@ -97,7 +97,7 @@ Public Class Form1
     Private _BufferFlag As Boolean = True
 
 
-    Private Monster As New Rectangle(500, 500, 75, 75)
+    Private Monster As New Rectangle(500, 500, 150, 150)
     Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 39, 205, 89))
     Private Monster_LifeMAX As Integer = 50
     Private Monster_Life As Integer = Monster_LifeMAX
@@ -234,14 +234,15 @@ Public Class Form1
 
         'Load sound files
         GS.AddSound("Music", Application.StartupPath & "level_music.mp3") 'adds and open a Background music file
-        GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3") 'adds and open a Laser Gun sound
-        GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3") 'adds and open a Laser Gun sound
+        GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3")
+        GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3")
+        GS.AddSound("Undead_Move", Application.StartupPath & "undead_move.mp3")
+        GS.AddSound("Undead_Attack", Application.StartupPath & "undead_attack.mp3")
+        GS.AddSound("Potion_Pickup", Application.StartupPath & "potion_pickup.mp3")
 
-        GS.AddSound("Undead_Move", Application.StartupPath & "undead_move.mp3") 'adds and open a Laser Gun sound
 
-        GS.AddSound("Undead_Attack", Application.StartupPath & "undead_attack.mp3") 'adds and open a Laser Gun sound
+        GS.AddSound("Undead_Death", Application.StartupPath & "undead_death.mp3")
 
-        GS.AddSound("Potion_Pickup", Application.StartupPath & "potion_pickup.mp3") 'adds and open a Laser Gun sound
 
         'Set set volume 
         GS.SetVolume("Music", 200)
@@ -250,6 +251,8 @@ Public Class Form1
         GS.SetVolume("Undead_Move", 900)
         GS.SetVolume("Undead_Attack", 900)
         GS.SetVolume("Potion_Pickup", 1000)
+
+        GS.SetVolume("Undead_Death", 1000)
 
 
         'Set frame rate for the display timer.
@@ -701,224 +704,37 @@ Public Class Form1
         If OurHero.Life > 0 Then
 
             'Roll for initative.
-            If RandomNumber.Next(1, 20) > 5 Then
+            If RandomNumber.Next(1, 20) > 10 Then
                 OurHero.Initiative = True
             Else
                 OurHero.Initiative = False
             End If
 
             If MoveLeft = True Then
-                'Move hero to the left.
-                'OurHero.Rec.X -= OurHero.Speed
 
-                MoveHero(DirectionEnum.Left)
+                Move_Hero_Left()
 
-                'Is the hero touching the wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching the wall.
-                    'Push hero to the right of wall.
-                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width
-                End If
-
-                'Is the monster alive?
-                If Monster_Life > 0 Then
-                    'Yes, the monster is alive.
-                    'Is the hero touching the monster?
-                    If OurHero.Rec.IntersectsWith(Monster) = True Then
-                        'Yes, the hero is touching the monster.
-                        'Push hero to the right of monster.
-                        OurHero.Rec.X = Monster.X + Monster.Width + 1
-
-
-
-
-                        If OurHero.Initiative = True Then
-                            Monster_Hit = True
-                            'Attack the monsters life points directly.
-                            Monster_Life -= OurHero.Attack
-                            If Monster_Life < 0 Then
-                                Monster_Life = 0
-                            End If
-
-
-
-                            'Knock monster to the left of hero.
-                            Monster.X = OurHero.Rec.X - Monster.Width - 32
-
-
-
-
-                            'Wall Collision Handler Monster moing left*************************
-                            'Is the monster touching the wall?
-                            If Monster.IntersectsWith(Wall.Rec) = True Then
-                                'Yes, the monster is touching the wall.
-
-                                'Push monster to the right of wall.
-                                Monster.X = Wall.Rec.X + Wall.Rec.Width
-
-                            End If
-                            '************************************************
-
-
-
-
-
-
-
-                        End If
-                    End If
-                End If
             End If
 
             If MoveRight = True Then
-                'Move hero to the right.
-                'OurHero.Rec.X += OurHero.Speed
 
-                MoveHero(DirectionEnum.Right)
+                Move_Hero_Right()
 
-
-
-                'Is the hero touching the wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching the wall.
-                    'Push hero to the left of wall.
-                    OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 1
-
-                End If
-
-                'Is the monster alive?
-                If Monster_Life > 0 Then
-                    'Yes, the monster is alive.
-                    'Is the hero touching the monster?
-                    If OurHero.Rec.IntersectsWith(Monster) = True Then
-                        'Yes, the hero is touching the monster.
-                        'Push hero to the left of monster.
-                        OurHero.Rec.X = Monster.X - Monster.Width - 1
-                        If OurHero.Initiative = True Then
-                            Monster_Hit = True
-
-
-                            'Attack the monsters life points directly.
-                            Monster_Life -= OurHero.Attack
-                            If Monster_Life < 0 Then
-                                Monster_Life = 0
-                            End If
-
-
-                            'Knock monster to the right of hero.
-                            Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
-
-                            'Is the monster touching a wall?
-                            If Monster.IntersectsWith(Wall.Rec) = True Then
-                                'Yes, the monster is touching a wall.
-
-                                'Knock monster to the left of wall.
-                                Monster.X = Wall.Rec.X - OurHero.Rec.Width - 16
-
-                                'Knock the hero to the left of the monster.
-                                OurHero.Rec.X = Monster.X - Monster.Width - 8
-
-                            End If
-
-
-                            ''Wall Collision Handler - Moving Right*****************
-                            ''Is the monster touching the wall?
-                            'If Monster.IntersectsWith(Wall.Rec) = True Then
-                            '    'Yes, the monster is touching the wall.
-
-                            '    'Push monster to the left of wall.
-                            '    Monster.X = Wall.Rec.X - Monster.Width - 16
-
-                            'End If
-                            ''************************************************
-
-                        End If
-                    End If
-                End If
             End If
 
             If MoveUp = True Then
-                'Move hero up.
-                'OurHero.Rec.Y -= OurHero.Speed
 
-                MoveHero(DirectionEnum.Up)
+                Move_Hero_Up()
 
-                'Is the hero touching the wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching the wall.
-                    'Push the hero below the wall.
-                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height
-                End If
-
-                'Is the monster alive?
-                If Monster_Life > 0 Then
-                    'Yes, the monster is alive.
-                    'Is the hero touching the monster?
-                    If OurHero.Rec.IntersectsWith(Monster) = True Then
-                        'Yes, the hero is touching the monster.
-                        'Push the hero below the monster.
-                        OurHero.Rec.Y = Monster.Y + Monster.Height + 1
-                        If OurHero.Initiative = True Then
-                            Monster_Hit = True
-                            'Attack the monsters life points directly.
-                            Monster_Life -= OurHero.Attack
-
-                            If Monster_Life < 0 Then
-                                Monster_Life = 0
-                            End If
-                            'Knock monster above the hero.
-                            Monster.Y = OurHero.Rec.Y - Monster.Height - 32
-                        End If
-                    End If
-                End If
             End If
 
             If MoveDown = True Then
-                'OurHero.Rec.Y += OurHero.Speed
 
-                MoveHero(DirectionEnum.Down)
+                Move_Hero_Down()
 
-
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    OurHero.Rec.Y = Wall.Rec.Y - OurHero.Rec.Height - 1
-                End If
-
-
-
-                If Monster_Life > 0 Then
-                    If OurHero.Rec.IntersectsWith(Monster) = True Then
-                        OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 1
-                        If OurHero.Initiative = True Then
-                            Monster_Hit = True
-                            'Attack the monsters life points directly.
-                            Monster_Life -= OurHero.Attack
-
-                            If Monster_Life < 0 Then
-                                Monster_Life = 0
-                            End If
-                            'Knock monster below the hero.
-                            Monster.Y = OurHero.Rec.Y + Monster.Height + 32
-
-                            'Wall Collision Handler - Moving Down ********************************************************
-                            'Is the monster touching the wall?
-                            If Monster.IntersectsWith(Wall.Rec) = True Then
-                                'Yes, the monster is touching the wall.
-
-                                'Push the monster above the wall.
-                                Monster.Y = Wall.Rec.Y - (Monster.Height - 1)
-
-                            End If
-                            '************************************************
-                        End If
-                    End If
-                End If
             End If
 
-
-
-
             Do_Hero_Shots()
-
 
             If Potion.Active = True Then
                 If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
@@ -931,14 +747,555 @@ Public Class Form1
                         GS.Play("Potion_Pickup")
                     End If
 
+
                 End If
+
             End If
+
 
 
         End If
 
 
+
     End Sub
+
+
+
+
+    Private Sub Move_Hero_Right()
+
+        MoveHero(DirectionEnum.Right)
+
+        'Play hero move sound.
+
+        'Wall Collision Handler - Moving Right*****************
+        'Is the hero touching the wall?
+        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the hero is touching the wall.
+
+            'Push hero to the left of wall.
+            OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 1
+
+        End If
+
+
+
+
+
+        'Is the monster alive?
+        If Monster_Life > 0 Then
+            'Yes, the monster is alive.
+
+            'Hero Attacks Right*******************************************
+            'Is the hero touching the monster?
+            If OurHero.Rec.IntersectsWith(Monster) = True Then
+                'Yes, the hero is touching the monster.
+
+                'Push hero to the left of monster.
+                OurHero.Rec.X = Monster.X - OurHero.Rec.Width - 1
+
+                If OurHero.Initiative = True Then
+
+                    Monster_Hit = True
+
+
+                    'Attack the monsters life points directly.
+                    Monster_Life -= OurHero.Attack
+                    If Monster_Life < 0 Then
+                        Monster_Life = 0
+                    End If
+
+                    'Play hero attack sound.
+
+                    'Knock monster to the right of hero.
+                    Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 32
+
+
+                    'Wall Collision Handler - Moving Right*****************
+                    'Is the monster touching a wall?
+                    If Monster.IntersectsWith(Wall.Rec) = True Then
+                        'Yes, the monster is touching a wall.
+
+                        'Knock monster to the left of wall.
+                        Monster.X = Wall.Rec.X - Monster.Width - 16
+
+                        'Knock the hero to the left of the monster.
+                        OurHero.Rec.X = Monster.X - Monster.Width - 8
+
+                    End If
+                    '************************************************
+                End If
+            End If
+        End If
+
+    End Sub
+
+    Private Sub Move_Monster_Right()
+
+
+        Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
+        Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
+
+
+        'Move Monster Right**************************************************************
+        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
+        'Is the monster close to the hero?
+        If Horizontal_Distance(Monster_Center_X, Hero_Center_X) > 8 Then
+            'No, the monster is not close to the hero.
+            'Move the monster to the right fast.
+            Monster.X += Monster_Speed
+        Else
+            'Yes, the monster is close to the hero.
+            'Move the monster to the right slowly.
+            Monster.X += 1
+        End If
+
+        'Play undead moveing sound.
+        If GS.IsPlaying("Undead_Move") = False Then
+            GS.Play("Undead_Move")
+        End If
+        '*********************************************************************************
+
+
+        'Wall Collision Handler - Moving Right*****************
+        'Is the monster touching the wall?
+        If Monster.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the monster is touching the wall.
+
+            'Push monster to the left of wall.
+            Monster.X = Wall.Rec.X - Monster.Width - 1
+
+            If GS.IsPlaying("Undead_Move") = True Then
+                GS.Pause("Undead_Move")
+            End If
+
+        End If
+        '************************************************
+
+        'Attack Right**************************************************
+        'Is the monster touching the hero?
+        If Monster.IntersectsWith(OurHero.Rec) = True Then
+            'Yes, the monster is touching the hero.
+
+            'Push the monster to the left of the hero.
+            Monster.X = OurHero.Rec.X - Monster.Width - 1
+
+            If OurHero.Initiative = False Then
+
+                OurHero.Hit = True
+
+                'Attack the heros life points directly.
+                OurHero.Life -= Monster_Attack
+                If OurHero.Life < 0 Then
+                    OurHero.Life = 0
+                End If
+
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
+
+                'Knock hero to the right of monster.
+                OurHero.Rec.X = Monster.X + Monster.Width + 32
+
+
+                'Wall Collision Handler - Moving Right*****************
+                'Is the hero touching a wall?
+                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                    'Yes, the hero is touching a wall.
+
+                    'Knock hero to the left of wall.
+                    OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 1
+
+                    'Knock the monster to the left of the hero.
+                    Monster.X = OurHero.Rec.X - Monster.Width - 16
+
+                End If
+            End If
+        End If
+
+    End Sub
+
+    Private Sub Move_Hero_Left()
+
+        MoveHero(DirectionEnum.Left)
+
+        'Play hero moving sound.
+
+
+        'Wall Collision Handler Hero moving left*************************
+        'Is the hero touching the wall?
+        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the hero is touching the wall.
+
+
+            'Push hero to the right of wall.
+            OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width
+
+        End If
+
+        'Is the monster alive?
+        If Monster_Life > 0 Then
+            'Yes, the monster is alive.
+
+            'Is the hero touching the monster?
+            If OurHero.Rec.IntersectsWith(Monster) = True Then
+                'Yes, the hero is touching the monster.
+
+                'Push hero to the right of monster.
+                OurHero.Rec.X = Monster.X + Monster.Width + 1
+
+                If OurHero.Initiative = True Then
+
+                    Monster_Hit = True
+
+                    'Attack the monsters life points directly.
+                    Monster_Life -= OurHero.Attack
+                    If Monster_Life < 0 Then
+                        Monster_Life = 0
+                    End If
+
+                    'Knock monster to the left of hero.
+                    Monster.X = OurHero.Rec.X - Monster.Width - 32
+
+                    'Wall Collision Handler Monster moving left*************************
+                    'Is the monster touching the wall?
+                    If Monster.IntersectsWith(Wall.Rec) = True Then
+                        'Yes, the monster is touching the wall.
+
+                        'Push monster to the right of wall.
+                        Monster.X = Wall.Rec.X + Wall.Rec.Width + 1
+
+                        'Knock the hero to the right of the monster.
+                        OurHero.Rec.X = Monster.X + Monster.Width + 16
+
+                    End If
+                    '************************************************
+                End If
+            End If
+        End If
+
+
+
+
+    End Sub
+
+    Private Sub Move_Monster_Left()
+
+        'Move Left************************************************************************************
+        'Move the monster to the left.
+        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
+        'Is the monster close to the hero?
+        If Math.Abs(Monster.X + (Monster.Width \ 2) - (OurHero.Rec.X + OurHero.Rec.Width \ 2)) > 8 Then
+
+            'No, the monster is not close to the hero.
+            'Move the monster to the left fast.
+            Monster.X -= Monster_Speed
+        Else
+            'Yes, the monster is close to the hero.
+            'Move the monster to the left slowly.
+            Monster.X -= 1
+        End If
+
+        'Play undead moving sound.
+        If GS.IsPlaying("Undead_Move") = False Then
+            GS.Play("Undead_Move")
+        End If
+        '***********************************************************************************************
+        'Wall Collision Handler Monster moving left*************************
+        'Is the monster touching the wall?
+        If Monster.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the monster is touching the wall.
+
+            'Push monster to the right of wall.
+            Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+            If GS.IsPlaying("Undead_Move") = True Then
+                GS.Pause("Undead_Move")
+            End If
+
+        End If
+        '************************************************
+        'Attack Left************************************************************************************
+        'Is the monster touching the hero?
+        If Monster.IntersectsWith(OurHero.Rec) = True Then
+            'Yes, the monster is touching the hero.
+
+            'Push the monster to the right of the hero.
+            Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 1
+
+            If OurHero.Initiative = False Then
+
+                'Attack the heros life points directly.
+                OurHero.Life -= Monster_Attack
+
+                OurHero.Hit = True
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
+
+                'Knock hero to the left of monster.
+                OurHero.Rec.X = Monster.X - OurHero.Rec.Width - 32
+
+                'Is the hero touching a wall?
+                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                    'Yes, the hero is touching a wall.
+
+                    'Knock hero to the right of wall.
+                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 1
+
+                    'Knock the monster to the right of the hero.
+                    Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
+
+                End If
+            End If
+        End If
+        '*********************************************************************
+    End Sub
+
+    Private Sub Move_Hero_Up()
+
+        MoveHero(DirectionEnum.Up)
+
+        'Is the hero touching the wall?
+        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the hero is touching the wall.
+            'Push the hero below the wall.
+            OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height
+        End If
+
+        'Is the monster alive?
+        If Monster_Life > 0 Then
+            'Yes, the monster is alive.
+            'Is the hero touching the monster?
+            If OurHero.Rec.IntersectsWith(Monster) = True Then
+                'Yes, the hero is touching the monster.
+                'Push the hero below the monster.
+                OurHero.Rec.Y = Monster.Y + Monster.Height + 1
+                If OurHero.Initiative = True Then
+                    Monster_Hit = True
+                    'Attack the monsters life points directly.
+                    Monster_Life -= OurHero.Attack
+
+                    If Monster_Life < 0 Then
+                        Monster_Life = 0
+                    End If
+                    'Knock monster above the hero.
+                    Monster.Y = OurHero.Rec.Y - Monster.Height - 32
+                    'Wall Collision Handler - Monster moving up *************************
+                    'Is the monster touching the wall?
+                    If Monster.IntersectsWith(Wall.Rec) = True Then
+                        'Yes, the monster is touching the wall.
+
+                        'Push the hero below the wall.
+                        Monster.Y = Wall.Rec.Y + (Wall.Rec.Height - 1)
+
+                        If GS.IsPlaying("Undead_Move") = True Then
+                            GS.Pause("Undead_Move")
+                        End If
+
+                    End If
+                    '************************************************
+                End If
+            End If
+        End If
+
+    End Sub
+
+
+    Private Sub Move_Monster_Up()
+
+        'Move the monster up.
+        'Is the monster close to the hero?
+        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
+            'No, the monster is not close to the hero.
+            'Move the monster up fast.
+            Monster.Y -= Monster_Speed
+        Else
+            'Yes, the monster is close to the hero.
+            'Move the monster up slowly.
+            Monster.Y -= 1
+        End If
+
+        'Play undead moveing sound.
+        If GS.IsPlaying("Undead_Move") = False Then
+            GS.Play("Undead_Move")
+        End If
+
+        'Wall Collision Handler - Monster moving up *************************
+        'Is the monster touching the wall?
+        If Monster.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the monster is touching the wall.
+
+            'Push the hero below the wall.
+            Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+
+            If GS.IsPlaying("Undead_Move") = True Then
+                GS.Pause("Undead_Move")
+            End If
+
+        End If
+        '************************************************
+        'Attack Up************************************************************************************
+        If Monster.IntersectsWith(OurHero.Rec) = True Then
+
+            'Push the monster below the hero.
+            Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
+
+            If OurHero.Initiative = False Then
+
+                'Attack the heros life points directly.
+                OurHero.Life -= Monster_Attack
+
+                OurHero.Hit = True
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
+
+                'Knock hero above the monster.
+                OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 32
+
+                'Is the hero touching a wall?
+                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                    'Yes, the hero is touching a wall.
+
+                    'Knock hero below the wall.
+                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
+
+                    'Knock the monster below the hero.
+                    Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
+
+                End If
+            End If
+        End If
+
+    End Sub
+
+
+    Private Sub Move_Hero_Down()
+
+        MoveHero(DirectionEnum.Down)
+
+        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+            OurHero.Rec.Y = Wall.Rec.Y - OurHero.Rec.Height - 1
+        End If
+
+        If Monster_Life > 0 Then
+            If OurHero.Rec.IntersectsWith(Monster) = True Then
+                OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 1
+                If OurHero.Initiative = True Then
+                    Monster_Hit = True
+                    'Attack the monsters life points directly.
+                    Monster_Life -= OurHero.Attack
+
+                    If Monster_Life < 0 Then
+                        Monster_Life = 0
+                    End If
+                    'Knock monster below the hero.
+                    Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 32
+
+                    'Wall Collision Handler - Moving Down ********************************************************
+                    'Is the monster touching the wall?
+                    If Monster.IntersectsWith(Wall.Rec) = True Then
+                        'Yes, the monster is touching the wall.
+
+                        'Push the monster above the wall.
+                        Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+
+
+
+                    End If
+                    '************************************************
+                End If
+            End If
+        End If
+
+    End Sub
+
+    Private Sub Move_Monster_Down()
+
+
+        'Move monster down.
+        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
+        'Is the monster close to the hero?
+        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
+            'No, the monster is not close to the hero.
+
+            'Move the monster down fast.
+            Monster.Y += Monster_Speed
+        Else
+            'Yes, the monster is close to the hero.
+            'Move the monster down slowly.
+            Monster.Y += 1
+
+        End If
+
+        'Play undead moveing sound.
+        If GS.IsPlaying("Undead_Move") = False Then
+            GS.Play("Undead_Move")
+        End If
+        '***********************************************************************************************
+
+        'Wall Collision Handler - Moving Down ********************************************************
+        'Is the monster touching the wall?
+        If Monster.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the monster is touching the wall.
+
+            'Push the monster above the wall.
+            Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+            If GS.IsPlaying("Undead_Move") = True Then
+                GS.Pause("Undead_Move")
+            End If
+
+        End If
+        '************************************************
+
+
+        If Monster.IntersectsWith(OurHero.Rec) = True Then
+
+            'Push to monster above the hero.
+            Monster.Y = OurHero.Rec.Y - Monster.Height - 1
+
+
+            If OurHero.Initiative = False Then
+
+                'Attack the heros life points directly.
+                OurHero.Life -= Monster_Attack
+
+                OurHero.Hit = True
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
+
+                'Knock hero below monster.
+                OurHero.Rec.Y = Monster.Y + Monster.Height + 32
+
+                'Is the hero touching a wall?
+                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                    'Yes, the hero is touching a wall.
+
+                    'Knock hero above the wall.
+                    OurHero.Rec.Y = Wall.Rec.Y - OurHero.Rec.Height - 1
+
+                    'Knock the monster above the hero.
+                    Monster.Y = OurHero.Rec.Y - Monster.Height - 16
+
+                End If
+            End If
+        End If
+
+    End Sub
+
 
     Private Sub Do_Monster_Moves()
         'Monster Moves **********************************************************************************************************
@@ -959,293 +1316,92 @@ Public Class Form1
                 If Monster_Center_X <> Hero_Center_X Then
                     'No, the monster is not centered horizontally with the hero.
 
-                    'Is the monster to the left of the hero?
-                    If Monster_Center_X < Hero_Center_X Then
-                        'Yes, the monster is to the left of the hero.
+                    ''Is the monster to the left of the hero?
+                    'If Monster_Center_X < Hero_Center_X Then
+                    '    'Yes, the monster is to the left of the hero.
 
-                        'Move Monster Right**************************************************************
-                        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
-                        'Is the monster close to the hero?
-                        If Horizontal_Distance(Monster_Center_X, Hero_Center_X) > 8 Then
-                            'No, the monster is not close to the hero.
-                            'Move the monster to the right fast.
-                            Monster.X += Monster_Speed
-                        Else
-                            'Yes, the monster is close to the hero.
-                            'Move the monster to the right slowly.
-                            Monster.X += 1
-                        End If
+                    '    Move_Monster_Right()
 
-                        'Play undead moveing sound.
-                        If GS.IsPlaying("Undead_Move") = False Then
-                            GS.Play("Undead_Move")
-                        End If
-                        '*********************************************************************************
+                    'Else
+                    '    'No, the monster is to the right of the hero.
 
+                    '    Move_Monster_Left()
 
-                        'Wall Collision Handler - Moving Right*****************
-                        'Is the monster touching the wall?
-                        If Monster.IntersectsWith(Wall.Rec) = True Then
-                            'Yes, the monster is touching the wall.
+                    'End If
 
-                            'Push monster to the left of wall.
-                            Monster.X = Wall.Rec.X - Monster.Width - 1
+                    'Is the monster to the right of the hero?
+                    If Monster_Center_X > Hero_Center_X Then
+                        'Yes, the monster is to the right of the hero.
 
-                            If GS.IsPlaying("Undead_Move") = True Then
-                                GS.Pause("Undead_Move")
-                            End If
+                        Move_Monster_Left()
 
-                        End If
-                        '************************************************
-
-                        'Attack Right**************************************************
-                        'Is the monster touching the hero?
-                        If Monster.IntersectsWith(OurHero.Rec) = True Then
-
-                            'Yes, the monster is touching the hero.
-
-                            'Push the monster to the left of the hero.
-                            Monster.X = OurHero.Rec.X - Monster.Width - 1
-
-
-
-
-
-                            If OurHero.Initiative = False Then
-
-
-                                'GS.Play("Monster") 'play the Music
-
-                                'Attack the heros life points directly.
-                                OurHero.Life -= Monster_Attack
-
-                                OurHero.Hit = True
-
-                                'Play undead attack sound.
-                                If GS.IsPlaying("Undead_Attack") = False Then
-                                    GS.Play("Undead_Attack") 'play the Music
-                                End If
-
-                                'If Monster_AttackTimer = 0 Then
-                                '        GS.Play("Monster") 'play the Music
-                                '        Monster_AttackTimer += 1
-                                '    ElseIf Monster_AttackTimer < 4 Then
-                                '        Monster_AttackTimer += 1
-                                '    Else
-                                '        Monster_AttackTimer = 0
-                                '    End If
-
-
-
-
-                                'Knock hero to the right of monster.
-                                OurHero.Rec.X = Monster.X + Monster.Width + 16
-
-
-
-                                'Is the hero touching a wall?
-                                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the hero is touching a wall.
-
-                                    'Knock hero to the left of wall.
-                                    OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 16
-
-                                    'Knock the monster to the left of the hero.
-                                    Monster.X = OurHero.Rec.X - OurHero.Rec.Width - 8
-
-                                End If
-
-                            End If
-
-                        End If
-
-                        '********************************************************************************
                     Else
+                        'No, the monster is to the left of the hero.
 
-                        'No, the monster is to the right of the hero.
+                        Move_Monster_Right()
 
-                        'Move the monster to the left.
-                        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
-                        'Is the monster close to the hero?
-                        If Math.Abs(Monster.X + (Monster.Width \ 2) - (OurHero.Rec.X + OurHero.Rec.Width \ 2)) > 8 Then
-
-                            'No, the monster is not close to the hero.
-                            'Move the monster to the left fast.
-                            Monster.X -= Monster_Speed
-                        Else
-                            'Yes, the monster is close to the hero.
-                            'Move the monster to the left slowly.
-                            Monster.X -= 1
-                        End If
-
-                        'Play undead moveing sound.
-                        If GS.IsPlaying("Undead_Move") = False Then
-                            GS.Play("Undead_Move")
-                        End If
-                        '***********************************************************************************************
-
-
-
-                        'Wall Collision Handler Monster moing left*************************
-                        'Is the monster touching the wall?
-                        If Monster.IntersectsWith(Wall.Rec) = True Then
-                            'Yes, the monster is touching the wall.
-
-                            'Push monster to the right of wall.
-                            Monster.X = Wall.Rec.X + Wall.Rec.Width
-
-                            If GS.IsPlaying("Undead_Move") = True Then
-                                GS.Pause("Undead_Move")
-                            End If
-
-                        End If
-                        '************************************************
-
-
-                        'Attack Left************************************************************************************
-                        'Is the monster touching the hero?
-                        If Monster.IntersectsWith(OurHero.Rec) = True Then
-                            'Yes, the monster is touching the hero.
-
-                            'Push the monster to the right of the hero.
-                            Monster.X = OurHero.Rec.X + Monster.Width + 1
-
-                            If OurHero.Initiative = False Then
-
-                                'Attack the heros life points directly.
-                                OurHero.Life -= Monster_Attack
-
-                                OurHero.Hit = True
-
-                                'Play undead attack sound.
-                                If GS.IsPlaying("Undead_Attack") = False Then
-                                    GS.Play("Undead_Attack") 'play the Music
-                                End If
-
-                                'Knock hero to the left of monster.
-                                OurHero.Rec.X = Monster.X - Monster.Width - 16
-
-                                'Is the hero touching a wall?
-                                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the hero is touching a wall.
-
-                                    'Knock hero to the right of wall.
-                                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 16
-
-                                    'Knock the monster to the right of the hero.
-                                    Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 8
-
-                                End If
-                            End If
-                        End If
-                        '*********************************************************************
                     End If
                 End If
+
+
+
+
+
                 'Is the monster centered with the hero vertically?
                 If Monster.Y + Monster.Height \ 2 <> OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
                     'No, the monster is not centered vertically with the hero.
 
-                    'Is the monster above the hero?
-                    If Monster.Y + Monster.Height \ 2 < OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
+                    ''Is the monster above the hero?
+                    'If Monster.Y + Monster.Height \ 2 < OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
+                    '    'Yes, the monster is above the hero.
+
+                    '    Move_Monster_Down()
+
+                    'Else
+                    '    'No, the monster is below the hero.
+
+
+                    '    Move_Monster_Up()
+
+                    'End If
+
+
+                    'Is the monster below the hero?
+                    If Monster.Y + Monster.Height \ 2 > OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
                         'Yes, the monster is above the hero.
 
-
-                        'Move monster down.
-                        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
-                        'Is the monster close to the hero?
-                        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
-                            'No, the monster is not close to the hero.
-
-                            'Move the monster down fast.
-                            Monster.Y += Monster_Speed
-                        Else
-                            'Yes, the monster is close to the hero.
-                            'Move the monster down slowly.
-                            Monster.Y += 1
-
-                        End If
-
-                        'Play undead moveing sound.
-                        If GS.IsPlaying("Undead_Move") = False Then
-                            GS.Play("Undead_Move")
-                        End If
-                        '***********************************************************************************************
-
-                        'Wall Collision Handler - Moving Down ********************************************************
-                        'Is the monster touching the wall?
-                        If Monster.IntersectsWith(Wall.Rec) = True Then
-                            'Yes, the monster is touching the wall.
-
-                            'Push the monster above the wall.
-                            Monster.Y = Wall.Rec.Y - Monster.Height - 1
-
-                            If GS.IsPlaying("Undead_Move") = True Then
-                                GS.Pause("Undead_Move")
-                            End If
-
-                        End If
-                        '************************************************
-
-
-                        If Monster.IntersectsWith(OurHero.Rec) = True Then
-                            Monster.Y = OurHero.Rec.Y - Monster.Height - 1
-                        End If
+                        Move_Monster_Up()
 
                     Else
                         'No, the monster is below the hero.
 
 
-
-                        'Move the monster up.
-                        'Is the monster close to the hero?
-                        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
-                            'No, the monster is not close to the hero.
-                            'Move the monster up fast.
-                            Monster.Y -= Monster_Speed
-                        Else
-                            'Yes, the monster is close to the hero.
-                            'Move the monster up slowly.
-                            Monster.Y -= 1
-                        End If
-
-                        'Play undead moveing sound.
-                        If GS.IsPlaying("Undead_Move") = False Then
-                            GS.Play("Undead_Move")
-                        End If
-
-                        'Wall Collision Handler*************************
-                        'Is the monster touching the wall?
-                        If Monster.IntersectsWith(Wall.Rec) = True Then
-                            'Yes, the monster is touching the wall.
-
-                            'Push the hero below the wall.
-                            Monster.Y = Wall.Rec.Y + Wall.Rec.Height
-
-                            If GS.IsPlaying("Undead_Move") = True Then
-                                GS.Pause("Undead_Move")
-                            End If
-
-                        End If
-                        '************************************************
-
-
-
-
-                        If Monster.IntersectsWith(OurHero.Rec) = True Then
-                            Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
-                        End If
+                        Move_Monster_Down()
 
                     End If
+
+
+
                 End If
-
-
             End If
 
         Else
             If Monster_Life = 0 Then
 
+                'Pause undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Pause("Undead_Attack") 'play the Music
+                End If
+
+                'Pause undead move sound.
+                If GS.IsPlaying("Undead_Move") = True Then
+                    GS.Pause("Undead_Move")
+                End If
+
+                'Play undead death sound.
+                GS.Play("Undead_Death")
+
                 'Drop loot
-                'Potion.Rec.Location = Monster.Location
                 Potion.Rec.Size = New Size(65, 65)
                 Potion.Rec.X = Monster.X + (Monster.Width - Potion.Rec.Width) \ 2
                 Potion.Rec.Y = Monster.Y + (Monster.Height - Potion.Rec.Height) \ 2
