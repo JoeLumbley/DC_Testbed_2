@@ -270,11 +270,11 @@ Public Class Form1
         GS.SetVolume("Undead_Attack", 400)
         GS.SetVolume("Potion_Pickup", 1000)
         GS.SetVolume("Undead_Death", 300)
-        GS.SetVolume("Hero_Move", 400)
+        GS.SetVolume("Hero_Move", 200)
         GS.SetVolume("Undead_Hit", 800)
 
 
-        GS.SetVolume("Hero_Death", 300)
+        GS.SetVolume("Hero_Death", 400)
 
 
 
@@ -1009,7 +1009,7 @@ Public Class Form1
 
 
             'Roll for initative.************************
-            If RandomNumber.Next(1, 20) > 9 Then 'Chance to hit is 1 in 20
+            If RandomNumber.Next(1, 20) > 5 Then 'Chance to hit is 1 in 20
                 Monster_Initiative = True
             Else
                 Monster_Initiative = False
@@ -1190,42 +1190,56 @@ Public Class Form1
             'Push the monster to the right of the hero.
             Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 1
 
-            If OurHero.Initiative = False Then
+            'Roll for initative.************************
+            If RandomNumber.Next(1, 20) > 9 Then 'Chance to hit is 1 in 20
+                Monster_Initiative = True
+            Else
+                Monster_Initiative = False
+            End If
+            '*******************************************
+
+            If Monster_Initiative = False Then
 
                 'Play undead attack sound.
                 If GS.IsPlaying("Undead_Attack") = False Then
                     GS.Play("Undead_Attack") 'play the Music
                 End If
 
-
-
-
                 'Reset the hit total on the first hit.
                 If OurHero.Hit = False Then
-                        OurHero.LifeBeforeHit = OurHero.Life
-                    End If
+                    OurHero.LifeBeforeHit = OurHero.Life
+                End If
 
-                    'Attack the heros life points directly.
-                    OurHero.Life -= Monster_Attack
+                'Attack the heros life points directly.
+                OurHero.Life -= Monster_Attack
 
-                    OurHero.Hit = True
+                If OurHero.Life < 1 Then
 
-                    'Knock hero to the left of monster.
-                    OurHero.Rec.X = Monster.X - OurHero.Rec.Width - 32
+                    'Play hero death sound.
+                    GS.Play("Hero_Death")
 
-                    'Is the hero touching a wall?
-                    If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                        'Yes, the hero is touching a wall.
+                    OurHero.Life = 0
 
-                        'Knock hero to the right of wall.
-                        OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 1
+                End If
 
-                        'Knock the monster to the right of the hero.
-                        Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
+                OurHero.Hit = True
 
-                    End If
+                'Knock hero to the left of monster.
+                OurHero.Rec.X = Monster.X - OurHero.Rec.Width - 32
+
+                'Is the hero touching a wall?
+                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                    'Yes, the hero is touching a wall.
+
+                    'Knock hero to the right of wall.
+                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 1
+
+                    'Knock the monster to the right of the hero.
+                    Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
+
                 End If
             End If
+        End If
         '*********************************************************************
     End Sub
 
@@ -1692,8 +1706,13 @@ Public Class Form1
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
+
+
                                 'Knock monster to the right of hero.
                                 Monster.X += CInt(Projectile_Speed / 3)
+
+
+
 
                                 'Wall Collision Handler - Moving Right*****************
                                 'Is the monster touching the wall?
@@ -1705,6 +1724,9 @@ Public Class Form1
 
                                 End If
                                 '************************************************
+
+
+
                             End If
                         End If
                     Case DirectionEnum.Left
@@ -1716,13 +1738,19 @@ Public Class Form1
                             'Is the hero touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
                                 Monster_Hit = True
                                 'ProjectileInflight = False
+
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
+
+
+
                                 'Knock monster to the left of hero.
                                 Monster.X -= CInt(Projectile_Speed / 3)
 
@@ -1754,15 +1782,41 @@ Public Class Form1
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
+
+
                                 Monster_Hit = True
                                 'ProjectileInflight = False
+
+
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
-                                'Knock monster to the right of hero.
+
+
+
+                                'Knock monster above the hero.
                                 Monster.Y -= CInt(Projectile_Speed / 3)
+
+
+
+                                'Wall Collision Handler - Monster moving up *************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push the hero below the wall.
+                                    Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+
+                                End If
+                                '************************************************
+
+
+
+
                             End If
                         End If
                     Case DirectionEnum.Down
@@ -1774,15 +1828,39 @@ Public Class Form1
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
+
                                 Monster_Hit = True
+
+
                                 'ProjectileInflight = False
+
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
-                                'Knock monster to the right of hero.
+
+                                'Knock monster below hero.
                                 Monster.Y += CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler - Moving Down ********************************************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push the monster above the wall.
+                                    Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+                                End If
+                                '************************************************
+
+
+
+
+
                             End If
                         End If
                     Case DirectionEnum.RightUP
@@ -1802,9 +1880,49 @@ Public Class Form1
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
+
+
+
+
                                 'Knock monster to the right of hero.
                                 Monster.X += CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler - Moving Right*****************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push monster to the left of wall.
+                                    Monster.X = Wall.Rec.X - Monster.Width - 1
+
+                                End If
+                                '************************************************
+
+
+
+
+                                'Knock monster above hero.
                                 Monster.Y -= CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler - Monster moving up *************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push the hero below the wall.
+                                    Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+
+                                End If
+                                '************************************************
+
+
+
+
+
+
+
                             End If
                         End If
                     Case DirectionEnum.RightDown
@@ -1824,9 +1942,47 @@ Public Class Form1
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
+
+
+
                                 'Knock monster to the right of hero.
                                 Monster.X += CInt(Projectile_Speed / 3)
+
+
+
+                                'Wall Collision Handler - Moving Right*****************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push monster to the left of wall.
+                                    Monster.X = Wall.Rec.X - Monster.Width - 1
+
+                                End If
+                                '************************************************
+
+
+
+
+                                'Knock monster below hero.
                                 Monster.Y += CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler - Moving Down ********************************************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push the monster above the wall.
+                                    Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+                                End If
+                                '************************************************
+
+
+
+
+
                             End If
                         End If
                     Case DirectionEnum.LeftUp
@@ -1846,9 +2002,53 @@ Public Class Form1
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
-                                'Knock monster to the right of hero.
+
+
+
+
+                                'Knock monster to the left of hero.
                                 Monster.X -= CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler Monster moving left*************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push monster to the right of wall.
+                                    Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+                                End If
+                                '************************************************
+
+
+
+
+
+                                'Knock monster above the hero.
                                 Monster.Y -= CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler - Monster moving up *************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push the hero below the wall.
+                                    Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+
+                                End If
+                                '************************************************
+
+
+
+
+
+
+
+
+
+
                             End If
                         End If
                     Case DirectionEnum.LeftDown
@@ -1876,10 +2076,51 @@ Public Class Form1
                                     Monster_Life = 0
                                 End If
 
-                                'Knock the monster to the right of hero.
+
+
+
+
+
+                                'Knock the monster to the left of hero.
                                 Monster.X -= CInt(Projectile_Speed / 3)
+
+
+                                'Wall Collision Handler Monster moving left*************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push monster to the right of wall.
+                                    Monster.X = Wall.Rec.X + Wall.Rec.Width
+
+                                End If
+                                '************************************************
+
+
+
+
+
+
                                 'Knock the monster below the hero.
                                 Monster.Y += CInt(Projectile_Speed / 3)
+
+
+
+
+                                'Wall Collision Handler - Moving Down ********************************************************
+                                'Is the monster touching the wall?
+                                If Monster.IntersectsWith(Wall.Rec) = True Then
+                                    'Yes, the monster is touching the wall.
+
+                                    'Push the monster above the wall.
+                                    Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+                                End If
+                                '************************************************
+
+
+
+
 
                             End If
                         End If
