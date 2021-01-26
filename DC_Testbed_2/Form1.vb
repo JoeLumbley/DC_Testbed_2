@@ -241,6 +241,11 @@ Public Class Form1
 
         SetStyle(ControlStyles.AllPaintingInWmPaint, True)
         SetStyle(ControlStyles.OptimizedDoubleBuffer, True)
+        SetStyle(ControlStyles.UserPaint, False)
+
+
+        SetStyle(ControlStyles.FixedHeight, True)
+        SetStyle(ControlStyles.FixedWidth, True)
 
 
         WindowState = FormWindowState.Maximized
@@ -279,10 +284,10 @@ Public Class Form1
 
 
         'Set frame rate for the display timer.
-        Timer1.Interval = 33
+        Timer1.Interval = 30
 
         'Set frame rate for the game timer.
-        Timer2.Interval = 20
+        Timer2.Interval = 32
 
         'Start display timer.
         Timer1.Start()
@@ -1009,7 +1014,7 @@ Public Class Form1
 
 
             'Roll for initative.************************
-            If RandomNumber.Next(1, 20) > 5 Then 'Chance to hit is 1 in 20
+            If RandomNumber.Next(1, 20) > 4 Then 'Chance to hit is 1 in 20
                 Monster_Initiative = True
             Else
                 Monster_Initiative = False
@@ -1191,7 +1196,7 @@ Public Class Form1
             Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 1
 
             'Roll for initative.************************
-            If RandomNumber.Next(1, 20) > 9 Then 'Chance to hit is 1 in 20
+            If RandomNumber.Next(1, 20) > 5 Then 'Chance to hit is 1 in 20
                 Monster_Initiative = True
             Else
                 Monster_Initiative = False
@@ -1514,7 +1519,7 @@ Public Class Form1
 
             'Proximity Based Chase Behavior
             'Is the monster near the hero?
-            If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < Viewport_Size.Width Then
+            If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < Viewport_Size.Width \ 3 Then
                 'Yes, the monster is near the hero.
 
                 Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
