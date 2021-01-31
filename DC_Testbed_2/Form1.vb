@@ -38,13 +38,16 @@ Public Structure MonsterInfo
     Public MaxLife As Integer
     Public Attack As Integer
     Public Hit As Boolean
+    Public WallCollision As Boolean 'If true the monster has collide with a wall.
 End Structure
 Public Structure WallInfo
     Public Rec As Rectangle
     Public Color As Color
+    Public OutlineColor As Color
     Public Revealed As Boolean 'If true the wall will be seen on the map.
     Public MapColor As Color
     Public MapOutlineColor As Color
+
 End Structure
 Public Structure PotionInfo
     Public Rec As Rectangle
@@ -84,9 +87,16 @@ Public Enum MCI_NOTIFY As Integer
 End Enum
 Public Class Form1
 
-    Private Level_Background_Color As Color = Color.FromArgb(255, 61, 61, 78)
+    'Private Level_Background_Color As Color = Color.FromArgb(255, 61, 61, 78)
+
+    'Private Level_Background_Color As Color = Color.FromArgb(255, 16, 19, 16)
+
+    Private Level_Background_Color As Color = Color.FromArgb(255, 2, 19, 0)
+
 
     Private OurHero As HeroInfo
+
+    Private OurMonster As MonsterInfo
 
     Private Wall As WallInfo
 
@@ -98,8 +108,17 @@ Public Class Form1
     Private _BufferFlag As Boolean = True
 
 
+
+
+
+
     Private Monster As New Rectangle(500, 500, 90, 90)
-    Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 39, 205, 89))
+    'Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 39, 205, 89))
+    'Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 7, 49, 19))
+    Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 14, 88, 34))
+
+
+
     Private Monster_LifeMAX As Integer = 50
     Private Monster_Life As Integer = Monster_LifeMAX
     Private Monster_Attack As Integer = 4
@@ -129,16 +148,55 @@ Public Class Form1
 
     Private CtrlDown As Boolean = False
 
-    Private Life_Brush As New SolidBrush(Color.FromArgb(255, 255, 0, 0))
+    Private Life_Brush As New SolidBrush(Color.FromArgb(255, 113, 9, 14))
+    'Private Life_Brush As New SolidBrush(Color.FromArgb(255, 170, 0, 0))
+
+    'Private Life_Outline As New SolidBrush(Color.FromArgb(255, 255, 0, 0))
+
+    Private Life_Outline_Pen As New Pen(Color.FromArgb(255, 255, 0, 0), 1)
+
+    Private Life_Frame_Brush As New SolidBrush(Color.FromArgb(255, 83, 6, 11))
+
+
+
     Private Life_Blink_Brush As New SolidBrush(Color.FromArgb(255, 170, 0, 0))
-    Private Life_Frame_Brush As New SolidBrush(Color.FromArgb(255, 149, 0, 0))
+    'Private Life_Blink_Brush As New SolidBrush(Color.FromArgb(255, 113, 9, 14))
+
+
+
+
+
     Private Life_Bar_Frame As Rectangle
     Private Life_Bar_Font As New Font("Arial", 15)
 
 
-    Private Magic_Brush As New SolidBrush(Color.FromArgb(255, 11, 182, 255))
+
+
+
+
+
+
+
+    Private Magic_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 172))
     Private Magic_Blink_Brush As New SolidBrush(Color.FromArgb(255, 128, 217, 255))
-    Private Magic_Frame_Brush As New SolidBrush(Color.FromArgb(255, 63, 72, 204))
+
+
+    'Private Magic_Outline_Pen As New Pen(Color.FromArgb(255, 0, 0, 255), 1)
+
+
+
+
+    Private Magic_Outline_Pen As New Pen(Color.FromArgb(255, 57, 57, 255), 1)
+
+
+
+
+
+    'Private Magic_Blink_Brush As New SolidBrush(Color.FromArgb(255, 170, 0, 0))
+
+
+
+    Private Magic_Frame_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 119))
     Private Magic_Bar_Frame As Rectangle
 
 
@@ -160,6 +218,14 @@ Public Class Form1
 
 
     Private Map_Border_Pen As New Pen(Color.Black, 3)
+
+
+
+
+    Dim LightRec As New Rectangle
+
+
+
 
 
     'Set up Game Sound
@@ -201,10 +267,14 @@ Public Class Form1
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
 
         OurHero.Rec = New Rectangle(0, 0, 90, 90)
-        OurHero.Color = Color.FromArgb(255, 11, 182, 255)
+        'OurHero.Color = Color.FromArgb(255, 11, 182, 255)
+        'OurHero.Color = Color.FromArgb(255, 201, 195, 184)
+        OurHero.Color = Color.FromArgb(255, 157, 150, 0)
+        OurHero.OutlineColor = Color.FromArgb(255, 255, 242, 0)
+
         OurHero.Life = 100
         OurHero.MaxLife = 100
-        OurHero.Magic = 100
+        OurHero.Magic = 50
         OurHero.MaxMagic = 100
 
         OurHero.Attack = 3
@@ -216,17 +286,49 @@ Public Class Form1
         OurHero.LifeBeforeHit = 100
 
 
+        OurMonster.WallCollision = False
+
+
+
+
+
+
         Wall.Rec.X = 900
         Wall.Rec.Y = 300
         Wall.Rec.Width = 125
         Wall.Rec.Height = 125
-        Wall.Color = Color.FromArgb(255, 164, 164, 164)
+        'Wall.Color = Color.FromArgb(255, 164, 164, 164)
+        'Wall.Color = Color.FromArgb(255, 11, 64, 26)
+
+
+        Wall.Color = Color.FromArgb(255, 35, 39, 33)
+
+
+
+        'Wall.Color = Color.SlateGray
+
+        'Wall.OutlineColor = Color.FromArgb(255, 0, 128, 0)
+
+
+
+        Wall.OutlineColor = Color.FromArgb(255, 195, 195, 195)
+
+
+
+
+
         Wall.MapColor = Color.FromArgb(128, 164, 164, 164)
 
         Potion.Rec = New Rectangle(0, 0, 200, 200)
         Potion.Active = False
-        Potion.Color = Color.FromArgb(255, 255, 19, 19)
-        Potion.OutlineColor = Color.FromArgb(255, 255, 255, 255)
+        'Potion.Color = Color.FromArgb(255, 255, 19, 19)
+        Potion.Color = Color.FromArgb(255, 95, 7, 12)
+
+        Potion.OutlineColor = Color.FromArgb(255, 255, 0, 0)
+
+
+
+
 
         cm(3, 3) = 0.6   'draw with 60% alpha
         atr.SetColorMatrix(cm)
@@ -249,6 +351,9 @@ Public Class Form1
 
 
         WindowState = FormWindowState.Maximized
+
+
+        'PictureBox1.
 
 
 
@@ -334,8 +439,11 @@ Public Class Form1
 
                     goBuf1.Clear(Level_Background_Color)
 
-                    'Draw Wall
-                    goBuf1.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+                    ''Draw Wall
+                    'goBuf1.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+
+
+                    Draw_Hero_Light(goBuf1, OurHero.Rec)
 
                     If Potion.Active = True Then
 
@@ -373,7 +481,16 @@ Public Class Form1
 
 
 
-                    Draw_Hero(goBuf1, OurHero.Rec)
+                    'Draw_Hero(goBuf1, OurHero.Rec)
+
+
+                    'Draw Wall
+                    'goBuf1.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+
+                    Draw_Wall(goBuf1, Wall.Rec)
+
+
+
 
                     'If OurHero.Life > 0 Then
 
@@ -392,6 +509,9 @@ Public Class Form1
                         goBuf1.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
                     End If
 
+
+                    Draw_Hero(goBuf1, OurHero.Rec)
+
                     'Draw Map************************************************************
                     'Draw map background.
                     goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
@@ -403,7 +523,7 @@ Public Class Form1
                     End If
 
 
-                    'Draw_Hero(goBuf1, OurHero.Rec)
+
 
 
 
@@ -416,6 +536,10 @@ Public Class Form1
                     'Draw map border.
                     goBuf1.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
                     '********************************************************************
+
+
+
+
 
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
@@ -469,8 +593,14 @@ Public Class Form1
 
                     goBuf2.Clear(Level_Background_Color)
 
-                    'Draw Wall
-                    goBuf2.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+
+                    Draw_Hero_Light(goBuf2, OurHero.Rec)
+
+
+
+
+                    ''Draw Wall
+                    'goBuf2.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
 
                     If Potion.Active = True Then
 
@@ -498,7 +628,18 @@ Public Class Form1
                     End If
 
 
-                    Draw_Hero(goBuf2, OurHero.Rec)
+                    'Draw_Hero(goBuf2, OurHero.Rec)
+
+
+
+                    'Draw Wall
+                    'goBuf2.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+
+
+                    Draw_Wall(goBuf2, Wall.Rec)
+
+
+
 
                     'If OurHero.Life > 0 Then
                     '    'goBuf2.FillRectangle(Hero_Brush, Hero)
@@ -524,6 +665,14 @@ Public Class Form1
                         goBuf2.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
                         goBuf2.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
                     End If
+
+
+
+
+                    Draw_Hero(goBuf2, OurHero.Rec)
+
+
+
 
                     'Draw Map************************************************************
                     'Draw map background.
@@ -609,19 +758,27 @@ Public Class Form1
         'Is the heros life points critically low?
         If OurHero.Life > OurHero.MaxLife \ 4 Then
             'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt(((Bar.Width - 4) \ OurHero.LifeMAX) * OurHero.Life), Bar.Height - 4)
-            g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+            'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+            g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+            g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
         Else
             'Yes, the heros life points are critically low?
 
             Select Case Blink_Counter
                 Case 0 To 8
-                    g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                    g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
                     Blink_Counter += 1
                 Case 9 To 18
-                    g.FillRectangle(Life_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    'g.FillRectangle(Life_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    g.FillRectangle(Life_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                    g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
                     Blink_Counter += 1
                 Case Else
-                    g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
+                    g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                    g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
                     Blink_Counter = 0
             End Select
         End If
@@ -642,19 +799,51 @@ Public Class Form1
         'Is the heros magic points critically low?
         If OurHero.Magic >= OurHero.MaxMagic \ 4 Then
             'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt(((Bar.Width - 4) \ OurHero.LifeMAX) * OurHero.Life), Bar.Height - 4)
-            g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+            'g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+
+
+
+
+
+            g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+            g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+
+
         Else
             'Yes, the heros life points are critically low?
 
             Select Case Blink_Counter
                 Case 0 To 1
-                    g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+                    'g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+
+
+
+                    g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                    g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+
+
+
                     Blink_Counter += 1
                 Case 2 To 4
-                    g.FillRectangle(Magic_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+                    'g.FillRectangle(Magic_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+
+
+
+                    g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                    g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+
+
+
                     Blink_Counter += 1
                 Case Else
-                    g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+                    'g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
+
+
+
+                    g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                    g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+
+
                     Blink_Counter = 0
             End Select
         End If
@@ -681,25 +870,120 @@ Public Class Form1
         ''g.SmoothingMode = SmoothingMode.AntiAlias
         'g.FillPath(pgBrush, path)
         ''g.FillRectangle(lgBrush, 250, 20, 100, 100)
+        ' New SolidBrush(Potion.Color)
 
 
-        g.FillRectangle(Life_Brush, Rec.X, Rec.Y, Rec.Width, Rec.Height)
+        If Rec.IntersectsWith(LightRec) = True Then
 
-        g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
+            g.FillRectangle(New SolidBrush(Potion.Color), Rec.X, Rec.Y, Rec.Width, Rec.Height)
+            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
+            g.DrawRectangle(New Pen(Potion.OutlineColor, 1), Rec)
 
-        g.DrawRectangle(New Pen(Color.DarkRed, 1), Rec)
+        Else
+
+            g.FillRectangle(New SolidBrush(Potion.Color), Rec.X, Rec.Y, Rec.Width, Rec.Height)
+            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
+            'g.DrawRectangle(New Pen(Potion.OutlineColor, 1), Rec)
+
+            'Draw darkness.
+            g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), Rec)
+
+        End If
 
     End Sub
 
 
     Private Sub Draw_Monster(g As Graphics, Rec As Rectangle)
 
+
+
+
+        'LightRec
+
+
+
+
         If Monster_Life > 0 Then
-            g.FillRectangle(Monster_Brush, Monster)
-            g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
-            g.DrawRectangle(New Pen(Color.Green, 1), Rec)
+
+            If Monster.IntersectsWith(LightRec) = True Then
+
+                g.FillRectangle(Monster_Brush, Monster)
+                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
+                g.DrawRectangle(New Pen(Color.Green, 1), Rec)
+
+
+            Else
+
+                g.FillRectangle(Monster_Brush, Monster)
+                g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Monster)
+                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
+                'g.DrawRectangle(New Pen(Color.Green, 1), Rec)
+
+
+
+            End If
+
+
+
+
 
         End If
+
+    End Sub
+
+
+    Private Sub Draw_Wall(g As Graphics, Rec As Rectangle)
+
+        If Wall.Rec.IntersectsWith(LightRec) = True Then
+
+            'Draw Wall
+            g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+
+            g.DrawRectangle(New Pen(Wall.OutlineColor, 1), Rec)
+
+        Else
+
+            'Draw Wall
+            g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+
+            g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
+
+        End If
+
+
+
+
+    End Sub
+
+
+    Private Sub Draw_Hero_Light(g As Graphics, Rec As Rectangle)
+
+        'Dim LightRec As New Rectangle
+
+
+        If ProjectileInflight = True Then
+
+            LightRec = Rec
+
+            LightRec.Inflate(300, 300)
+
+            'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
+            g.FillEllipse(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
+
+        Else
+
+            LightRec = Rec
+
+            LightRec.Inflate(300, 300)
+
+            'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
+            g.FillEllipse(New SolidBrush(Color.FromArgb(32, Color.White)), LightRec)
+
+        End If
+
+
+
+
 
     End Sub
 
@@ -709,11 +993,25 @@ Public Class Form1
         If OurHero.Life > 0 Then
             If OurHero.Hit = False Then
                 'Draw hero.
+
+                'Dim LightRec As New Rectangle
+
+                'LightRec = Rec
+
+                'LightRec.Inflate(300, 300)
+
+                'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
+
+
+
+
+
+
                 g.FillRectangle(New SolidBrush(OurHero.Color), Rec)
 
                 g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
 
-                g.DrawRectangle(New Pen(Color.DarkBlue, 1), Rec)
+                g.DrawRectangle(New Pen(OurHero.OutlineColor, 1), Rec)
 
 
             Else
@@ -993,12 +1291,28 @@ Public Class Form1
         If Monster.IntersectsWith(Wall.Rec) = True Then
             'Yes, the monster is touching the wall.
 
+
+            OurMonster.WallCollision = True
+
+
             'Push monster to the left of wall.
             Monster.X = Wall.Rec.X - Monster.Width - 1
 
             'If GS.IsPlaying("Undead_Move") = True Then
             '    GS.Pause("Undead_Move")
             'End If
+
+            'Move monster down.
+            Monster.Y += Monster_Speed
+
+            If Monster.IntersectsWith(Wall.Rec) = True Then
+
+                'Push monster above wall.
+                Monster.Y = Wall.Rec.Y - Monster.Height - 1
+
+            End If
+
+            OurMonster.WallCollision = False
 
         End If
         '************************************************
@@ -1305,77 +1619,90 @@ Public Class Form1
 
     Private Sub Move_Monster_Up()
 
-        'Move the monster up.
-        'Is the monster close to the hero?
-        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
-            'No, the monster is not close to the hero.
-            'Move the monster up fast.
-            Monster.Y -= Monster_Speed
-        Else
-            'Yes, the monster is close to the hero.
-            'Move the monster up slowly.
-            Monster.Y -= 1
-        End If
-
-        'Play undead moveing sound.
-        If GS.IsPlaying("Undead_Move") = False Then
-            GS.Play("Undead_Move")
-        End If
-
-        'Wall Collision Handler - Monster moving up *************************
-        'Is the monster touching the wall?
-        If Monster.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the monster is touching the wall.
-
-            'Push the hero below the wall.
-            Monster.Y = Wall.Rec.Y + Wall.Rec.Height
-
-            'If GS.IsPlaying("Undead_Move") = True Then
-            '    GS.Pause("Undead_Move")
-            'End If
-
-        End If
-        '************************************************
-        'Attack Up************************************************************************************
-        If Monster.IntersectsWith(OurHero.Rec) = True Then
-
-            'Push the monster below the hero.
-            Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
-
-            If OurHero.Initiative = False Then
 
 
-                'Reset the hit total on the first hit.
-                If OurHero.Hit = False Then
-                    OurHero.LifeBeforeHit = OurHero.Life
-                End If
 
-                'Attack the heros life points directly.
-                OurHero.Life -= Monster_Attack
+        If OurMonster.WallCollision = False Then
 
-                OurHero.Hit = True
 
-                'Play undead attack sound.
-                If GS.IsPlaying("Undead_Attack") = False Then
-                    GS.Play("Undead_Attack") 'play the Music
-                End If
+            'Move the monster up.
+            'Is the monster close to the hero?
+            If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
+                'No, the monster is not close to the hero.
+                'Move the monster up fast.
+                Monster.Y -= Monster_Speed
+            Else
+                'Yes, the monster is close to the hero.
+                'Move the monster up slowly.
+                Monster.Y -= 1
+            End If
 
-                'Knock hero above the monster.
-                OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 32
+            'Play undead moveing sound.
+            If GS.IsPlaying("Undead_Move") = False Then
+                GS.Play("Undead_Move")
+            End If
 
-                'Is the hero touching a wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching a wall.
+            'Wall Collision Handler - Monster moving up *************************
+            'Is the monster touching the wall?
+            If Monster.IntersectsWith(Wall.Rec) = True Then
+                'Yes, the monster is touching the wall.
 
-                    'Knock hero below the wall.
-                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
+                'Push the hero below the wall.
+                Monster.Y = Wall.Rec.Y + Wall.Rec.Height
 
-                    'Knock the monster below the hero.
-                    Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
+                'If GS.IsPlaying("Undead_Move") = True Then
+                '    GS.Pause("Undead_Move")
+                'End If
 
+            End If
+            '************************************************
+            'Attack Up************************************************************************************
+            If Monster.IntersectsWith(OurHero.Rec) = True Then
+
+                'Push the monster below the hero.
+                Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
+
+                If OurHero.Initiative = False Then
+
+
+                    'Reset the hit total on the first hit.
+                    If OurHero.Hit = False Then
+                        OurHero.LifeBeforeHit = OurHero.Life
+                    End If
+
+                    'Attack the heros life points directly.
+                    OurHero.Life -= Monster_Attack
+
+                    OurHero.Hit = True
+
+                    'Play undead attack sound.
+                    If GS.IsPlaying("Undead_Attack") = False Then
+                        GS.Play("Undead_Attack") 'play the Music
+                    End If
+
+                    'Knock hero above the monster.
+                    OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 32
+
+                    'Is the hero touching a wall?
+                    If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                        'Yes, the hero is touching a wall.
+
+                        'Knock hero below the wall.
+                        OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
+
+                        'Knock the monster below the hero.
+                        Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
+
+                    End If
                 End If
             End If
+
         End If
+
+
+
+
+
 
     End Sub
 
@@ -1525,23 +1852,9 @@ Public Class Form1
                 Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
                 Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
 
-
                 'Is the monster centered with the hero horizontally?
                 If Monster_Center_X <> Hero_Center_X Then
                     'No, the monster is not centered horizontally with the hero.
-
-                    ''Is the monster to the left of the hero?
-                    'If Monster_Center_X < Hero_Center_X Then
-                    '    'Yes, the monster is to the left of the hero.
-
-                    '    Move_Monster_Right()
-
-                    'Else
-                    '    'No, the monster is to the right of the hero.
-
-                    '    Move_Monster_Left()
-
-                    'End If
 
                     'Is the monster to the right of the hero?
                     If Monster_Center_X > Hero_Center_X Then
@@ -1557,28 +1870,9 @@ Public Class Form1
                     End If
                 End If
 
-
-
-
-
                 'Is the monster centered with the hero vertically?
                 If Monster.Y + Monster.Height \ 2 <> OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
                     'No, the monster is not centered vertically with the hero.
-
-                    ''Is the monster above the hero?
-                    'If Monster.Y + Monster.Height \ 2 < OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
-                    '    'Yes, the monster is above the hero.
-
-                    '    Move_Monster_Down()
-
-                    'Else
-                    '    'No, the monster is below the hero.
-
-
-                    '    Move_Monster_Up()
-
-                    'End If
-
 
                     'Is the monster below the hero?
                     If Monster.Y + Monster.Height \ 2 > OurHero.Rec.Y + OurHero.Rec.Height \ 2 Then
@@ -1589,13 +1883,9 @@ Public Class Form1
                     Else
                         'No, the monster is below the hero.
 
-
                         Move_Monster_Down()
 
                     End If
-
-
-
                 End If
             End If
 
