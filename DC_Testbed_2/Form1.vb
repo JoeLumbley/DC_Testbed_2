@@ -49,13 +49,25 @@ Public Structure WallInfo
     Public MapOutlineColor As Color
 
 End Structure
+
+
+
 Public Structure PotionInfo
+
+    Public IsLife As Boolean 'If true the potion is a potion of life. If false the potion is a magical potion.
     Public Rec As Rectangle
     Public Color As Color
     Public OutlineColor As Color
     Public Active As Boolean 'If true the potion will be seen and can be used in the level.
     Public Life As Integer
+    Public Magic As Integer
+    'Public Text As String
+
+
 End Structure
+
+
+
 Public Enum LootEnum As Integer
     None = 0
     LifePotion = 1 'Restores the heros life points. Keeps the hero alive.
@@ -91,7 +103,7 @@ Public Class Form1
 
     'Private Level_Background_Color As Color = Color.FromArgb(255, 16, 19, 16)
 
-    Private Level_Background_Color As Color = Color.FromArgb(255, 2, 19, 0)
+    Private Level_Background_Color As Color = Color.FromArgb(255, 1, 13, 0)
 
 
     Private OurHero As HeroInfo
@@ -162,7 +174,7 @@ Public Class Form1
     Private Life_Blink_Brush As New SolidBrush(Color.FromArgb(255, 170, 0, 0))
     'Private Life_Blink_Brush As New SolidBrush(Color.FromArgb(255, 113, 9, 14))
 
-
+    Dim Life_Blink_Counter As Integer = 0
 
 
 
@@ -178,7 +190,11 @@ Public Class Form1
 
 
     Private Magic_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 172))
-    Private Magic_Blink_Brush As New SolidBrush(Color.FromArgb(255, 128, 217, 255))
+    Private Magic_Blink_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 227))
+
+
+    Dim Magic_Blink_Counter As Integer = 0
+
 
 
     'Private Magic_Outline_Pen As New Pen(Color.FromArgb(255, 0, 0, 255), 1)
@@ -214,7 +230,7 @@ Public Class Form1
 
     Dim Center_String As New StringFormat()
 
-    Dim Blink_Counter As Integer = 0
+
 
 
     Private Map_Border_Pen As New Pen(Color.Black, 3)
@@ -274,7 +290,7 @@ Public Class Form1
 
         OurHero.Life = 100
         OurHero.MaxLife = 100
-        OurHero.Magic = 50
+        OurHero.Magic = 100
         OurHero.MaxMagic = 100
 
         OurHero.Attack = 3
@@ -319,12 +335,28 @@ Public Class Form1
 
         Wall.MapColor = Color.FromArgb(128, 164, 164, 164)
 
+
+
+
+
+        ''Init Life Potion
+        'Potion.IsLife = True
+        'Potion.Rec = New Rectangle(0, 0, 200, 200)
+        'Potion.Active = False
+        'Potion.Color = Color.FromArgb(255, 95, 7, 12)
+        'Potion.OutlineColor = Color.FromArgb(255, 255, 0, 0)
+
+        'Init Magic Potion
+        Potion.IsLife = False
         Potion.Rec = New Rectangle(0, 0, 200, 200)
         Potion.Active = False
-        'Potion.Color = Color.FromArgb(255, 255, 19, 19)
-        Potion.Color = Color.FromArgb(255, 95, 7, 12)
+        Potion.Color = Color.FromArgb(255, 0, 0, 255)
+        Potion.OutlineColor = Color.FromArgb(255, 0, 0, 255)
 
-        Potion.OutlineColor = Color.FromArgb(255, 255, 0, 0)
+
+
+
+
 
 
 
@@ -764,22 +796,22 @@ Public Class Form1
         Else
             'Yes, the heros life points are critically low?
 
-            Select Case Blink_Counter
+            Select Case Life_Blink_Counter
                 Case 0 To 8
                     'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
                     g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
                     g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
-                    Blink_Counter += 1
+                    Life_Blink_Counter += 1
                 Case 9 To 18
                     'g.FillRectangle(Life_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
                     g.FillRectangle(Life_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
                     g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
-                    Blink_Counter += 1
+                    Life_Blink_Counter += 1
                 Case Else
                     'g.FillRectangle(Life_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxLife * OurHero.Life), Bar.Height - 4)
                     g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
                     g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
-                    Blink_Counter = 0
+                    Life_Blink_Counter = 0
             End Select
         End If
     End Sub
@@ -812,8 +844,8 @@ Public Class Form1
         Else
             'Yes, the heros life points are critically low?
 
-            Select Case Blink_Counter
-                Case 0 To 1
+            Select Case Magic_Blink_Counter
+                Case 0 To 8
                     'g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
 
 
@@ -823,8 +855,8 @@ Public Class Form1
 
 
 
-                    Blink_Counter += 1
-                Case 2 To 4
+                    Magic_Blink_Counter += 1
+                Case 9 To 18
                     'g.FillRectangle(Magic_Blink_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
 
 
@@ -834,7 +866,7 @@ Public Class Form1
 
 
 
-                    Blink_Counter += 1
+                    Magic_Blink_Counter += 1
                 Case Else
                     'g.FillRectangle(Magic_Brush, Bar.X + 2, Bar.Y + 2, CInt((Bar.Width - 4) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 4)
 
@@ -844,7 +876,7 @@ Public Class Form1
                     g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
 
-                    Blink_Counter = 0
+                    Magic_Blink_Counter = 0
             End Select
         End If
     End Sub
@@ -915,11 +947,13 @@ Public Class Form1
             Else
 
                 g.FillRectangle(Monster_Brush, Monster)
-                g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Monster)
+
+
                 g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
                 'g.DrawRectangle(New Pen(Color.Green, 1), Rec)
 
-
+                'Draw darkness.
+                g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), Monster)
 
             End If
 
@@ -960,15 +994,39 @@ Public Class Form1
 
         'Dim LightRec As New Rectangle
 
-
         If ProjectileInflight = True Then
 
             LightRec = Rec
 
             LightRec.Inflate(300, 300)
 
+
+            'Create a path
+            Dim path As New GraphicsPath()
+            path.AddEllipse(LightRec)
+
+
+            'Create a path gradient brush
+            Dim pgBrush As New PathGradientBrush(path)
+            'pgBrush.CenterColor = Color.White
+
+            pgBrush.CenterColor = Color.FromArgb(255, 255, 255, 255)
+
+
+
+            'Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+            Dim list As Color() = New Color() {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+
+
+
+            pgBrush.SurroundColors = list
+
+
+            g.FillPath(pgBrush, path)
+
+
             'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
-            g.FillEllipse(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
+            'g.FillEllipse(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
 
         Else
 
@@ -976,8 +1034,31 @@ Public Class Form1
 
             LightRec.Inflate(300, 300)
 
+            'Create a path
+            Dim path As New GraphicsPath()
+            path.AddEllipse(LightRec)
+
+
+            'Create a path gradient brush
+            Dim pgBrush As New PathGradientBrush(path)
+            'pgBrush.CenterColor = Color.White
+            pgBrush.CenterColor = Color.FromArgb(90, Color.White)
+
+
+
+            Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+            pgBrush.SurroundColors = list
+
+            'g.SmoothingMode = SmoothingMode.AntiAlias
+
+
+            g.FillPath(pgBrush, path)
+
+
+
+
             'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
-            g.FillEllipse(New SolidBrush(Color.FromArgb(32, Color.White)), LightRec)
+            'g.FillEllipse(New SolidBrush(Color.FromArgb(32, Color.White)), LightRec)
 
         End If
 
@@ -1152,15 +1233,40 @@ Public Class Form1
             Do_Hero_Shots()
 
             If Potion.Active = True Then
-                If OurHero.Rec.IntersectsWith(Potion.Rec) = True And OurHero.Life <> OurHero.MaxLife Then
 
-                    OurHero.Life = OurHero.MaxLife
-                    Potion.Active = False
+                If OurHero.Rec.IntersectsWith(Potion.Rec) = True Then
 
-                    'Play potion pickupsound.
-                    If GS.IsPlaying("Potion_Pickup") = False Then
-                        GS.Play("Potion_Pickup")
+                    If Potion.IsLife = True Then
+
+                        If OurHero.Life <> OurHero.MaxLife Then
+
+                            'Play potion pickupsound.
+                            If GS.IsPlaying("Potion_Pickup") = False Then
+                                GS.Play("Potion_Pickup")
+                            End If
+
+                            OurHero.Life = OurHero.MaxLife
+                            Potion.Active = False
+
+                        End If
+
+                    Else
+
+                        If OurHero.Magic <> OurHero.MaxMagic Then
+
+                            'Play potion pickupsound.
+                            If GS.IsPlaying("Potion_Pickup") = False Then
+                                GS.Play("Potion_Pickup")
+                            End If
+
+                            OurHero.Magic = OurHero.MaxMagic
+                            Potion.Active = False
+
+                        End If
+
                     End If
+
+
 
 
                 End If
@@ -1292,7 +1398,7 @@ Public Class Form1
             'Yes, the monster is touching the wall.
 
 
-            OurMonster.WallCollision = True
+            'OurMonster.WallCollision = True
 
 
             'Push monster to the left of wall.
@@ -1303,18 +1409,19 @@ Public Class Form1
             'End If
 
             'Move monster down.
-            Monster.Y += Monster_Speed
+            'Monster.Y += Monster_Speed
 
-            If Monster.IntersectsWith(Wall.Rec) = True Then
+            'If Monster.IntersectsWith(Wall.Rec) = True Then
 
-                'Push monster above wall.
-                Monster.Y = Wall.Rec.Y - Monster.Height - 1
+            'Push monster above wall.
+            'Monster.Y = Wall.Rec.Y - Monster.Height - 1
 
-            End If
+            'End If
 
-            OurMonster.WallCollision = False
+            'OurMonster.WallCollision = False
 
         End If
+
         '************************************************
 
         'Attack Right**************************************************
@@ -1622,12 +1729,12 @@ Public Class Form1
 
 
 
-        If OurMonster.WallCollision = False Then
+        'If OurMonster.WallCollision = False Then
 
 
-            'Move the monster up.
-            'Is the monster close to the hero?
-            If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
+        'Move the monster up.
+        'Is the monster close to the hero?
+        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
                 'No, the monster is not close to the hero.
                 'Move the monster up fast.
                 Monster.Y -= Monster_Speed
@@ -1655,49 +1762,50 @@ Public Class Form1
                 'End If
 
             End If
-            '************************************************
-            'Attack Up************************************************************************************
-            If Monster.IntersectsWith(OurHero.Rec) = True Then
+        '************************************************
+        'Attack Up************************************************************************************
+        If Monster.IntersectsWith(OurHero.Rec) = True Then
 
-                'Push the monster below the hero.
-                Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
+            'Push the monster below the hero.
+            Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
 
-                If OurHero.Initiative = False Then
+            If OurHero.Initiative = False Then
 
 
-                    'Reset the hit total on the first hit.
-                    If OurHero.Hit = False Then
-                        OurHero.LifeBeforeHit = OurHero.Life
-                    End If
+                'Reset the hit total on the first hit.
+                If OurHero.Hit = False Then
+                    OurHero.LifeBeforeHit = OurHero.Life
+                End If
 
-                    'Attack the heros life points directly.
-                    OurHero.Life -= Monster_Attack
+                'Attack the heros life points directly.
+                OurHero.Life -= Monster_Attack
 
-                    OurHero.Hit = True
+                OurHero.Hit = True
 
-                    'Play undead attack sound.
-                    If GS.IsPlaying("Undead_Attack") = False Then
-                        GS.Play("Undead_Attack") 'play the Music
-                    End If
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
 
-                    'Knock hero above the monster.
-                    OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 32
+                'Knock hero above the monster.
+                OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 32
 
-                    'Is the hero touching a wall?
-                    If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                        'Yes, the hero is touching a wall.
+                'Is the hero touching a wall?
+                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
+                    'Yes, the hero is touching a wall.
 
-                        'Knock hero below the wall.
-                        OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
+                    'Knock hero below the wall.
+                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
 
-                        'Knock the monster below the hero.
-                        Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
+                    'Knock the monster below the hero.
+                    Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
 
-                    End If
                 End If
             End If
-
         End If
+
+
+        'End If
 
 
 
@@ -1905,11 +2013,47 @@ Public Class Form1
                 'Play undead death sound.
                 GS.Play("Undead_Death")
 
-                'Drop loot
-                Potion.Rec.Size = New Size(85, 85)
-                Potion.Rec.X = Monster.X + (Monster.Width - Potion.Rec.Width) \ 2
-                Potion.Rec.Y = Monster.Y + (Monster.Height - Potion.Rec.Height) \ 2
-                Potion.Active = True
+
+                'Roll for loot.************************
+                If RandomNumber.Next(1, 20) > 10 Then 'Chance to hit is 1 in 20
+                    'Drop life potion.
+                    Potion.IsLife = True
+                    Potion.Rec.Size = New Size(85, 85)
+                    Potion.Rec.X = Monster.X + (Monster.Width - Potion.Rec.Width) \ 2
+                    Potion.Rec.Y = Monster.Y + (Monster.Height - Potion.Rec.Height) \ 2
+                    Potion.Active = True
+
+                    Potion.Color = Color.FromArgb(255, 95, 7, 12)
+                    Potion.OutlineColor = Color.FromArgb(255, 255, 0, 0)
+                Else
+                    'Drop magic potion.
+                    Potion.IsLife = False
+                    Potion.Rec.Size = New Size(85, 85)
+                    Potion.Rec.X = Monster.X + (Monster.Width - Potion.Rec.Width) \ 2
+                    Potion.Rec.Y = Monster.Y + (Monster.Height - Potion.Rec.Height) \ 2
+                    Potion.Active = True
+
+                    Potion.Color = Color.FromArgb(255, 0, 0, 202)
+                    Potion.OutlineColor = Color.FromArgb(255, 57, 57, 255)
+                End If
+                '*******************************************
+
+
+                ''Init Life Potion
+                'Potion.IsLife = True
+                'Potion.Rec = New Rectangle(0, 0, 200, 200)
+                'Potion.Active = False
+                'Potion.Color = Color.FromArgb(255, 95, 7, 12)
+                'Potion.OutlineColor = Color.FromArgb(255, 255, 0, 0)
+
+                ''Init Magic Potion
+                'Potion.IsLife = False
+                'Potion.Rec = New Rectangle(0, 0, 200, 200)
+                'Potion.Active = False
+                'Potion.Color = Color.FromArgb(255, 0, 0, 255)
+                'Potion.OutlineColor = Color.FromArgb(255, 0, 0, 255)
+
+
 
                 'Play loot drop sound.
 
@@ -1930,50 +2074,65 @@ Public Class Form1
 
     Private Sub Do_Hero_Shots()
 
+        'Does the hero have enough magic to cast?
+        If OurHero.Magic >= 25 Then
+            'Yes, the hero has enough magic to cast.
 
-        'Does the player want to cast a spell and isn't already casting a spell.
-        If CtrlDown = True And ProjectileInflight = False Then
-            'Yes, the player wants to cast a spell and isn't already casting a spell.
-            'Determine the hero's direction of fire.**************************
-            If MoveRight = True Then
-                If MoveUp = True Then
-                    Projectile_Direction = DirectionEnum.RightUP
+            'Does the player want to cast a spell and isn't already casting a spell.
+            If CtrlDown = True And ProjectileInflight = False Then
+                'Yes, the player wants to cast a spell and isn't already casting a spell.
+                'Determine the hero's direction of fire.**************************
+                If MoveRight = True Then
+                    If MoveUp = True Then
+                        Projectile_Direction = DirectionEnum.RightUP
+                    ElseIf MoveDown = True Then
+                        Projectile_Direction = DirectionEnum.RightDown
+                    Else
+                        Projectile_Direction = DirectionEnum.Right
+                    End If
+                ElseIf MoveLeft = True Then
+                    If MoveUp = True Then
+                        Projectile_Direction = DirectionEnum.LeftUp
+                    ElseIf MoveDown = True Then
+                        Projectile_Direction = DirectionEnum.LeftDown
+                    Else
+                        Projectile_Direction = DirectionEnum.Left
+                    End If
+                ElseIf MoveUp = True Then
+                    Projectile_Direction = DirectionEnum.Up
                 ElseIf MoveDown = True Then
-                    Projectile_Direction = DirectionEnum.RightDown
+                    Projectile_Direction = DirectionEnum.Down
                 Else
-                    Projectile_Direction = DirectionEnum.Right
+                    Projectile_Direction = DirectionEnum.None
                 End If
-            ElseIf MoveLeft = True Then
-                If MoveUp = True Then
-                    Projectile_Direction = DirectionEnum.LeftUp
-                ElseIf MoveDown = True Then
-                    Projectile_Direction = DirectionEnum.LeftDown
-                Else
-                    Projectile_Direction = DirectionEnum.Left
+                '*************************************************************
+                'Fire**************************************************
+                If Projectile_Direction <> DirectionEnum.None Then
+
+                    'Position the projectile under the hero. Make the projectile the same size as the hero.
+                    Projectile = OurHero.Rec
+
+                    'Loose the projectile.
+                    ProjectileInflight = True
+
+                    'Subtract the cost of magic.
+                    OurHero.Magic -= 25
+                    If OurHero.Magic < 1 Then
+                        OurHero.Magic = 0
+                    End If
+
+                    'Play projectile in flight sound.
+                    GS.Play("Magic")
+
                 End If
-            ElseIf MoveUp = True Then
-                Projectile_Direction = DirectionEnum.Up
-            ElseIf MoveDown = True Then
-                Projectile_Direction = DirectionEnum.Down
-            Else
-                Projectile_Direction = DirectionEnum.None
+                '******************************************************
             End If
-            '*************************************************************
-            'Fire**************************************************
-            If Projectile_Direction <> DirectionEnum.None Then
 
-                'Position the projectile under the hero. Make the projectile the same size as the hero.
-                Projectile = OurHero.Rec
 
-                'Loose the projectile.
-                ProjectileInflight = True
-
-                'Play projectile in flight sound.
-                GS.Play("Magic")
-
-            End If
-            '******************************************************
         End If
+
+
+
 
 
         'Move projectile and attack the monster when hit.*****************************************************************************
