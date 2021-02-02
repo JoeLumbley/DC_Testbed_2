@@ -317,7 +317,7 @@ Public Class Form1
         'Wall.Color = Color.FromArgb(255, 11, 64, 26)
 
 
-        Wall.Color = Color.FromArgb(255, 35, 39, 33)
+        Wall.Color = Color.FromArgb(255, 72, 82, 67)
 
 
 
@@ -399,9 +399,10 @@ Public Class Form1
         GS.AddSound("Undead_Death", Application.StartupPath & "undead_death.mp3")
         GS.AddSound("Hero_Move", Application.StartupPath & "hero_move.mp3")
         GS.AddSound("Undead_Hit", Application.StartupPath & "undead_hit.mp3")
-
-
         GS.AddSound("Hero_Death", Application.StartupPath & "hero_death.mp3")
+
+
+        GS.AddSound("Not_Enough_Magic", Application.StartupPath & "not_enough_magic.mp3")
 
 
         'Set set volume 
@@ -414,9 +415,10 @@ Public Class Form1
         GS.SetVolume("Undead_Death", 300)
         GS.SetVolume("Hero_Move", 200)
         GS.SetVolume("Undead_Hit", 800)
-
-
         GS.SetVolume("Hero_Death", 400)
+
+        GS.SetVolume("Not_Enough_Magic", 400)
+
 
 
 
@@ -460,20 +462,33 @@ Public Class Form1
             Using Buffer1_BMP As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
                 Using goBuf1 As Graphics = Graphics.FromImage(Buffer1_BMP)
                     With goBuf1
-                        'To fix draw string error: "Parameters not valid." I had to set the compositing mode to source over.
-                        .CompositingMode = Drawing2D.CompositingMode.SourceOver
-                        .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
-                        .SmoothingMode = Drawing2D.SmoothingMode.None
-                        .InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
+                        .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug Fix
+                        'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
+                        .SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
                         .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
+                        .CompositingQuality = Drawing2D.CompositingQuality.HighSpeed
+                        .InterpolationMode = Drawing2D.InterpolationMode.Low
+                        .PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
+                    End With
+
+                    With e.Graphics
+                        .CompositingMode = Drawing2D.CompositingMode.SourceCopy
+                        .SmoothingMode = Drawing2D.SmoothingMode.None
+                        .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
+                        .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
+                        .InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.HighSpeed
                     End With
 
+
+
+
+
+                    'End With
+
+
+
                     goBuf1.Clear(Level_Background_Color)
-
-                    ''Draw Wall
-                    'goBuf1.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
-
 
                     Draw_Hero_Light(goBuf1, OurHero.Rec)
 
@@ -483,64 +498,18 @@ Public Class Form1
 
                     End If
 
-
-
                     Draw_Monster(goBuf1, Monster)
-
-
-
-
-
-
-                    'If Monster_Life > 0 Then
-                    '    goBuf1.FillRectangle(Monster_Brush, Monster)
-
-
-                    '    goBuf1.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
-
-
-
-
-                    'End If
 
                     If ProjectileInflight = True Then
                         goBuf1.FillRectangle(Projectile_Brush, Projectile)
                     End If
 
-
-
-
-
-
-
-                    'Draw_Hero(goBuf1, OurHero.Rec)
-
-
-                    'Draw Wall
-                    'goBuf1.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
-
                     Draw_Wall(goBuf1, Wall.Rec)
-
-
-
-
-                    'If OurHero.Life > 0 Then
-
-                    '    If OurHero.Hit = False Then
-                    '        'goBuf1.FillRectangle(New SolidBrush(OurHero.Color), OurHero.Rec)
-                    '        Draw_Hero(goBuf1, OurHero.Rec)
-                    '    Else
-                    '        goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), OurHero.Rec)
-                    '        OurHero.HitTimer += 1
-                    '    End If
-                    'End If
-
 
                     If Monster_Life > 0 And Monster_Hit = True Then
                         goBuf1.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
                         goBuf1.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
                     End If
-
 
                     Draw_Hero(goBuf1, OurHero.Rec)
 
@@ -548,19 +517,10 @@ Public Class Form1
                     'Draw map background.
                     goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
 
-
                     If Wall.Revealed = True Then
                         'Draw wall.
                         goBuf1.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
                     End If
-
-
-
-
-
-
-
-
 
                     'Draw hero.
                     goBuf1.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
@@ -569,29 +529,11 @@ Public Class Form1
                     goBuf1.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
                     '********************************************************************
 
-
-
-
-
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
                     Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
 
-
-
-
-
-
-
-
-
-
-                    'goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "     Undead - Attack:" & Monster_Attack.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
-
-                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - 10000 : Gold ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
-
-
-                    'To fix DrawString error: "Parameters not valid." I had to set the compositing mode to source over.
+                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
                     goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport_Size.Height - 30)
 
@@ -610,16 +552,29 @@ Public Class Form1
 
                 End Using
             End Using
+
         Else
+
             Using _Buffer2 As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
                 Using goBuf2 As Graphics = Graphics.FromImage(_Buffer2)
+
                     With goBuf2
-                        'To fix draw string error: "Parameters not valid." I had to set the compositing mode to source over.
-                        .CompositingMode = Drawing2D.CompositingMode.SourceOver
-                        .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
-                        .SmoothingMode = Drawing2D.SmoothingMode.None
-                        .InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
+                        .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug Fix
+                        'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
+                        .SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
                         .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
+                        .CompositingQuality = Drawing2D.CompositingQuality.HighSpeed
+                        .InterpolationMode = Drawing2D.InterpolationMode.Low
+                        .PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
+                    End With
+
+
+                    With e.Graphics
+                        .CompositingMode = Drawing2D.CompositingMode.SourceCopy
+                        .SmoothingMode = Drawing2D.SmoothingMode.None
+                        .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
+                        .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
+                        .InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.HighSpeed
                     End With
 
@@ -747,7 +702,7 @@ Public Class Form1
 
                     'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
-                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - 10000 : Gold ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
 
 
@@ -937,25 +892,55 @@ Public Class Form1
 
         If Monster_Life > 0 Then
 
+
             If Monster.IntersectsWith(LightRec) = True Then
 
                 g.FillRectangle(Monster_Brush, Monster)
                 g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
-                g.DrawRectangle(New Pen(Color.Green, 1), Rec)
 
+
+                'Draw shadow.
+                Dim MyShadow As Integer
+                Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
+                If Distance <= Viewport_Size.Width / 2 Then
+                    MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                Else
+                    MyShadow = 255
+                End If
+                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Monster)
+
+
+
+                g.DrawRectangle(New Pen(Color.Green, 1), Rec)
 
             Else
 
                 g.FillRectangle(Monster_Brush, Monster)
 
 
+
+
                 g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
                 'g.DrawRectangle(New Pen(Color.Green, 1), Rec)
 
-                'Draw darkness.
-                g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), Monster)
+                'Draw shadow.
+                Dim MyShadow As Integer
+
+                Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
+
+                If Distance <= Viewport_Size.Width / 2 Then
+                    MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                Else
+
+                    MyShadow = 255
+                End If
+                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Monster)
+
 
             End If
+
+
+
 
 
 
@@ -973,6 +958,16 @@ Public Class Form1
             'Draw Wall
             g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
 
+            'Draw shadow.
+            Dim MyShadow As Integer
+            Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
+            If Distance <= Viewport_Size.Width / 2 Then
+                MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance)
+            Else
+                MyShadow = 255
+            End If
+            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Wall.Rec)
+
             g.DrawRectangle(New Pen(Wall.OutlineColor, 1), Rec)
 
         Else
@@ -980,7 +975,18 @@ Public Class Form1
             'Draw Wall
             g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
 
-            g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
+
+            'Draw shadow.
+            Dim MyShadow As Integer
+            Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
+            If Distance <= Viewport_Size.Width / 2 Then
+                MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance)
+            Else
+                MyShadow = 255
+            End If
+            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Wall.Rec)
+
+            'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
 
         End If
 
@@ -2013,9 +2019,9 @@ Public Class Form1
                 'Play undead death sound.
                 GS.Play("Undead_Death")
 
-
-                'Roll for loot.************************
-                If RandomNumber.Next(1, 20) > 10 Then 'Chance to hit is 1 in 20
+                'Loot Drop ************************************************************
+                'Roll for loot.
+                If RandomNumber.Next(1, 3) < 2 Then 'Chance 50/50
                     'Drop life potion.
                     Potion.IsLife = True
                     Potion.Rec.Size = New Size(85, 85)
@@ -2036,7 +2042,7 @@ Public Class Form1
                     Potion.Color = Color.FromArgb(255, 0, 0, 202)
                     Potion.OutlineColor = Color.FromArgb(255, 57, 57, 255)
                 End If
-                '*******************************************
+                '**********************************************************************
 
 
                 ''Init Life Potion
@@ -2127,7 +2133,19 @@ Public Class Form1
                 End If
                 '******************************************************
             End If
+        Else
+            'No, the hero doesn't have enough magic to cast.
 
+            'Does the player want to cast a spell.
+            If CtrlDown = True Then
+                'Yes, the player wants to cast a spell.
+
+                'Play not enough magic dialogue.
+                If GS.IsPlaying("Not_Enough_Magic") = False Then
+                    GS.Play("Not_Enough_Magic")
+                End If
+
+            End If
 
         End If
 
@@ -2135,9 +2153,11 @@ Public Class Form1
 
 
 
-        'Move projectile and attack the monster when hit.*****************************************************************************
-        'Has the player cast a spell?
-        If ProjectileInflight = True Then
+
+
+            'Move projectile and attack the monster when hit.*****************************************************************************
+            'Has the player cast a spell?
+            If ProjectileInflight = True Then
             'Yes the player has cast a spell.
             'Is the projectile within it's range?
             If Distance_Between_Points(Projectile.Location, OurHero.Rec.Location) < Projectile_Max_Distance Then
