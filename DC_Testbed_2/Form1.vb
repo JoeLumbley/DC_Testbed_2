@@ -189,7 +189,7 @@ Public Class Form1
 
 
 
-    Private Magic_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 172))
+    Private Magic_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 145))
     Private Magic_Blink_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 227))
 
 
@@ -202,7 +202,7 @@ Public Class Form1
 
 
 
-    Private Magic_Outline_Pen As New Pen(Color.FromArgb(255, 57, 57, 255), 1)
+    Private Magic_Outline_Pen As New Pen(Color.FromArgb(255, 0, 128, 255), 1)
 
 
 
@@ -976,6 +976,7 @@ Public Class Form1
             g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
 
 
+
             'Draw shadow.
             Dim MyShadow As Integer
             Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
@@ -1322,7 +1323,7 @@ Public Class Form1
         If Monster_Life > 0 Then
             'Yes, the monster is alive.
 
-            'Hero Attacks Right*******************************************
+            'Hero Attacks Right *******************************************
             'Is the hero touching the monster?
             If OurHero.Rec.IntersectsWith(Monster) = True Then
                 'Yes, the hero is touching the monster.
@@ -1331,6 +1332,8 @@ Public Class Form1
                 OurHero.Rec.X = Monster.X - OurHero.Rec.Width - 1
 
                 If OurHero.Initiative = True Then
+
+                    'Play hero attack sound.
 
                     Monster_Hit = True
 
@@ -1346,8 +1349,6 @@ Public Class Form1
                         Monster_Life = 0
                     End If
 
-                    'Play hero attack sound.
-
                     'Knock monster to the right of hero.
                     Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 32
 
@@ -1358,10 +1359,10 @@ Public Class Form1
                         'Yes, the monster is touching a wall.
 
                         'Knock monster to the left of wall.
-                        Monster.X = Wall.Rec.X - Monster.Width - 16
+                        Monster.X = Wall.Rec.X - Monster.Width - 1
 
                         'Knock the hero to the left of the monster.
-                        OurHero.Rec.X = Monster.X - Monster.Width - 8
+                        OurHero.Rec.X = Monster.X - Monster.Width - 16
 
                     End If
                     '************************************************
@@ -1529,6 +1530,7 @@ Public Class Form1
         If Monster_Life > 0 Then
             'Yes, the monster is alive.
 
+            'Hero Attacks Left *******************************************
             'Is the hero touching the monster?
             If OurHero.Rec.IntersectsWith(Monster) = True Then
                 'Yes, the hero is touching the monster.
@@ -1540,6 +1542,11 @@ Public Class Form1
 
                     Monster_Hit = True
 
+                    'Play monster hit sound.
+                    If GS.IsPlaying("Undead_Hit") = False Then
+                        GS.Play("Undead_Hit")
+                    End If
+
                     'Attack the monsters life points directly.
                     Monster_Life -= OurHero.Attack
                     If Monster_Life < 0 Then
@@ -1547,14 +1554,7 @@ Public Class Form1
                     End If
 
                     'Knock monster to the left of hero.
-                    'Monster.X = OurHero.Rec.X - Monster.Width - 32
                     Monster.X = OurHero.Rec.X - Monster.Width - 32
-
-
-
-
-
-
 
                     'Wall Collision Handler Monster moving left*************************
                     'Is the monster touching the wall?
@@ -2136,13 +2136,16 @@ Public Class Form1
         Else
             'No, the hero doesn't have enough magic to cast.
 
-            'Does the player want to cast a spell.
+            'Does the player want to cast a spell?
             If CtrlDown = True Then
-                'Yes, the player wants to cast a spell.
+                If MoveLeft = True Or MoveRight = True Or MoveUp = True Or MoveDown = True Then
+                    'Yes, the player wants to cast a spell.
 
-                'Play not enough magic dialogue.
-                If GS.IsPlaying("Not_Enough_Magic") = False Then
-                    GS.Play("Not_Enough_Magic")
+                    'Play not enough magic dialogue.
+                    If GS.IsPlaying("Not_Enough_Magic") = False Then
+                        GS.Play("Not_Enough_Magic")
+                    End If
+
                 End If
 
             End If
@@ -2150,14 +2153,9 @@ Public Class Form1
         End If
 
 
-
-
-
-
-
-            'Move projectile and attack the monster when hit.*****************************************************************************
-            'Has the player cast a spell?
-            If ProjectileInflight = True Then
+        'Move projectile and attack the monster when hit.*****************************************************************************
+        'Has the player cast a spell?
+        If ProjectileInflight = True Then
             'Yes the player has cast a spell.
             'Is the projectile within it's range?
             If Distance_Between_Points(Projectile.Location, OurHero.Rec.Location) < Projectile_Max_Distance Then
@@ -2606,7 +2604,9 @@ Public Class Form1
                 ProjectileInflight = False
 
             End If
+
         End If
+
 
 
 
@@ -2678,19 +2678,22 @@ Public Class Form1
 
         Select Case e.KeyValue
             Case Keys.Left
+
                 MoveLeft = False
 
             Case Keys.Right
+
                 MoveRight = False
 
             Case Keys.Up
+
                 MoveUp = False
 
             Case Keys.Down
+
                 MoveDown = False
 
             Case Keys.ControlKey
-
 
                 CtrlDown = False
 
