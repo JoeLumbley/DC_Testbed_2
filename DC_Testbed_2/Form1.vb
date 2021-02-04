@@ -254,10 +254,10 @@ Public Class Form1
     Private drawBrush As New SolidBrush(Color.White)
     Dim drawString As String = "Sample Text"
 
-    Private Blur_BMP1 As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
+    Private Blur_BMP1 As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
     Private goBlur1 As Graphics = Graphics.FromImage(Blur_BMP1)
 
-    Private Blur_BMP2 As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
+    Private Blur_BMP2 As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
     Private goBlur2 As Graphics = Graphics.FromImage(Blur_BMP2)
 
     Dim cm As New Drawing.Imaging.ColorMatrix
@@ -455,11 +455,14 @@ Public Class Form1
         PictureBox1.Invalidate()
 
     End Sub
+
     Private Sub PictureBox1_Paint(ByVal sender As System.Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles PictureBox1.Paint
 
         If _BufferFlag = True Then
 
-            Using Buffer1_BMP As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
+            Using Buffer1_BMP As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
+                'Using Buffer1_BMP As New Bitmap(4000, 4000, Imaging.PixelFormat.Format32bppPArgb)
+
                 Using goBuf1 As Graphics = Graphics.FromImage(Buffer1_BMP)
                     With goBuf1
                         .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug Fix
@@ -500,33 +503,34 @@ Public Class Form1
 
                     Draw_Monster(goBuf1, Monster)
 
-                    If ProjectileInflight = True Then
-                        goBuf1.FillRectangle(Projectile_Brush, Projectile)
-                    End If
+
+                    Draw_Projectile(goBuf1)
+
+
+                    'If ProjectileInflight = True Then
+                    '    goBuf1.FillRectangle(Projectile_Brush, Projectile)
+                    'End If
 
                     Draw_Wall(goBuf1, Wall.Rec)
 
-                    If Monster_Life > 0 And Monster_Hit = True Then
-                        goBuf1.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
-                        goBuf1.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
-                    End If
+                    Draw_Monster_Life_Bar(goBuf1)
 
                     Draw_Hero(goBuf1, OurHero.Rec)
 
                     'Draw Map************************************************************
                     'Draw map background.
-                    goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
+                    goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
 
                     If Wall.Revealed = True Then
                         'Draw wall.
-                        goBuf1.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
+                        goBuf1.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
                     End If
 
                     'Draw hero.
-                    goBuf1.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
+                    goBuf1.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
 
                     'Draw map border.
-                    goBuf1.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
+                    goBuf1.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
                     '********************************************************************
 
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
@@ -535,27 +539,32 @@ Public Class Form1
 
                     goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
-                    goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport_Size.Height - 30)
+                    goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
 
+                    'Draw die screen.
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
-                        goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport_Size.Width, Viewport_Size.Height)
-                        goBuf1.DrawString("Died", PauseFont, drawBrush, Viewport_Size.Width \ 2, Viewport_Size.Height \ 2, Center_String)
+                        goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
+                        goBuf1.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
 
-
+                    'Draw paused screen.
                     If Timer2.Enabled = False Then
-                        goBuf1.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport_Size.Width, Viewport_Size.Height)
-                        goBuf1.DrawString("Paused", PauseFont, drawBrush, Viewport_Size.Width \ 2, Viewport_Size.Height \ 2, Center_String)
+                        goBuf1.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport.Width, Viewport.Height)
+                        goBuf1.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
 
                     e.Graphics.DrawImageUnscaled(Buffer1_BMP, 0, 0)
+
+                    'e.Graphics.DrawImage(Buffer1_BMP, Viewport)
+                    'e.Graphics.DrawImage(Buffer1_BMP, 0, 0, Viewport, GraphicsUnit.Pixel)
 
                 End Using
             End Using
 
         Else
 
-            Using _Buffer2 As New Bitmap(Viewport_Size.Width, Viewport_Size.Height, Imaging.PixelFormat.Format32bppPArgb)
+            Using _Buffer2 As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
+                'Using _Buffer2 As New Bitmap(4000, 4000, Imaging.PixelFormat.Format32bppPArgb)
                 Using goBuf2 As Graphics = Graphics.FromImage(_Buffer2)
 
                     With goBuf2
@@ -610,9 +619,7 @@ Public Class Form1
 
                     'End If
 
-                    If ProjectileInflight = True Then
-                        goBuf2.FillRectangle(Projectile_Brush, Projectile)
-                    End If
+                    Draw_Projectile(goBuf2)
 
 
                     'Draw_Hero(goBuf2, OurHero.Rec)
@@ -648,10 +655,14 @@ Public Class Form1
                     '    End If
                     'End If
 
-                    If Monster_Life > 0 And Monster_Hit = True Then
-                        goBuf2.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
-                        goBuf2.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
-                    End If
+
+
+                    Draw_Monster_Life_Bar(goBuf2)
+
+                    'If Monster_Life > 0 And Monster_Hit = True Then
+                    '    goBuf2.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
+                    '    goBuf2.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
+                    'End If
 
 
 
@@ -663,13 +674,13 @@ Public Class Form1
 
                     'Draw Map************************************************************
                     'Draw map background.
-                    goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
+                    goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
 
                     'Wall.MapColor
 
                     If Wall.Revealed = True Then
                         'Draw wall.
-                        goBuf2.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
+                        goBuf2.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
                     End If
 
 
@@ -679,10 +690,10 @@ Public Class Form1
 
 
                     'Draw hero.
-                    goBuf2.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
+                    goBuf2.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
 
                     'Draw map border.
-                    goBuf2.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport_Size.Width - (Viewport_Size.Width \ 4) - 10, 10, Viewport_Size.Width \ 4, Viewport_Size.Height \ 4))
+                    goBuf2.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
                     '********************************************************************
 
                     Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
@@ -707,29 +718,55 @@ Public Class Form1
 
 
                     'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
-                    goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport_Size.Height - 30)
+                    goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
 
 
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
-                        goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport_Size.Width, Viewport_Size.Height)
-                        goBuf2.DrawString("Died", PauseFont, drawBrush, Viewport_Size.Width \ 2, Viewport_Size.Height \ 2, Center_String)
+                        goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
+                        goBuf2.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
 
                     If Timer2.Enabled = False Then
-                        goBuf2.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport_Size.Width, Viewport_Size.Height)
+                        goBuf2.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport.Width, Viewport.Height)
                         'goBuf2.TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
-                        goBuf2.DrawString("Paused", PauseFont, drawBrush, Viewport_Size.Width \ 2, Viewport_Size.Height \ 2, Center_String)
+                        goBuf2.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
 
                     e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
+                    'e.Graphics.DrawImage(_Buffer2, 0, 0, Viewport, GraphicsUnit.Pixel)
 
                 End Using
             End Using
         End If
     End Sub
 
+    Private Sub Draw_Projectile(g As Graphics)
+
+        Dim ProjectileInViewportCoordinates As Rectangle
+        ProjectileInViewportCoordinates = Projectile
+        ProjectileInViewportCoordinates.X = Projectile.X - Viewport.X
+        ProjectileInViewportCoordinates.Y = Projectile.Y - Viewport.Y
 
 
+        If ProjectileInflight = True Then
+            g.FillRectangle(Projectile_Brush, ProjectileInViewportCoordinates)
+        End If
+    End Sub
+
+    Private Sub Draw_Monster_Life_Bar(g As Graphics)
+
+        Dim MonsterInViewportCoordinates As Rectangle
+        MonsterInViewportCoordinates = Monster
+        MonsterInViewportCoordinates.X = Monster.X - Viewport.X
+        MonsterInViewportCoordinates.Y = Monster.Y - Viewport.Y
+
+
+
+        If Monster_Life > 0 And Monster_Hit = True Then
+            g.FillRectangle(Life_Frame_Brush, MonsterInViewportCoordinates.X, MonsterInViewportCoordinates.Y - 10, MonsterInViewportCoordinates.Width, 6)
+            g.FillRectangle(Life_Brush, MonsterInViewportCoordinates.X, MonsterInViewportCoordinates.Y - 10, CInt(MonsterInViewportCoordinates.Width / Monster_LifeMAX * Monster_Life), 6)
+        End If
+    End Sub
 
     Private Sub Draw_HeroLife_Bar(g As Graphics, Bar As Rectangle)
 
@@ -840,6 +877,11 @@ Public Class Form1
 
     Private Sub Draw_Potion(g As Graphics, Rec As Rectangle)
 
+        Dim PotionInViewportCoordinates As Rectangle
+        PotionInViewportCoordinates = Potion.Rec
+        PotionInViewportCoordinates.X = Potion.Rec.X - Viewport.X
+        PotionInViewportCoordinates.Y = Potion.Rec.Y - Viewport.Y
+
         ''Create a path
         'Dim path As New GraphicsPath()
         ''path.AddEllipse(Elixir.X, Elixir.Y, Elixir.Width + 25, Elixir.Height + 25)
@@ -860,20 +902,54 @@ Public Class Form1
         ' New SolidBrush(Potion.Color)
 
 
-        If Rec.IntersectsWith(LightRec) = True Then
+        If PotionInViewportCoordinates.IntersectsWith(LightRec) = True Then
 
-            g.FillRectangle(New SolidBrush(Potion.Color), Rec.X, Rec.Y, Rec.Width, Rec.Height)
-            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
-            g.DrawRectangle(New Pen(Potion.OutlineColor, 1), Rec)
+            g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
+            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
+
+
+            'Draw shadow.
+            Dim MyShadow As Integer
+
+            Dim Distance As Double = Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location)
+
+            If Distance <= Viewport.Width / 2 Then
+                MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location))
+            Else
+
+                MyShadow = 255
+            End If
+            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), PotionInViewportCoordinates)
+
+
+
+
+            g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
 
         Else
 
-            g.FillRectangle(New SolidBrush(Potion.Color), Rec.X, Rec.Y, Rec.Width, Rec.Height)
-            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
+            g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, PotionInViewportCoordinates.Height)
+            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
             'g.DrawRectangle(New Pen(Potion.OutlineColor, 1), Rec)
 
+
+
+            'Draw shadow.
+            Dim MyShadow As Integer
+
+            Dim Distance As Double = Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location)
+
+            If Distance <= Viewport.Width / 2 Then
+                MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location))
+            Else
+
+                MyShadow = 255
+            End If
+            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), PotionInViewportCoordinates)
+
+
             'Draw darkness.
-            g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), Rec)
+            'g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), Rec)
 
         End If
 
@@ -882,7 +958,10 @@ Public Class Form1
 
     Private Sub Draw_Monster(g As Graphics, Rec As Rectangle)
 
-
+        Dim MonsterInViewportCoordinates As Rectangle
+        MonsterInViewportCoordinates = Rec
+        MonsterInViewportCoordinates.X = Rec.X - Viewport.X
+        MonsterInViewportCoordinates.Y = Rec.Y - Viewport.Y
 
 
         'LightRec
@@ -893,34 +972,34 @@ Public Class Form1
         If Monster_Life > 0 Then
 
 
-            If Monster.IntersectsWith(LightRec) = True Then
+            If MonsterInViewportCoordinates.IntersectsWith(LightRec) = True Then
 
-                g.FillRectangle(Monster_Brush, Monster)
-                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
+                g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
+                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
 
 
                 'Draw shadow.
                 Dim MyShadow As Integer
                 Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
-                If Distance <= Viewport_Size.Width / 2 Then
-                    MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                If Distance <= Viewport.Width / 2 Then
+                    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
                 Else
                     MyShadow = 255
                 End If
-                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Monster)
+                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
 
 
 
-                g.DrawRectangle(New Pen(Color.Green, 1), Rec)
+                g.DrawRectangle(New Pen(Color.Green, 1), MonsterInViewportCoordinates)
 
             Else
 
-                g.FillRectangle(Monster_Brush, Monster)
+                g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
 
 
 
 
-                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster, Center_String)
+                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
                 'g.DrawRectangle(New Pen(Color.Green, 1), Rec)
 
                 'Draw shadow.
@@ -928,13 +1007,13 @@ Public Class Form1
 
                 Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
 
-                If Distance <= Viewport_Size.Width / 2 Then
-                    MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                If Distance <= Viewport.Width / 2 Then
+                    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
                 Else
 
                     MyShadow = 255
                 End If
-                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Monster)
+                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
 
 
             End If
@@ -953,39 +1032,46 @@ Public Class Form1
 
     Private Sub Draw_Wall(g As Graphics, Rec As Rectangle)
 
-        If Wall.Rec.IntersectsWith(LightRec) = True Then
+        Dim WallInViewportCoordinates As Rectangle
+        WallInViewportCoordinates = Rec
+        WallInViewportCoordinates.X = Rec.X - Viewport.X
+        WallInViewportCoordinates.Y = Rec.Y - Viewport.Y
+
+
+
+        If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
 
             'Draw Wall
-            g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+            g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
             'Draw shadow.
             Dim MyShadow As Integer
             Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
-            If Distance <= Viewport_Size.Width / 2 Then
-                MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance)
+            If Distance <= Viewport.Width / 2 Then
+                MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
             Else
                 MyShadow = 255
             End If
-            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Wall.Rec)
+            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
 
-            g.DrawRectangle(New Pen(Wall.OutlineColor, 1), Rec)
+            g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
         Else
 
             'Draw Wall
-            g.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
+            g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
 
 
             'Draw shadow.
             Dim MyShadow As Integer
             Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
-            If Distance <= Viewport_Size.Width / 2 Then
-                MyShadow = CInt((255 / (Viewport_Size.Width / 2)) * Distance)
+            If Distance <= Viewport.Width / 2 Then
+                MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
             Else
                 MyShadow = 255
             End If
-            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), Wall.Rec)
+            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
 
             'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
 
@@ -999,11 +1085,17 @@ Public Class Form1
 
     Private Sub Draw_Hero_Light(g As Graphics, Rec As Rectangle)
 
+
+        Dim HeroInViewportCoordinates As Rectangle
+        HeroInViewportCoordinates = Rec
+        HeroInViewportCoordinates.X = Rec.X - Viewport.X
+        HeroInViewportCoordinates.Y = Rec.Y - Viewport.Y
+
         'Dim LightRec As New Rectangle
 
         If ProjectileInflight = True Then
 
-            LightRec = Rec
+            LightRec = HeroInViewportCoordinates
 
             LightRec.Inflate(300, 300)
 
@@ -1037,7 +1129,7 @@ Public Class Form1
 
         Else
 
-            LightRec = Rec
+            LightRec = HeroInViewportCoordinates
 
             LightRec.Inflate(300, 300)
 
@@ -1078,6 +1170,12 @@ Public Class Form1
 
     Private Sub Draw_Hero(g As Graphics, Rec As Rectangle)
 
+
+        Dim HeroInViewportCoordinates As Rectangle
+        HeroInViewportCoordinates = Rec
+        HeroInViewportCoordinates.X = Rec.X - Viewport.X
+        HeroInViewportCoordinates.Y = Rec.Y - Viewport.Y
+
         If OurHero.Life > 0 Then
             If OurHero.Hit = False Then
                 'Draw hero.
@@ -1090,24 +1188,19 @@ Public Class Form1
 
                 'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.White)), LightRec)
 
+                g.FillRectangle(New SolidBrush(OurHero.Color), HeroInViewportCoordinates)
 
+                g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), HeroInViewportCoordinates, Center_String)
 
-
-
-
-                g.FillRectangle(New SolidBrush(OurHero.Color), Rec)
-
-                g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), Rec, Center_String)
-
-                g.DrawRectangle(New Pen(OurHero.OutlineColor, 1), Rec)
+                g.DrawRectangle(New Pen(OurHero.OutlineColor, 1), HeroInViewportCoordinates)
 
 
             Else
-                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), Rec)
+                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), HeroInViewportCoordinates)
 
-                g.DrawString("Hero", Monster_Font, New SolidBrush(Color.White), Rec, Center_String)
+                g.DrawString("Hero", Monster_Font, New SolidBrush(Color.White), HeroInViewportCoordinates, Center_String)
 
-                g.DrawRectangle(New Pen(Color.White, 1), Rec)
+                g.DrawRectangle(New Pen(Color.White, 1), HeroInViewportCoordinates)
 
 
                 'g.DrawString("-" & CStr(OurHero.LifeBeforeHit - OurHero.Life), Monster_Font, New SolidBrush(Color.White), Rec.X - 10, Rec.Y - 10, Center_String)
@@ -1121,7 +1214,7 @@ Public Class Form1
 
 
                 'g.DrawString("-" & CStr(Math.Abs(OurHero.LifeBeforeHit - OurHero.Life)), Monster_Font, New SolidBrush(Color.White), Rec.X - 18, Rec.Y - 35)
-                g.DrawString("-" & CStr(HitTotal), Monster_Font, New SolidBrush(Color.White), Rec.X - 18, Rec.Y - 35)
+                g.DrawString("-" & CStr(HitTotal), Monster_Font, New SolidBrush(Color.White), HeroInViewportCoordinates.X - 18, HeroInViewportCoordinates.Y - 35)
 
                 'OurHero.LifeBeforeHit
 
@@ -1146,18 +1239,22 @@ Public Class Form1
     Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
         'Game timer
 
+
+
+
+
         Viewport.Width = PictureBox1.Width
         Viewport.Height = PictureBox1.Height
 
 
         Life_Bar_Frame.X = 10
         Life_Bar_Frame.Y = 10
-        Life_Bar_Frame.Width = Viewport_Size.Width \ 4
+        Life_Bar_Frame.Width = Viewport.Width \ 4
         Life_Bar_Frame.Height = 20
 
         Magic_Bar_Frame.X = 10
         Magic_Bar_Frame.Y = 40
-        Magic_Bar_Frame.Width = Viewport_Size.Width \ 4
+        Magic_Bar_Frame.Width = Viewport.Width \ 4
         Magic_Bar_Frame.Height = 20
 
 
@@ -1370,6 +1467,34 @@ Public Class Form1
             End If
         End If
 
+
+
+
+
+
+
+        'Fallow the hero.
+        'Is the hero about to walk off screen?
+        If OurHero.Rec.X > Viewport.X + Viewport.Width - OurHero.Rec.Width * 4 Then
+            'Yes, the hero is about to walk off screen.
+
+            'Move viewport to the right.
+
+            Viewport.X += OurHero.Speed
+
+
+
+
+        End If
+
+
+
+
+
+
+
+
+
     End Sub
 
     Private Sub Move_Monster_Right()
@@ -1574,6 +1699,19 @@ Public Class Form1
         End If
 
 
+        'Fallow the hero.
+        'Is the hero about to walk off screen?
+        If OurHero.Rec.X < Viewport.X + OurHero.Rec.Width * 4 Then
+            'Yes, the hero is about to walk off screen.
+
+            'Move viewport to the right.
+
+            Viewport.X -= OurHero.Speed
+
+
+
+
+        End If
 
 
     End Sub
@@ -1741,33 +1879,33 @@ Public Class Form1
         'Move the monster up.
         'Is the monster close to the hero?
         If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
-                'No, the monster is not close to the hero.
-                'Move the monster up fast.
-                Monster.Y -= Monster_Speed
-            Else
-                'Yes, the monster is close to the hero.
-                'Move the monster up slowly.
-                Monster.Y -= 1
-            End If
+            'No, the monster is not close to the hero.
+            'Move the monster up fast.
+            Monster.Y -= Monster_Speed
+        Else
+            'Yes, the monster is close to the hero.
+            'Move the monster up slowly.
+            Monster.Y -= 1
+        End If
 
-            'Play undead moveing sound.
-            If GS.IsPlaying("Undead_Move") = False Then
-                GS.Play("Undead_Move")
-            End If
+        'Play undead moveing sound.
+        If GS.IsPlaying("Undead_Move") = False Then
+            GS.Play("Undead_Move")
+        End If
 
-            'Wall Collision Handler - Monster moving up *************************
-            'Is the monster touching the wall?
-            If Monster.IntersectsWith(Wall.Rec) = True Then
-                'Yes, the monster is touching the wall.
+        'Wall Collision Handler - Monster moving up *************************
+        'Is the monster touching the wall?
+        If Monster.IntersectsWith(Wall.Rec) = True Then
+            'Yes, the monster is touching the wall.
 
-                'Push the hero below the wall.
-                Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+            'Push the hero below the wall.
+            Monster.Y = Wall.Rec.Y + Wall.Rec.Height
 
-                'If GS.IsPlaying("Undead_Move") = True Then
-                '    GS.Pause("Undead_Move")
-                'End If
+            'If GS.IsPlaying("Undead_Move") = True Then
+            '    GS.Pause("Undead_Move")
+            'End If
 
-            End If
+        End If
         '************************************************
         'Attack Up************************************************************************************
         If Monster.IntersectsWith(OurHero.Rec) = True Then
@@ -1960,7 +2098,7 @@ Public Class Form1
 
             'Proximity Based Chase Behavior
             'Is the monster near the hero?
-            If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < Viewport_Size.Width \ 3 Then
+            If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < Viewport.Width \ 3 Then
                 'Yes, the monster is near the hero.
 
                 Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
@@ -2705,18 +2843,23 @@ Public Class Form1
     End Sub
     Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
 
-        Viewport_Size.Width = PictureBox1.Width
-        Viewport_Size.Height = PictureBox1.Height
+
+
+        'viewport
+        Viewport.Width = PictureBox1.Width
+        Viewport.Height = PictureBox1.Height
+
+
 
         Life_Bar_Frame.X = 10
         Life_Bar_Frame.Y = 10
-        Life_Bar_Frame.Width = Viewport_Size.Width \ 4
+        Life_Bar_Frame.Width = Viewport.Width \ 4
         Life_Bar_Frame.Height = 20
 
 
         Magic_Bar_Frame.X = 10
         Magic_Bar_Frame.Y = 40
-        Magic_Bar_Frame.Width = Viewport_Size.Width \ 4
+        Magic_Bar_Frame.Width = Viewport.Width \ 4
         Magic_Bar_Frame.Height = 20
 
     End Sub
