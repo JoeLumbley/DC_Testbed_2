@@ -309,7 +309,7 @@ Public Class Form1
 
 
 
-        Wall.Rec.X = 900
+        Wall.Rec.X = 2500
         Wall.Rec.Y = 300
         Wall.Rec.Width = 125
         Wall.Rec.Height = 125
@@ -517,21 +517,7 @@ Public Class Form1
 
                     Draw_Hero(goBuf1, OurHero.Rec)
 
-                    'Draw Map************************************************************
-                    'Draw map background.
-                    goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-
-                    If Wall.Revealed = True Then
-                        'Draw wall.
-                        goBuf1.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
-                    End If
-
-                    'Draw hero.
-                    goBuf1.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
-
-                    'Draw map border.
-                    goBuf1.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-                    '********************************************************************
+                    Draw_Map(goBuf1)
 
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
@@ -670,31 +656,31 @@ Public Class Form1
                     Draw_Hero(goBuf2, OurHero.Rec)
 
 
+                    Draw_Map(goBuf2)
 
+                    ''Draw Map************************************************************
+                    ''Draw map background.
+                    'goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
 
-                    'Draw Map************************************************************
-                    'Draw map background.
-                    goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
+                    ''Wall.MapColor
 
-                    'Wall.MapColor
-
-                    If Wall.Revealed = True Then
-                        'Draw wall.
-                        goBuf2.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
-                    End If
-
-
-
+                    'If Wall.Revealed = True Then
+                    '    'Draw wall.
+                    '    goBuf2.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
+                    'End If
 
 
 
 
-                    'Draw hero.
-                    goBuf2.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
 
-                    'Draw map border.
-                    goBuf2.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-                    '********************************************************************
+
+
+                    ''Draw hero.
+                    'goBuf2.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
+
+                    ''Draw map border.
+                    'goBuf2.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
+                    ''********************************************************************
 
                     Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
 
@@ -738,6 +724,52 @@ Public Class Form1
                 End Using
             End Using
         End If
+    End Sub
+
+    Private Sub Draw_Map(g As Graphics)
+
+
+        Dim Level As Rectangle
+        Level.X = 0
+        Level.Y = 0
+        Level.Width = 4000
+        Level.Height = 4000
+
+
+        'Draw Map************************************************************
+        'Draw map background.
+        'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
+        g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32, 10, Level.Width \ 8, Level.Height \ 8))
+
+
+
+
+        If Wall.Revealed = True Then
+            'Draw wall.
+            'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
+            'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Wall.Rec.X \ 8, 10 + Wall.Rec.Y \ 8, Wall.Rec.Width \ 8, Wall.Rec.Height \ 8))
+            g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Wall.Rec.X \ 8, 10 + Wall.Rec.Y \ 8, CInt(Wall.Rec.Width / 8), CInt(Wall.Rec.Height / 8)))
+        End If
+
+        'Draw hero.
+        g.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + OurHero.Rec.X \ 8, 10 + OurHero.Rec.Y \ 8, OurHero.Rec.Width \ 8, OurHero.Rec.Height \ 8))
+
+        'Draw map border.
+        'g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
+        g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32, 10, Level.Width \ 8, Level.Height \ 8))
+        '********************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
     End Sub
 
     Private Sub Draw_Projectile(g As Graphics)
@@ -2809,6 +2841,11 @@ Public Class Form1
                         Timer3.Start()
                     End If
                 End If
+
+            Case Keys.Clear
+
+                CtrlDown = True
+
         End Select
 
     End Sub
@@ -2835,7 +2872,10 @@ Public Class Form1
 
                 CtrlDown = False
 
-            Case Keys.P
+            Case Keys.Clear
+
+
+                CtrlDown = False
 
 
         End Select
