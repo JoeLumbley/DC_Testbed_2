@@ -66,6 +66,14 @@ Public Structure PotionInfo
 
 End Structure
 
+Public Structure LevelInfo
+
+    Public BackgroundColor As Color
+    Public Rec As Rectangle
+    Public Text As String
+
+End Structure
+
 
 
 Public Enum LootEnum As Integer
@@ -99,24 +107,36 @@ Public Enum MCI_NOTIFY As Integer
 End Enum
 Public Class Form1
 
-    'Private Level_Background_Color As Color = Color.FromArgb(255, 61, 61, 78)
+    Private Editor_On As Boolean = False
 
-    'Private Level_Background_Color As Color = Color.FromArgb(255, 16, 19, 16)
+    Private Selected_Index As Integer = 0
+    Private IsSelected As Boolean = False
+    Private Selected_Pen As New Pen(Color.Blue, 2)
 
-    Private Level_Background_Color As Color = Color.FromArgb(255, 1, 13, 0)
 
+
+    Private Level As LevelInfo
 
     Private OurHero As HeroInfo
 
     Private OurMonster As MonsterInfo
 
     Private Wall As WallInfo
+    Private Wall_Origin As Point
+    Private Walls() As Rectangle
+
+
+
+
 
     Private Potion As PotionInfo
 
     Private Viewport As New Rectangle(0, 0, 640, 480)
 
-    Private Viewport_Size As New Drawing.Size(640, 480)
+
+    Private Map As Rectangle
+
+    'Private Viewport_Size As New Drawing.Size(640, 480)
     Private _BufferFlag As Boolean = True
 
 
@@ -159,6 +179,12 @@ Public Class Form1
     Private ShootDown As Boolean = False
 
     Private CtrlDown As Boolean = False
+
+
+    Private Mouse_Down As Boolean = False
+
+
+
 
     Private Life_Brush As New SolidBrush(Color.FromArgb(255, 113, 9, 14))
     'Private Life_Brush As New SolidBrush(Color.FromArgb(255, 170, 0, 0))
@@ -219,8 +245,11 @@ Public Class Form1
 
 
 
-    Private Instruction_Text As String = "Use arrow keys to move hero. Bump monsters to attack. Use Ctrl and use arrow keys to cast spells. Press P to pause game."
+    Private Instruction_Text As String = "Use arrow keys to move. Bump to attack. Use Ctrl + arrow keys to cast spells. Press P to pause, M for map and I to hide/show instructions."
     Private Instruction_Font As New Font("Arial", 14)
+
+    Private Instructions_On As Boolean = True
+
 
     Private Fifty_Percent_Black_Brush As New SolidBrush(Color.FromArgb(128, Color.Black))
     Private Pause_Screen_Brush As New SolidBrush(Color.FromArgb(128, Color.Black))
@@ -229,13 +258,13 @@ Public Class Form1
     Dim RandomNumber As New Random()
 
     Dim Center_String As New StringFormat()
+    Dim Left_Aline_String As New StringFormat()
 
 
 
+    Private Map_Border_Pen As New Pen(Color.FromArgb(16, Color.White), 3)
 
-    Private Map_Border_Pen As New Pen(Color.Black, 3)
-
-
+    Private Map_On As Boolean = False
 
 
     Dim LightRec As New Rectangle
@@ -274,19 +303,31 @@ Public Class Form1
 
     Dim drawFormat As New StringFormat
 
-    Dim music As String = Application.StartupPath & "level_music.wav" ' *.wav file location
-    Dim media As New Media.SoundPlayer(music)
+    'Dim music As String = Application.StartupPath & "level_music.wav" ' *.wav file location
+    'Dim media As New Media.SoundPlayer(music)
 
-    Dim sound As String = Application.StartupPath & "machine_gun.wav" ' *.wav file location
-    Dim media2 As New Media.SoundPlayer(sound)
+    'Dim sound As String = Application.StartupPath & "machine_gun.wav" ' *.wav file location
+    'Dim media2 As New Media.SoundPlayer(sound)
 
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+
+        'Private Level_Background_Color As Color = Color.FromArgb(255, 1, 13, 0)
+        Level.BackgroundColor = Color.FromArgb(255, 1, 13, 0)
+        Level.Rec.X = 0
+        Level.Rec.Y = 0
+        Level.Rec.Width = 5300
+        Level.Rec.Height = 5300
+
+
+
+
 
         OurHero.Rec = New Rectangle(0, 0, 90, 90)
         'OurHero.Color = Color.FromArgb(255, 11, 182, 255)
         'OurHero.Color = Color.FromArgb(255, 201, 195, 184)
         OurHero.Color = Color.FromArgb(255, 157, 150, 0)
         OurHero.OutlineColor = Color.FromArgb(255, 255, 242, 0)
+        OurHero.MapColor = Color.FromArgb(64, 255, 242, 0)
 
         OurHero.Life = 100
         OurHero.MaxLife = 100
@@ -368,6 +409,12 @@ Public Class Form1
 
         Center_String.Alignment = StringAlignment.Center
         Center_String.LineAlignment = StringAlignment.Center
+
+
+        Left_Aline_String.Alignment = StringAlignment.Far
+        Left_Aline_String.LineAlignment = StringAlignment.Far
+
+
 
         MinimumSize = New Size(600, 480)
 
@@ -484,14 +531,7 @@ Public Class Form1
                     End With
 
 
-
-
-
-                    'End With
-
-
-
-                    goBuf1.Clear(Level_Background_Color)
+                    goBuf1.Clear(Level.BackgroundColor)
 
                     Draw_Hero_Light(goBuf1, OurHero.Rec)
 
@@ -511,21 +551,65 @@ Public Class Form1
                     '    goBuf1.FillRectangle(Projectile_Brush, Projectile)
                     'End If
 
-                    Draw_Wall(goBuf1, Wall.Rec)
+
+
+
+
+
+
+                    If Editor_On = True Then
+
+                        If Mouse_Down = True Then
+
+                            Draw_Wall(goBuf1, Wall.Rec)
+
+                        End If
+
+                    End If
+
+
+
+                    Draw_Walls(goBuf1)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                     Draw_Monster_Life_Bar(goBuf1)
 
                     Draw_Hero(goBuf1, OurHero.Rec)
 
-                    Draw_Map(goBuf1)
+
+                    goBuf1.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
+
+                    Draw_Map(goBuf1, Viewport.Width - Map.Width - 10, 40, 9)
+
+                    'Draw_Map(goBuf1, Viewport.Width - Map.Width - 10, 10, 9)
 
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
                     Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
 
-                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
-                    goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+
+                    If Instructions_On = True Then
+                        'goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+
+                        Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                        goBuf1.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+
+                    End If
+
 
                     'Draw die screen.
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
@@ -573,7 +657,7 @@ Public Class Form1
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.HighSpeed
                     End With
 
-                    goBuf2.Clear(Level_Background_Color)
+                    goBuf2.Clear(Level.BackgroundColor)
 
 
                     Draw_Hero_Light(goBuf2, OurHero.Rec)
@@ -616,7 +700,30 @@ Public Class Form1
                     'goBuf2.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
 
 
-                    Draw_Wall(goBuf2, Wall.Rec)
+
+
+
+
+
+
+
+
+                    If Editor_On = True Then
+
+                        If Mouse_Down = True Then
+
+                            Draw_Wall(goBuf2, Wall.Rec)
+
+                        End If
+
+                    End If
+
+
+
+                    Draw_Walls(goBuf2)
+
+
+
 
 
 
@@ -655,8 +762,13 @@ Public Class Form1
 
                     Draw_Hero(goBuf2, OurHero.Rec)
 
+                    'Viewport.Height \ Scale
 
-                    Draw_Map(goBuf2)
+
+
+                    goBuf2.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
+
+                    Draw_Map(goBuf2, Viewport.Width - Map.Width - 10, 40, 9)
 
                     ''Draw Map************************************************************
                     ''Draw map background.
@@ -699,12 +811,19 @@ Public Class Form1
 
                     'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
-                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
 
+                    If Instructions_On = True Then
 
-                    'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
-                    goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+                        'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
+                        'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+
+                        Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                        goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+
+                    End If
+
 
 
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
@@ -726,38 +845,71 @@ Public Class Form1
         End If
     End Sub
 
-    Private Sub Draw_Map(g As Graphics)
+    Private Sub Draw_Map(g As Graphics, x As Integer, y As Integer, Scale As Integer)
 
 
-        Dim Level As Rectangle
-        Level.X = 0
-        Level.Y = 0
-        Level.Width = 4000
-        Level.Height = 4000
+        Map.X = x
+        Map.Y = y
+        Map.Width = Level.Rec.Width \ Scale
+        Map.Height = Level.Rec.Height \ Scale
 
 
-        'Draw Map************************************************************
-        'Draw map background.
-        'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-        g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32, 10, Level.Width \ 8, Level.Height \ 8))
+        If Map_On = True Then
 
 
 
 
-        If Wall.Revealed = True Then
-            'Draw wall.
-            'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
-            'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Wall.Rec.X \ 8, 10 + Wall.Rec.Y \ 8, Wall.Rec.Width \ 8, Wall.Rec.Height \ 8))
-            g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Wall.Rec.X \ 8, 10 + Wall.Rec.Y \ 8, CInt(Wall.Rec.Width / 8), CInt(Wall.Rec.Height / 8)))
+            'Dim Level As Rectangle
+            'Level.X = 0
+            'Level.Y = 0
+            'Level.Width = 7680
+            'Level.Height = 5300
+
+            'Dim Scale As Integer = 8
+
+            'Draw Map************************************************************
+            'Draw map background.
+            'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
+            'g.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32, 10, Level.Width \ 8, Level.Height \ 8))
+            g.FillRectangle(New SolidBrush(Color.FromArgb(16, Color.White)), New Rectangle(x, y, Level.Rec.Width \ Scale, Level.Rec.Height \ Scale))
+
+
+
+
+            If Wall.Revealed = True Then
+                'Draw wall.
+                'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
+                'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Wall.Rec.X \ 8, 10 + Wall.Rec.Y \ 8, Wall.Rec.Width \ 8, Wall.Rec.Height \ 8))
+                'g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Wall.Rec.X \ 8, 10 + Wall.Rec.Y \ 8, CInt(Wall.Rec.Width / 8), CInt(Wall.Rec.Height / 8)))
+                g.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(x + Wall.Rec.X \ Scale, y + Wall.Rec.Y \ Scale, CInt(Wall.Rec.Width / Scale), CInt(Wall.Rec.Height / Scale)))
+            End If
+
+            'Draw hero.
+            'g.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + OurHero.Rec.X \ 8, 10 + OurHero.Rec.Y \ 8, OurHero.Rec.Width \ 8, OurHero.Rec.Height \ 8))
+            g.FillRectangle(New SolidBrush(OurHero.MapColor), New Rectangle(x + OurHero.Rec.X \ Scale, y + OurHero.Rec.Y \ Scale, OurHero.Rec.Width \ Scale, OurHero.Rec.Height \ Scale))
+
+
+
+
+
+            'Draw map border.
+            'g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
+            'g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32, 10, Level.Width \ 8, Level.Height \ 8))
+            g.DrawRectangle(Map_Border_Pen, New Rectangle(x, y, Level.Rec.Width \ Scale, Level.Rec.Height \ Scale))
+
+
+
+            'Draw viewport.
+            'g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + Viewport.X \ Scale, 10 + Viewport.Y \ Scale, Viewport.Width \ Scale, Viewport.Height \ Scale))
+            g.DrawRectangle(Map_Border_Pen, New Rectangle(x + Viewport.X \ Scale, y + Viewport.Y \ Scale, Viewport.Width \ Scale, Viewport.Height \ Scale))
+            '********************************************************************
+
+
+
         End If
 
-        'Draw hero.
-        g.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32 + OurHero.Rec.X \ 8, 10 + OurHero.Rec.Y \ 8, OurHero.Rec.Width \ 8, OurHero.Rec.Height \ 8))
 
-        'Draw map border.
-        'g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-        g.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 32, 10, Level.Width \ 8, Level.Height \ 8))
-        '********************************************************************
+
 
 
 
@@ -1115,6 +1267,104 @@ Public Class Form1
     End Sub
 
 
+
+    Private Sub Draw_Walls(g As Graphics)
+
+        Dim WallInViewportCoordinates As Rectangle
+
+
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
+                'Frame_Graphics.DrawRectangle(Drawing_Pen, Walls(index))
+                'Frame_Graphics.FillRectangle(Wall_Brush, Walls(index))
+                WallInViewportCoordinates = Walls(index)
+                WallInViewportCoordinates.X = Walls(index).X - Viewport.X
+                WallInViewportCoordinates.Y = Walls(index).Y - Viewport.Y
+                'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+
+
+
+
+
+                If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
+
+                    'Draw Wall
+                    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+                    'Draw shadow.
+                    Dim MyShadow As Integer
+                    Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                    If Distance <= Viewport.Width / 2 Then
+                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                    Else
+                        MyShadow = 255
+                    End If
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+
+                    g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
+
+                Else
+
+                    'Draw Wall
+                    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+
+
+                    'Draw shadow.
+                    Dim MyShadow As Integer
+                    Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                    If Distance <= Viewport.Width / 2 Then
+                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                    Else
+                        MyShadow = 255
+                    End If
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+
+                    'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
+
+                End If
+
+
+
+
+
+
+            Next
+        End If
+
+        If IsSelected = True Then
+
+            'Draw selection outline.
+            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index))
+            WallInViewportCoordinates = Walls(Selected_Index)
+            WallInViewportCoordinates.X = Walls(Selected_Index).X - Viewport.X
+            WallInViewportCoordinates.Y = Walls(Selected_Index).Y - Viewport.Y
+            g.DrawRectangle(Selected_Pen, WallInViewportCoordinates)
+
+            ''Draw control points.
+            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Left, Walls(Selected_Index).Top, 15, 15)
+            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Right - 15, Walls(Selected_Index).Top, 15, 15)
+
+            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Right - 15, Walls(Selected_Index).Bottom - 15, 15, 15)
+            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Left, Walls(Selected_Index).Bottom - 15, 15, 15)
+
+
+        End If
+
+        'If Mouse_Down = True Then
+
+        '    'Frame_Graphics.FillRectangle(Wall_Brush, Wall)
+        '    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+        'End If
+
+        'Frame_Graphics.DrawRectangle(Drawing_Pen, Wall)
+
+
+    End Sub
+
+
     Private Sub Draw_Hero_Light(g As Graphics, Rec As Rectangle)
 
 
@@ -1270,7 +1520,31 @@ Public Class Form1
 
     Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
         'Game timer
+        If Editor_On = False Then
 
+            If GS.IsPlaying("Music") = False Then
+
+                GS.Play("Music")
+
+            End If
+
+            If Me.Text <> "Dungeon Crawler - Playing" Then
+
+                Me.Text = "Dungeon Crawler - Playing"
+
+            End If
+
+        Else
+            GS.Stop("Music")
+
+            If Me.Text <> "Dungeon Crawler - Editing" Then
+                Me.Text = "Dungeon Crawler - Editing"
+
+            End If
+
+
+
+        End If
 
 
 
@@ -1313,21 +1587,26 @@ Public Class Form1
 
 
 
+        If Editor_On = False Then
+
+
+            Do_Hero_Moves()
+
+            Do_Monster_Moves()
 
 
 
 
-        Do_Hero_Moves()
+            If Wall.Rec.IntersectsWith(Viewport) Then
 
-        Do_Monster_Moves()
+                Wall.Revealed = True
+            End If
 
-
-
-
-        If Wall.Rec.IntersectsWith(Viewport) Then
-
-            Wall.Revealed = True
         End If
+
+
+
+
 
     End Sub
 
@@ -1435,15 +1714,19 @@ Public Class Form1
         End If
 
         'Wall Collision Handler - Moving Right*****************
-        'Is the hero touching the wall?
-        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the hero is touching the wall.
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
+                'Is the hero touching the wall?
+                If OurHero.Rec.IntersectsWith(Walls(index)) = True Then
+                    'Yes, the hero is touching the wall.
 
-            'Push hero to the left of wall.
-            OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 1
+                    'Push hero to the left of wall.
+                    OurHero.Rec.X = Walls(index).X - OurHero.Rec.Width - 1
 
+                End If
+            Next
         End If
-
+        '*****************************************************************
 
 
 
@@ -1483,16 +1766,20 @@ Public Class Form1
 
 
                     'Wall Collision Handler - Moving Right*****************
-                    'Is the monster touching a wall?
-                    If Monster.IntersectsWith(Wall.Rec) = True Then
-                        'Yes, the monster is touching a wall.
+                    If Walls IsNot Nothing Then
+                        For index = 0 To UBound(Walls)
+                            'Is the monster touching a wall?
+                            If Monster.IntersectsWith(Walls(index)) = True Then
+                                'Yes, the monster is touching a wall.
 
-                        'Knock monster to the left of wall.
-                        Monster.X = Wall.Rec.X - Monster.Width - 1
+                                'Knock monster to the left of wall.
+                                Monster.X = Walls(index).X - Monster.Width - 1
 
-                        'Knock the hero to the left of the monster.
-                        OurHero.Rec.X = Monster.X - Monster.Width - 16
+                                'Knock the hero to the left of the monster.
+                                OurHero.Rec.X = Monster.X - Monster.Width - 16
 
+                            End If
+                        Next
                     End If
                     '************************************************
                 End If
@@ -1510,9 +1797,22 @@ Public Class Form1
         If OurHero.Rec.X > Viewport.X + Viewport.Width - OurHero.Rec.Width * 4 Then
             'Yes, the hero is about to walk off screen.
 
-            'Move viewport to the right.
 
-            Viewport.X += OurHero.Speed
+            If Viewport.X < Level.Rec.Width - Viewport.Width Then
+                'Move viewport to the right.
+                Viewport.X += OurHero.Speed
+            Else
+
+                Viewport.X = Level.Rec.Width - Viewport.Width
+
+            End If
+
+            If OurHero.Rec.X > Level.Rec.Width - OurHero.Rec.Width Then
+
+                OurHero.Rec.X = Level.Rec.Width - OurHero.Rec.Width
+
+            End If
+
 
 
 
@@ -1736,12 +2036,23 @@ Public Class Form1
         If OurHero.Rec.X < Viewport.X + OurHero.Rec.Width * 4 Then
             'Yes, the hero is about to walk off screen.
 
-            'Move viewport to the right.
+            If Viewport.X > Level.Rec.X Then
 
-            Viewport.X -= OurHero.Speed
+                'Move viewport to the right.
+                Viewport.X -= OurHero.Speed
+
+            Else
+
+                Viewport.X = Level.Rec.X
+
+            End If
 
 
+            If OurHero.Rec.X < Level.Rec.X Then
 
+                OurHero.Rec.X = Level.Rec.X
+
+            End If
 
         End If
 
@@ -1897,6 +2208,36 @@ Public Class Form1
             End If
         End If
 
+
+
+
+        'Fallow the hero.
+        'Is the hero about to walk off screen?
+        If OurHero.Rec.Y < Viewport.Y + OurHero.Rec.Height * 4 Then
+            'Yes, the hero is about to walk off screen.
+
+            If Viewport.Y > Level.Rec.Y Then
+
+                'Move viewport to the up.
+                Viewport.Y -= OurHero.Speed
+
+            Else
+
+                Viewport.Y = Level.Rec.Y
+
+            End If
+
+
+            If OurHero.Rec.Y < Level.Rec.Y Then
+
+                OurHero.Rec.Y = Level.Rec.Y
+
+            End If
+
+        End If
+
+
+
     End Sub
 
 
@@ -2035,6 +2376,40 @@ Public Class Form1
                 End If
             End If
         End If
+
+
+
+
+        'Fallow the hero.
+        'Is the hero about to walk off screen?
+        If OurHero.Rec.Y > Viewport.Y + Viewport.Height - OurHero.Rec.Height * 4 Then
+            'Yes, the hero is about to walk off screen.
+
+
+            If Viewport.Y < Level.Rec.Height - Viewport.Height Then
+                'Move viewport to the right.
+                Viewport.Y += OurHero.Speed
+            Else
+
+                Viewport.Y = Level.Rec.Height - Viewport.Height
+
+            End If
+
+            If OurHero.Rec.Y > Level.Rec.Height - OurHero.Rec.Height Then
+
+                OurHero.Rec.Y = Level.Rec.Height - OurHero.Rec.Height
+
+            End If
+
+
+
+
+
+        End If
+
+
+
+
 
     End Sub
 
@@ -2846,7 +3221,26 @@ Public Class Form1
 
                 CtrlDown = True
 
+            Case Keys.M
+                'Toggle map on or off.
+                If Map_On = False Then
+                    Map_On = True
+                Else
+                    Map_On = False
+                End If
+
+            Case Keys.I
+                'Toggle instructions on or off.
+                If Instructions_On = False Then
+                    Instructions_On = True
+
+                Else
+                    Instructions_On = False
+
+                End If
+
         End Select
+        'Map_On = True
 
     End Sub
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
@@ -3041,19 +3435,171 @@ Public Class Form1
         Dim LoopPlayer As New System.Media.SoundPlayer(My.Resources.level_music)
         LoopPlayer.PlayLooping()
     End Sub
-    Private Sub GS_SoundEnded(ByVal SndName As String) Handles GS.SoundEnded
-        If SndName = "Music" Then GS.Play("Music") 'if the Music has reached the end then you can keep replaying it for a loop effect
+    Private Sub GS_SoundEnded(ByVal SndName As String)
+        'If SndName = "Music" Then GS.Play("Music") 'if the Music has reached the end then you can keep replaying it for a loop effect
 
-        'If GS.IsPlaying("Music") = False Then
+        If GS.IsPlaying("Music") = False Then
 
-        'GS.Play("Music" )
-        'GS.
+            GS.Play("Music")
 
-
-        'End If
+        End If
 
         'mciSendString("close FirstSound", String.Empty, 0, 0)
     End Sub
+
+    Private Sub MenuItemEditorOn_Click(sender As Object, e As EventArgs) Handles MenuItemEditorOn.Click
+
+
+        If Editor_On = False Then
+            Editor_On = True
+            MenuItemEditorOn.Checked = True
+
+
+        Else
+
+            Editor_On = False
+            MenuItemEditorOn.Checked = False
+
+
+        End If
+
+
+
+
+
+
+    End Sub
+
+    Private Sub PictureBox1_MouseDown(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseDown
+
+
+        If Editor_On = True Then
+            Mouse_Down = True
+
+            Wall.Rec.Width = 0
+            Wall.Rec.Height = 0
+
+            'Wall_Origin = e.Location
+            Wall_Origin.X = e.X + Viewport.X
+            Wall_Origin.Y = e.Y + Viewport.Y
+
+
+        End If
+
+
+
+
+
+    End Sub
+
+    Private Sub PictureBox1_MouseUp(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseUp
+
+
+        If Editor_On = True Then
+
+            Mouse_Down = False
+
+            'Has the mouse moved?
+            If Wall.Rec.Width > 0 Or Wall.Rec.Height > 0 Then
+                'Yes, the mouse moved.
+                Add_Wall(New System.Drawing.Rectangle(Wall.Rec.Location, Wall.Rec.Size))
+                'Background_Graphics.FillRectangle(Brushes.Black, New Rectangle(Viewport.X, 0, Viewport.Width, Viewport.Height))
+
+                'Draw_Walls(Wall_Pen)
+            Else
+                If Walls IsNot Nothing Then
+                    Dim rec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                    'IsSelected = False
+                    For index = 0 To UBound(Walls)
+
+
+
+                        If rec.IntersectsWith(Walls(index)) Then
+
+                            Selected_Index = index
+                            IsSelected = True
+                            Exit For
+
+
+                            'Hero.Y = Walls(index).Y - Hero.Height
+                        End If
+                        IsSelected = False
+                    Next
+                End If
+            End If
+
+        End If
+
+
+
+
+
+
+
+
+    End Sub
+
+    Private Sub PictureBox1_MouseMove(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseMove
+
+        If Editor_On = True Then
+
+            If Mouse_Down = True Then
+
+                'Which point is the top?
+                If Wall_Origin.Y > e.Y + Viewport.Y Then
+                    Wall.Rec.Y = e.Y + Viewport.Y
+                Else
+                    Wall.Rec.Y = Wall_Origin.Y
+                End If
+
+                'Which point is the left?
+                If Wall_Origin.X > e.X + Viewport.X Then
+                    Wall.Rec.X = e.X + Viewport.X
+                Else
+                    Wall.Rec.X = Wall_Origin.X
+                End If
+
+                Wall.Rec.Width = Abs(Wall_Origin.X - (e.X + Viewport.X))
+
+                Wall.Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
+
+
+            End If
+
+        End If
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    End Sub
+
+    Private Sub Add_Wall(ByVal Wall As Rectangle)
+
+        If Walls IsNot Nothing Then
+            Array.Resize(Walls, Walls.Length + 1)
+            Walls(Walls.Length - 1) = Wall
+        Else
+            ReDim Walls(0)
+            Walls(0) = Wall
+        End If
+
+    End Sub
+
+
+
+
+
 End Class
 Public Class GameSounds
     Inherits NativeWindow
