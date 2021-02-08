@@ -1322,84 +1322,155 @@ Public Class Form1
         Dim WallInViewportCoordinates As Rectangle
 
 
-        If Walls IsNot Nothing Then
-            For index = 0 To UBound(Walls)
-                'Frame_Graphics.DrawRectangle(Drawing_Pen, Walls(index))
-                'Frame_Graphics.FillRectangle(Wall_Brush, Walls(index))
-                WallInViewportCoordinates = Walls(index)
-                WallInViewportCoordinates.X = Walls(index).X - Viewport.X
-                WallInViewportCoordinates.Y = Walls(index).Y - Viewport.Y
-                'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+
+
+        'Is the editor on?
+        If Editor_On = False Then
+            'No, the editor off. The game is running.
+
+            If Walls IsNot Nothing Then
+                For index = 0 To UBound(Walls)
+                    'Frame_Graphics.DrawRectangle(Drawing_Pen, Walls(index))
+                    'Frame_Graphics.FillRectangle(Wall_Brush, Walls(index))
+                    WallInViewportCoordinates = Walls(index)
+                    WallInViewportCoordinates.X = Walls(index).X - Viewport.X
+                    WallInViewportCoordinates.Y = Walls(index).Y - Viewport.Y
+                    'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+                    If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
+
+                        'Draw Wall
+                        g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+                        'Draw shadow.
+                        Dim MyShadow As Integer
+                        Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        If Distance <= Viewport.Width / 2 Then
+                            MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                        Else
+                            MyShadow = 255
+                        End If
+                        g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+
+                        g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
+
+                    Else
+
+                        'Draw Wall
+                        g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+                        'Draw shadow.
+                        Dim MyShadow As Integer
+                        Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        If Distance <= Viewport.Width / 2 Then
+                            MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                        Else
+                            MyShadow = 255
+                        End If
+                        g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+
+                        'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
+
+                    End If
+                Next
+            End If
 
 
 
 
+        Else
+            'Yes, the editor is on. The game is stopped.
+
+            'Draw Wall
+            'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
 
-                If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
+            'g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), WallInViewportCoordinates, Center_String)
+
+
+
+            If Walls IsNot Nothing Then
+                For index = 0 To UBound(Walls)
+                    'Frame_Graphics.DrawRectangle(Drawing_Pen, Walls(index))
+                    'Frame_Graphics.FillRectangle(Wall_Brush, Walls(index))
+                    WallInViewportCoordinates = Walls(index)
+                    WallInViewportCoordinates.X = Walls(index).X - Viewport.X
+                    WallInViewportCoordinates.Y = Walls(index).Y - Viewport.Y
+                    'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
 
                     'Draw Wall
                     g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
-                    'Draw shadow.
-                    Dim MyShadow As Integer
-                    Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
-                    If Distance <= Viewport.Width / 2 Then
-                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
-                    Else
-                        MyShadow = 255
-                    End If
-                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
-
-                    g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
-
-                Else
-
-                    'Draw Wall
-                    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                    g.DrawString(index.ToString, Monster_Font, New SolidBrush(Color.Black), WallInViewportCoordinates, Center_String)
 
 
 
-                    'Draw shadow.
-                    Dim MyShadow As Integer
-                    Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
-                    If Distance <= Viewport.Width / 2 Then
-                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
-                    Else
-                        MyShadow = 255
-                    End If
-                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+                    'If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
 
-                    'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
+                    '    'Draw Wall
+                    '    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
-                End If
+                    '    'Draw shadow.
+                    '    Dim MyShadow As Integer
+                    '    Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                    '    If Distance <= Viewport.Width / 2 Then
+                    '        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                    '    Else
+                    '        MyShadow = 255
+                    '    End If
+                    '    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+
+                    '    g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
+
+                    'Else
+
+                    '    'Draw Wall
+                    '    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
+                    '    'Draw shadow.
+                    '    Dim MyShadow As Integer
+                    '    Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                    '    If Distance <= Viewport.Width / 2 Then
+                    '        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                    '    Else
+                    '        MyShadow = 255
+                    '    End If
+                    '    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+
+                    '    'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
+
+                    'End If
+                Next
+            End If
 
 
+            If IsSelected = True Then
+
+                'Draw selection outline.
+                'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index))
+                WallInViewportCoordinates = Walls(Selected_Index)
+                WallInViewportCoordinates.X = Walls(Selected_Index).X - Viewport.X
+                WallInViewportCoordinates.Y = Walls(Selected_Index).Y - Viewport.Y
+                g.DrawRectangle(Selected_Pen, WallInViewportCoordinates)
+
+                ''Draw control points.
+                'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Left, Walls(Selected_Index).Top, 15, 15)
+                'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Right - 15, Walls(Selected_Index).Top, 15, 15)
+
+                'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Right - 15, Walls(Selected_Index).Bottom - 15, 15, 15)
+                'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Left, Walls(Selected_Index).Bottom - 15, 15, 15)
 
 
+            End If
 
-
-            Next
         End If
 
-        If IsSelected = True Then
-
-            'Draw selection outline.
-            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index))
-            WallInViewportCoordinates = Walls(Selected_Index)
-            WallInViewportCoordinates.X = Walls(Selected_Index).X - Viewport.X
-            WallInViewportCoordinates.Y = Walls(Selected_Index).Y - Viewport.Y
-            g.DrawRectangle(Selected_Pen, WallInViewportCoordinates)
-
-            ''Draw control points.
-            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Left, Walls(Selected_Index).Top, 15, 15)
-            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Right - 15, Walls(Selected_Index).Top, 15, 15)
-
-            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Right - 15, Walls(Selected_Index).Bottom - 15, 15, 15)
-            'Frame_Graphics.DrawRectangle(Selected_Pen, Walls(Selected_Index).Left, Walls(Selected_Index).Bottom - 15, 15, 15)
 
 
-        End If
+
+
 
         'If Mouse_Down = True Then
 
@@ -3236,7 +3307,13 @@ Public Class Form1
 
         Select Case e.KeyValue
             Case Keys.Left
-                MoveLeft = True
+                If Editor_On = False Then
+                    MoveLeft = True
+
+                Else
+                    Viewport.X -= 10
+                End If
+
 
             Case Keys.Right
 
@@ -3561,7 +3638,7 @@ Public Class Form1
             Mouse_Down = False
 
             'Has the mouse moved?
-            If Wall.Rec.Width > 0 Or Wall.Rec.Height > 0 Then
+            If Wall.Rec.Width > 10 And Wall.Rec.Height > 10 Then
                 'Yes, the mouse moved.
                 Add_Wall(New System.Drawing.Rectangle(Wall.Rec.Location, Wall.Rec.Size))
                 'Background_Graphics.FillRectangle(Brushes.Black, New Rectangle(Viewport.X, 0, Viewport.Width, Viewport.Height))
