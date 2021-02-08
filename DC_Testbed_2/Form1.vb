@@ -531,7 +531,31 @@ Public Class Form1
                     End With
 
 
-                    goBuf1.Clear(Level.BackgroundColor)
+                    If Editor_On = False Then
+
+                        goBuf1.Clear(Level.BackgroundColor)
+
+                    Else
+
+                        goBuf1.Clear(Color.Gray)
+
+
+
+                        'Vertical lines
+                        For index = 0 To Level.Rec.Width Step 100
+                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, 0), New Point(index - Viewport.X, Level.Rec.Height))
+                        Next
+
+                        'Horizontal lines
+                        For index = 0 To Level.Rec.Width Step 100
+                            'goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index), New Point(Level.Rec.Width, index))
+                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index - Viewport.Y), New Point(Level.Rec.Width, index - Viewport.Y))
+                        Next
+
+                    End If
+
+
+
 
                     Draw_Hero_Light(goBuf1, OurHero.Rec)
 
@@ -657,7 +681,32 @@ Public Class Form1
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.HighSpeed
                     End With
 
-                    goBuf2.Clear(Level.BackgroundColor)
+
+
+
+
+                    If Editor_On = False Then
+
+                        goBuf2.Clear(Level.BackgroundColor)
+
+                    Else
+
+                        goBuf2.Clear(Color.Gray)
+
+                        'Vertical lines
+                        For index = 0 To Level.Rec.Width Step 100
+                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, 0), New Point(index - Viewport.X, Level.Rec.Height))
+                        Next
+
+                        'Horizontal lines
+                        For index = 0 To Level.Rec.Width Step 100
+                            'goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index), New Point(Level.Rec.Width, index))
+                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index - Viewport.Y), New Point(Level.Rec.Width, index - Viewport.Y))
+                        Next
+
+                    End If
+
+                    'goBuf2.Clear(Level.BackgroundColor)
 
 
                     Draw_Hero_Light(goBuf2, OurHero.Rec)
@@ -3239,6 +3288,18 @@ Public Class Form1
 
                 End If
 
+            Case Keys.Delete
+
+                If Editor_On = True Then
+                    If IsSelected = True Then
+
+                        Remove_Wall(Selected_Index)
+
+                        IsSelected = False
+
+                    End If
+                End If
+
         End Select
         'Map_On = True
 
@@ -3593,6 +3654,34 @@ Public Class Form1
             ReDim Walls(0)
             Walls(0) = Wall
         End If
+
+    End Sub
+
+
+    Private Sub Remove_Wall(IndexToRemove As Integer)
+
+        'Create temporary array
+        Dim TempWalls(UBound(Walls) - 1) As Rectangle
+        Dim TempIndex As Integer = LBound(Walls)
+
+        'Copy the array without the element to the temporary array.
+        For index = LBound(Walls) To UBound(Walls)
+
+            If index <> IndexToRemove Then
+
+                TempWalls(TempIndex) = Walls(index)
+
+                TempIndex += 1
+            End If
+
+
+        Next
+
+        'Resize the array.
+        ReDim Walls(UBound(TempWalls))
+
+        'Copy the temporary array to the array.
+        Walls = TempWalls
 
     End Sub
 
