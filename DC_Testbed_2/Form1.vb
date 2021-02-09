@@ -1833,6 +1833,8 @@ Public Class Form1
             GS.Play("Hero_Move")
         End If
 
+
+
         'Wall Collision Handler - Moving Right*****************
         If Walls IsNot Nothing Then
             For index = 0 To UBound(Walls)
@@ -2092,16 +2094,28 @@ Public Class Form1
         End If
 
 
+
         'Wall Collision Handler Hero moving left*************************
-        'Is the hero touching the wall?
-        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the hero is touching the wall.
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
+                'Is the hero touching the wall?
+                If OurHero.Rec.IntersectsWith(Walls(index)) = True Then
+                    'Yes, the hero is touching the wall.
 
 
-            'Push hero to the right of wall.
-            OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width
+                    'Push hero to the right of wall.
+                    OurHero.Rec.X = Walls(index).X + Walls(index).Width
 
+                End If
+            Next
         End If
+        '*****************************************************************
+
+
+
+
+
+
 
         'Is the monster alive?
         If Monster_Life > 0 Then
@@ -2116,6 +2130,8 @@ Public Class Form1
                 OurHero.Rec.X = Monster.X + Monster.Width + 1
 
                 If OurHero.Initiative = True Then
+
+                    'Play hero attack sound.
 
                     Monster_Hit = True
 
@@ -2134,16 +2150,20 @@ Public Class Form1
                     Monster.X = OurHero.Rec.X - Monster.Width - 32
 
                     'Wall Collision Handler Monster moving left*************************
-                    'Is the monster touching the wall?
-                    If Monster.IntersectsWith(Wall.Rec) = True Then
-                        'Yes, the monster is touching the wall.
+                    If Walls IsNot Nothing Then
+                        For index = 0 To UBound(Walls)
+                            'Is the monster touching the wall?
+                            If Monster.IntersectsWith(Walls(index)) = True Then
+                                'Yes, the monster is touching the wall.
 
-                        'Push monster to the right of wall.
-                        Monster.X = Wall.Rec.X + Wall.Rec.Width + 1
+                                'Push monster to the right of wall.
+                                Monster.X = Walls(index).X + Walls(index).Width + 1
 
-                        'Knock the hero to the right of the monster.
-                        OurHero.Rec.X = Monster.X + Monster.Width + 16
+                                'Knock the hero to the right of the monster.
+                                OurHero.Rec.X = Monster.X + Monster.Width + 16
 
+                            End If
+                        Next
                     End If
                     '************************************************
                 End If
