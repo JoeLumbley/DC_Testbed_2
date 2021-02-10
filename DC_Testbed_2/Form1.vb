@@ -1,4 +1,8 @@
 ﻿Option Strict On
+'Dungeon Crawl
+'This is a simple action role-playing game in which the hero navigate a labyrinth,
+'battling various monsters, avoiding traps, solving puzzles, And looting any treasure they may find.
+'Coded by Joseph Lumbley.
 
 Imports System.Math
 Imports System.Drawing
@@ -543,14 +547,29 @@ Public Class Form1
 
                         'Vertical lines
                         For index = 0 To Level.Rec.Width Step 100
-                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, 0), New Point(index - Viewport.X, Level.Rec.Height))
+                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
+                            'goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+
+                            If index <> Level.Rec.Width Then
+                                goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+                            End If
+
                         Next
 
                         'Horizontal lines
                         For index = 0 To Level.Rec.Width Step 100
                             'goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index), New Point(Level.Rec.Width, index))
-                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index - Viewport.Y), New Point(Level.Rec.Width, index - Viewport.Y))
+                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
+
+                            If index <> 0 And index <> Level.Rec.Width Then
+                                goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+                            End If
+
+                            'goBuf1.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
+
+
                         Next
+
 
                     End If
 
@@ -619,20 +638,29 @@ Public Class Form1
 
                     'Draw_Map(goBuf1, Viewport.Width - Map.Width - 10, 10, 9)
 
-                    Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
+                    If Editor_On = False Then
+                        Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
-                    Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
+                        Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
 
-                    goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                        goBuf1.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
+                        If Instructions_On = True Then
+                            'goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
 
-                    If Instructions_On = True Then
-                        'goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+                            Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                            goBuf1.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
 
-                        Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
-                        goBuf1.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+                        End If
 
                     End If
+
+
+
+
+
+
+
 
 
                     'Draw die screen.
@@ -695,13 +723,24 @@ Public Class Form1
 
                         'Vertical lines
                         For index = 0 To Level.Rec.Width Step 100
-                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, 0), New Point(index - Viewport.X, Level.Rec.Height))
+                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
+                            'goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+
+                            If index <> Level.Rec.Width Then
+                                goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+                            End If
+
                         Next
 
                         'Horizontal lines
                         For index = 0 To Level.Rec.Width Step 100
                             'goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index), New Point(Level.Rec.Width, index))
-                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index - Viewport.Y), New Point(Level.Rec.Width, index - Viewport.Y))
+                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
+                            'goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+
+                            If index <> 0 And index <> Level.Rec.Width Then
+                                goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+                            End If
                         Next
 
                     End If
@@ -843,12 +882,12 @@ Public Class Form1
                     'goBuf2.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
                     ''********************************************************************
 
-                    Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
+                    'Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
 
 
 
 
-                    Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
+                    'Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
 
 
 
@@ -860,18 +899,37 @@ Public Class Form1
 
                     'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
-                    goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+                    'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
 
-                    If Instructions_On = True Then
+                    'If Instructions_On = True Then
 
-                        'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
-                        'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+                    '    'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
+                    '    'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
 
-                        Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
-                        goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+                    '    Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                    '    goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+
+                    'End If
+
+                    If Editor_On = False Then
+                        Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
+
+                        Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
+
+                        goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+
+                        If Instructions_On = True Then
+                            'goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
+
+                            Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                            goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+
+                        End If
 
                     End If
+
+
 
 
 
@@ -3325,25 +3383,65 @@ Public Class Form1
     End Sub
     Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles MyBase.KeyDown
 
-        Select Case e.KeyValue
-            Case Keys.Left
-                If Editor_On = False Then
-                    MoveLeft = True
-
-                Else
-                    Viewport.X -= 10
-                End If
 
 
-            Case Keys.Right
+        If e.KeyValue = Keys.Left Then
+            If Editor_On = False Then
+                MoveLeft = True
+            Else
+                MoveViewport(DirectionEnum.Left)
+            End If
+        End If
 
+        If e.KeyValue = Keys.Right Then
+            If Editor_On = False Then
                 MoveRight = True
+            Else
+                MoveViewport(DirectionEnum.Right)
+            End If
+        End If
 
-            Case Keys.Up
+        If e.KeyValue = Keys.Up Then
+            If Editor_On = False Then
                 MoveUp = True
+            Else
+                MoveViewport(DirectionEnum.Up)
+            End If
+        End If
 
-            Case Keys.Down
+        If e.KeyValue = Keys.Down Then
+            If Editor_On = False Then
                 MoveDown = True
+            Else
+                MoveViewport(DirectionEnum.Down)
+            End If
+        End If
+
+        Select Case e.KeyValue
+            'Case Keys.Left
+            '    If Editor_On = False Then
+            '        MoveLeft = True
+            '    Else
+            '        MoveViewport(DirectionEnum.Left)
+            '    End If
+            'Case Keys.Right
+            '    If Editor_On = False Then
+            '        MoveRight = True
+            '    Else
+            '        MoveViewport(DirectionEnum.Right)
+            '    End If
+            'Case Keys.Up
+            '    If Editor_On = False Then
+            '        MoveUp = True
+            '    Else
+            '        MoveViewport(DirectionEnum.Up)
+            '    End If
+            'Case Keys.Down
+            '    If Editor_On = False Then
+            '        MoveDown = True
+            '    Else
+            '        MoveViewport(DirectionEnum.Down)
+            '    End If
 
             Case Keys.ControlKey
 
@@ -3401,6 +3499,23 @@ Public Class Form1
         'Map_On = True
 
     End Sub
+
+    Private Sub MoveViewport(direction As DirectionEnum)
+
+        If direction = DirectionEnum.Left Then
+            Viewport.X -= 10
+        End If
+        If direction = DirectionEnum.Right Then
+            Viewport.X += 10
+        End If
+        If direction = DirectionEnum.Up Then
+            Viewport.Y -= 10
+        End If
+        If direction = DirectionEnum.Down Then
+            Viewport.Y += 10
+        End If
+    End Sub
+
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
 
         Select Case e.KeyValue
