@@ -1,6 +1,6 @@
 ﻿Option Strict On
 'Dungeon Crawl
-'This is a simple action role-playing game in which the hero navigate a labyrinth,
+'This is a simple action role-playing game in which the hero navigates a labyrinth,
 'battling various monsters, avoiding traps, solving puzzles, And looting any treasure they may find.
 'Coded by Joseph Lumbley.
 
@@ -112,6 +112,7 @@ End Enum
 Public Class Form1
 
     Private Editor_On As Boolean = False
+    Private Show_Rulers As Boolean = True
 
     Private Selected_Index As Integer = 0
     Private IsSelected As Boolean = False
@@ -322,7 +323,7 @@ Public Class Form1
         Level.Rec.Width = 5300
         Level.Rec.Height = 5300
 
-
+        MenuItemShowHideRulers.Checked = True
 
 
 
@@ -539,9 +540,11 @@ Public Class Form1
 
                         goBuf1.Clear(Level.BackgroundColor)
 
+                        Draw_Hero_Light(goBuf1, OurHero.Rec)
+
                     Else
 
-                        goBuf1.Clear(Color.Gray)
+                        goBuf1.Clear(Level.BackgroundColor)
 
 
 
@@ -550,9 +553,13 @@ Public Class Form1
                             goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
                             'goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
 
-                            If index <> Level.Rec.Width Then
-                                goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+
+                            If Show_Rulers = True Then
+                                If index <> Level.Rec.Width Then
+                                    goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+                                End If
                             End If
+
 
                         Next
 
@@ -561,9 +568,15 @@ Public Class Form1
                             'goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(0, index), New Point(Level.Rec.Width, index))
                             goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
 
-                            If index <> 0 And index <> Level.Rec.Width Then
-                                goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+
+                            If Show_Rulers = True Then
+                                If index <> 0 And index <> Level.Rec.Width Then
+                                    goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+                                End If
                             End If
+
+
+
 
                             'goBuf1.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
 
@@ -576,7 +589,7 @@ Public Class Form1
 
 
 
-                    Draw_Hero_Light(goBuf1, OurHero.Rec)
+
 
                     If Potion.Active = True Then
 
@@ -717,18 +730,25 @@ Public Class Form1
 
                         goBuf2.Clear(Level.BackgroundColor)
 
+                        Draw_Hero_Light(goBuf2, OurHero.Rec)
+
                     Else
 
-                        goBuf2.Clear(Color.Gray)
+                        goBuf2.Clear(Level.BackgroundColor)
 
                         'Vertical lines
                         For index = 0 To Level.Rec.Width Step 100
                             goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
                             'goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
 
-                            If index <> Level.Rec.Width Then
-                                goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+
+
+                            If Show_Rulers = True Then
+                                If index <> Level.Rec.Width Then
+                                    goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+                                End If
                             End If
+
 
                         Next
 
@@ -738,9 +758,13 @@ Public Class Form1
                             goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
                             'goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
 
-                            If index <> 0 And index <> Level.Rec.Width Then
-                                goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+
+                            If Show_Rulers = True Then
+                                If index <> 0 And index <> Level.Rec.Width Then
+                                    goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+                                End If
                             End If
+
                         Next
 
                     End If
@@ -748,7 +772,7 @@ Public Class Form1
                     'goBuf2.Clear(Level.BackgroundColor)
 
 
-                    Draw_Hero_Light(goBuf2, OurHero.Rec)
+
 
 
 
@@ -1403,7 +1427,8 @@ Public Class Form1
 
                         'Draw shadow.
                         Dim MyShadow As Integer
-                        Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        'Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        Dim Distance As Double = Distance_Between_Points(New Point(Walls(index).X + Walls(index).Width \ 2, Walls(index).Y + Walls(index).Height \ 2), OurHero.Rec.Location)
                         If Distance <= Viewport.Width / 2 Then
                             MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
                         Else
@@ -1420,7 +1445,8 @@ Public Class Form1
 
                         'Draw shadow.
                         Dim MyShadow As Integer
-                        Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        'Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        Dim Distance As Double = Distance_Between_Points(New Point(Walls(index).X + Walls(index).Width \ 2, Walls(index).Y + Walls(index).Height \ 2), OurHero.Rec.Location)
                         If Distance <= Viewport.Width / 2 Then
                             MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
                         Else
@@ -2160,7 +2186,6 @@ Public Class Form1
                 If OurHero.Rec.IntersectsWith(Walls(index)) = True Then
                     'Yes, the hero is touching the wall.
 
-
                     'Push hero to the right of wall.
                     OurHero.Rec.X = Walls(index).X + Walls(index).Width
 
@@ -2168,12 +2193,6 @@ Public Class Form1
             Next
         End If
         '*****************************************************************
-
-
-
-
-
-
 
         'Is the monster alive?
         If Monster_Life > 0 Then
@@ -2224,6 +2243,9 @@ Public Class Form1
                         Next
                     End If
                     '************************************************
+
+
+
                 End If
             End If
         End If
@@ -2363,12 +2385,25 @@ Public Class Form1
             GS.Play("Hero_Move")
         End If
 
-        'Is the hero touching the wall?
-        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the hero is touching the wall.
-            'Push the hero below the wall.
-            OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height
+
+
+        'Wall Collision Handler Hero moving up*************************
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
+                'Is the hero touching the wall?
+                If OurHero.Rec.IntersectsWith(Walls(index)) = True Then
+                    'Yes, the hero is touching the wall.
+
+                    'Push the hero below the wall.
+                    OurHero.Rec.Y = Walls(index).Y + Walls(index).Height
+
+                End If
+            Next
         End If
+        '*****************************************************************
+
+
+
 
         'Is the monster alive?
         If Monster_Life > 0 Then
@@ -2388,20 +2423,27 @@ Public Class Form1
                     End If
                     'Knock monster above the hero.
                     Monster.Y = OurHero.Rec.Y - Monster.Height - 32
+
                     'Wall Collision Handler - Monster moving up *************************
-                    'Is the monster touching the wall?
-                    If Monster.IntersectsWith(Wall.Rec) = True Then
-                        'Yes, the monster is touching the wall.
+                    If Walls IsNot Nothing Then
+                        For index = 0 To UBound(Walls)
+                            'Is the monster touching the wall?
+                            If Monster.IntersectsWith(Walls(index)) = True Then
+                                'Yes, the monster is touching the wall.
 
-                        'Push the hero below the wall.
-                        Monster.Y = Wall.Rec.Y + (Wall.Rec.Height - 1)
+                                'Push the hero below the wall.
+                                Monster.Y = Walls(index).Y + (Walls(index).Height - 1)
 
-                        If GS.IsPlaying("Undead_Move") = True Then
-                            GS.Pause("Undead_Move")
-                        End If
+                                'If GS.IsPlaying("Undead_Move") = True Then
+                                '    GS.Pause("Undead_Move")
+                                'End If
 
+                            End If
+                        Next
                     End If
                     '************************************************
+
+
                 End If
             End If
         End If
@@ -2534,43 +2576,80 @@ Public Class Form1
 
         MoveHero(DirectionEnum.Down)
 
-
         'Play hero moving sound.
         If GS.IsPlaying("Hero_Move") = False Then
             GS.Play("Hero_Move")
         End If
 
-        If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-            OurHero.Rec.Y = Wall.Rec.Y - OurHero.Rec.Height - 1
+        'Wall Collision Handler Hero moving down*************************
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
+                'Is the hero touching the wall?
+                If OurHero.Rec.IntersectsWith(Walls(index)) = True Then
+                    'Yes, the hero is touching the wall.
+
+                    'Push the hero above the wall.
+                    OurHero.Rec.Y = Walls(index).Y - OurHero.Rec.Height - 1
+
+                End If
+            Next
         End If
 
+
+        '*****************************************************************
+
+        'Is the monster alive?
         If Monster_Life > 0 Then
+            'Yes, the monster is alive.
+
+            'Hero Attacks Left *******************************************
+            'Is the hero touching the monster?
             If OurHero.Rec.IntersectsWith(Monster) = True Then
+                'Yes, the hero is touching the monster.
+
+                'Push hero to the right of monster.
                 OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 1
+
                 If OurHero.Initiative = True Then
+
+                    'Play hero attack sound.
+
                     Monster_Hit = True
+
+                    'Play monster hit sound.
+                    If GS.IsPlaying("Undead_Hit") = False Then
+                        GS.Play("Undead_Hit")
+                    End If
+
                     'Attack the monsters life points directly.
                     Monster_Life -= OurHero.Attack
-
                     If Monster_Life < 0 Then
                         Monster_Life = 0
                     End If
+
                     'Knock monster below the hero.
                     Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 32
 
                     'Wall Collision Handler - Moving Down ********************************************************
-                    'Is the monster touching the wall?
-                    If Monster.IntersectsWith(Wall.Rec) = True Then
-                        'Yes, the monster is touching the wall.
+                    If Walls IsNot Nothing Then
+                        For index = 0 To UBound(Walls)
+                            'Is the monster touching the wall?
+                            If Monster.IntersectsWith(Walls(index)) = True Then
+                                'Yes, the monster is touching the wall.
 
-                        'Push the monster above the wall.
-                        Monster.Y = Wall.Rec.Y - Monster.Height - 1
+                                'Push the monster above the wall.
+                                Monster.Y = Walls(index).Y - Monster.Height - 1
 
+                                'Knock the hero above the monster.
+                                OurHero.Rec.Y = Monster.Y + Monster.Height + 16
 
-
-
+                            End If
+                        Next
                     End If
                     '************************************************
+
+
+
                 End If
             End If
         End If
@@ -3897,8 +3976,18 @@ Public Class Form1
 
     End Sub
 
+    Private Sub MenuItemShowHideRulers_Click(sender As Object, e As EventArgs) Handles MenuItemShowHideRulers.Click
+
+        If Show_Rulers = True Then
+            Show_Rulers = False
+            MenuItemShowHideRulers.Checked = False
+        Else
+            Show_Rulers = True
+            MenuItemShowHideRulers.Checked = True
+        End If
 
 
+    End Sub
 
 
 End Class

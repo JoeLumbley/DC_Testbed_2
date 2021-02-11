@@ -30,6 +30,8 @@ Partial Class Form1
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.MenuItemTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemEditorOn = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuView = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuItemShowHideRulers = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -55,7 +57,7 @@ Partial Class Form1
         'MenuStrip1
         '
         Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(22, 22)
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemTools})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemTools, Me.MenuView})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Size = New System.Drawing.Size(900, 31)
@@ -74,6 +76,19 @@ Partial Class Form1
         Me.MenuItemEditorOn.Name = "MenuItemEditorOn"
         Me.MenuItemEditorOn.Size = New System.Drawing.Size(205, 30)
         Me.MenuItemEditorOn.Text = "Editor On/Off"
+        '
+        'MenuView
+        '
+        Me.MenuView.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemShowHideRulers})
+        Me.MenuView.Name = "MenuView"
+        Me.MenuView.Size = New System.Drawing.Size(62, 27)
+        Me.MenuView.Text = "View"
+        '
+        'MenuItemShowHideRulers
+        '
+        Me.MenuItemShowHideRulers.Name = "MenuItemShowHideRulers"
+        Me.MenuItemShowHideRulers.Size = New System.Drawing.Size(194, 30)
+        Me.MenuItemShowHideRulers.Text = "Show Rulers"
         '
         'Form1
         '
@@ -100,4 +115,6 @@ Partial Class Form1
     Friend WithEvents MenuStrip1 As MenuStrip
     Friend WithEvents MenuItemTools As ToolStripMenuItem
     Friend WithEvents MenuItemEditorOn As ToolStripMenuItem
+    Friend WithEvents MenuView As ToolStripMenuItem
+    Friend WithEvents MenuItemShowHideRulers As ToolStripMenuItem
 End Class
