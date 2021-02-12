@@ -1,8 +1,11 @@
 ﻿Option Strict On
+
 'Dungeon Crawl
-'This is a simple action role-playing game in which the hero navigates a labyrinth,
-'battling various monsters, avoiding traps, solving puzzles, And looting any treasure they may find.
+'A work In progress...
+'This Is a simple action role-playing game In which the hero navigates a labyrinth,
+'battles various monsters, avoids traps, solves puzzles, And loots any treasure that Is found.
 'Coded by Joseph Lumbley.
+
 
 Imports System.Math
 Imports System.Drawing
@@ -1425,16 +1428,16 @@ Public Class Form1
                         'Draw Wall
                         g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
-                        'Draw shadow.
-                        Dim MyShadow As Integer
-                        'Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
-                        Dim Distance As Double = Distance_Between_Points(New Point(Walls(index).X + Walls(index).Width \ 2, Walls(index).Y + Walls(index).Height \ 2), OurHero.Rec.Location)
-                        If Distance <= Viewport.Width / 2 Then
-                            MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
-                        Else
-                            MyShadow = 255
-                        End If
-                        g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
+                        ''Draw shadow.
+                        'Dim MyShadow As Integer
+                        ''Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
+                        'Dim Distance As Double = Distance_Between_Points(New Point(Walls(index).X + Walls(index).Width \ 2, Walls(index).Y + Walls(index).Height \ 2), OurHero.Rec.Location)
+                        'If Distance <= Viewport.Width Then
+                        '    MyShadow = CInt((255 / (Viewport.Width)) * Distance)
+                        'Else
+                        '    MyShadow = 255
+                        'End If
+                        'g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
 
                         g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
@@ -1446,24 +1449,50 @@ Public Class Form1
                         'Draw shadow.
                         Dim MyShadow As Integer
                         'Dim Distance As Double = Distance_Between_Points(Walls(index).Location, OurHero.Rec.Location)
-                        Dim Distance As Double = Distance_Between_Points(New Point(Walls(index).X + Walls(index).Width \ 2, Walls(index).Y + Walls(index).Height \ 2), OurHero.Rec.Location)
-                        If Distance <= Viewport.Width / 2 Then
-                            MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                        'Dim Distance As Double = Distance_Between_Points(New Point(Walls(index).X + Walls(index).Width \ 2, Walls(index).Y + Walls(index).Height \ 2), OurHero.Rec.Location)
+                        'Dim Distance As Double = Horizontal_Distance(Walls(index).X, OurHero.Rec.X)
+                        'Dim Distance As Double = Vertical_Distance(Walls(index).Y, OurHero.Rec.Y)
+
+                        Dim Distance As Double
+                        If Horizontal_Distance(Walls(index).X + Walls(index).Width \ 2, OurHero.Rec.X) > Vertical_Distance(Walls(index).Y + Walls(index).Height \ 2, OurHero.Rec.Y) Then
+
+                            Distance = Vertical_Distance(Walls(index).Y + Walls(index).Height \ 2, OurHero.Rec.Y)
+                        Else
+
+
+                            Distance = Horizontal_Distance(Walls(index).X + Walls(index).Width \ 2, OurHero.Rec.X)
+
+
+                        End If
+
+                        'If Distance <= Viewport.Width / 2 Then
+                        '    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
+                        'Else
+                        '    MyShadow = 255
+
+                        'End If
+                        If Distance <= 500 Then
+                            MyShadow = CInt((255 / (500)) * Distance)
                         Else
                             MyShadow = 255
+
                         End If
                         g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
 
                         'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
 
                     End If
+
                 Next
+
             End If
 
 
 
 
+
         Else
+
             'Yes, the editor is on. The game is stopped.
 
             'Draw Wall
