@@ -30,6 +30,8 @@ Partial Class Form1
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.MenuItemTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemEditorOn = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuItemPointer = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuItemWall = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuView = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemShowHideRulers = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -66,7 +68,7 @@ Partial Class Form1
         '
         'MenuItemTools
         '
-        Me.MenuItemTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemEditorOn})
+        Me.MenuItemTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemEditorOn, Me.MenuItemPointer, Me.MenuItemWall})
         Me.MenuItemTools.Name = "MenuItemTools"
         Me.MenuItemTools.Size = New System.Drawing.Size(64, 27)
         Me.MenuItemTools.Text = "Tools"
@@ -76,6 +78,18 @@ Partial Class Form1
         Me.MenuItemEditorOn.Name = "MenuItemEditorOn"
         Me.MenuItemEditorOn.Size = New System.Drawing.Size(205, 30)
         Me.MenuItemEditorOn.Text = "Editor On/Off"
+        '
+        'MenuItemPointer
+        '
+        Me.MenuItemPointer.Name = "MenuItemPointer"
+        Me.MenuItemPointer.Size = New System.Drawing.Size(205, 30)
+        Me.MenuItemPointer.Text = "Pointer"
+        '
+        'MenuItemWall
+        '
+        Me.MenuItemWall.Name = "MenuItemWall"
+        Me.MenuItemWall.Size = New System.Drawing.Size(205, 30)
+        Me.MenuItemWall.Text = "Wall"
         '
         'MenuView
         '
@@ -117,4 +131,6 @@ Partial Class Form1
     Friend WithEvents MenuItemEditorOn As ToolStripMenuItem
     Friend WithEvents MenuView As ToolStripMenuItem
     Friend WithEvents MenuItemShowHideRulers As ToolStripMenuItem
+    Friend WithEvents MenuItemPointer As ToolStripMenuItem
+    Friend WithEvents MenuItemWall As ToolStripMenuItem
 End Class
