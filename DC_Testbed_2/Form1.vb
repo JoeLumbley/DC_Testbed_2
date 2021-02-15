@@ -1,9 +1,9 @@
 ﻿Option Strict On
 
 'Dungeon Crawl
-'A work In progress...
-'This Is a simple action role-playing game In which the hero navigates a labyrinth,
-'battles various monsters, avoids traps, solves puzzles, And loots any treasure that Is found.
+'A work in progress...
+'This is a simple action role-playing game in which the hero navigates a labyrinth,
+'battles various monsters, avoids traps, solves puzzles, and loots any treasure that is found.
 'Coded by Joseph Lumbley.
 
 
@@ -332,6 +332,12 @@ Public Class Form1
     'Dim media2 As New Media.SoundPlayer(sound)
 
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
+        CreateSoundFileFromResource()
+
+
+
+
+
 
         'Private Level_Background_Color As Color = Color.FromArgb(255, 1, 13, 0)
         Level.BackgroundColor = Color.FromArgb(255, 20, 20, 20)
@@ -510,6 +516,62 @@ Public Class Form1
 
 
     End Sub
+
+    Private Shared Sub CreateSoundFileFromResource()
+
+        'Create a level music file in the games start up path.
+        Dim file As String = System.IO.Path.Combine(Application.StartupPath, "level_music.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.level_music)
+        End If
+        'Create a hero move file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "hero_move.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.hero_move)
+        End If
+        'Create a undead move sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_move.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_move)
+        End If
+        'Create a undead attack sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_attack.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_attack)
+        End If
+        'Create a undead hit sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_hit.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_hit)
+        End If
+        'Create a undead death sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_death.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_death)
+        End If
+        'Create a magic sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "magic_sound.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.magic_sound)
+        End If
+        'Create a not enough magic sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "not_enough_magic.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.not_enough_magic)
+        End If
+        'Create a potion pickup sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "potion_pickup.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.potion_pickup)
+        End If
+        'Create a hero death sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "hero_death.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.hero_death)
+        End If
+
+    End Sub
+
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         'Display timer
 
@@ -2130,37 +2192,26 @@ Public Class Form1
         '*********************************************************************************
 
 
+
+
+
         'Wall Collision Handler - Moving Right*****************
-        'Is the monster touching the wall?
-        If Monster.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the monster is touching the wall.
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
+                'Is the monster touching the wall?
+                If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                    'Yes, the monster is touching the wall.
 
+                    'Push monster to the left of wall.
+                    Monster.X = Walls(index).Rec.X - Monster.Width - 1
 
-            'OurMonster.WallCollision = True
-
-
-            'Push monster to the left of wall.
-            Monster.X = Wall.Rec.X - Monster.Width - 1
-
-            'If GS.IsPlaying("Undead_Move") = True Then
-            '    GS.Pause("Undead_Move")
-            'End If
-
-            'Move monster down.
-            'Monster.Y += Monster_Speed
-
-            'If Monster.IntersectsWith(Wall.Rec) = True Then
-
-            'Push monster above wall.
-            'Monster.Y = Wall.Rec.Y - Monster.Height - 1
-
-            'End If
-
-            'OurMonster.WallCollision = False
-
+                End If
+            Next
         End If
-
         '************************************************
+
+
+
 
         'Attack Right**************************************************
         'Is the monster touching the hero?
@@ -2220,17 +2271,23 @@ Public Class Form1
 
 
                 'Wall Collision Handler - Moving Right*****************
-                'Is the hero touching a wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching a wall.
+                If Walls IsNot Nothing Then
+                    For index = 0 To UBound(Walls)
+                        'Is the hero touching a wall?
+                        If OurHero.Rec.IntersectsWith(Walls(index).Rec) = True Then
+                            'Yes, the hero is touching a wall.
 
-                    'Knock hero to the left of wall.
-                    OurHero.Rec.X = Wall.Rec.X - OurHero.Rec.Width - 1
+                            'Knock hero to the left of wall.
+                            OurHero.Rec.X = Walls(index).Rec.X - OurHero.Rec.Width - 1
 
-                    'Knock the monster to the left of the hero.
-                    Monster.X = OurHero.Rec.X - Monster.Width - 16
+                            'Knock the monster to the left of the hero.
+                            Monster.X = OurHero.Rec.X - Monster.Width - 16
 
+                        End If
+                    Next
                 End If
+                '************************************************
+
             End If
         End If
 
@@ -3850,11 +3907,11 @@ Public Class Form1
         'ms.Dispose()
 
     End Sub
-    Sub PlayLoopingBackgroundSoundResource()
-        'My.Computer.Audio.Play(My.Resources.level_music, AudioPlayMode.BackgroundLoop)
-        Dim LoopPlayer As New System.Media.SoundPlayer(My.Resources.level_music)
-        LoopPlayer.PlayLooping()
-    End Sub
+    'Sub PlayLoopingBackgroundSoundResource()
+    '    'My.Computer.Audio.Play(My.Resources.level_music, AudioPlayMode.BackgroundLoop)
+    '    Dim LoopPlayer As New System.Media.SoundPlayer(My.Resources.level_music)
+    '    LoopPlayer.PlayLooping()
+    'End Sub
     Private Sub GS_SoundEnded(ByVal SndName As String)
         'If SndName = "Music" Then GS.Play("Music") 'if the Music has reached the end then you can keep replaying it for a loop effect
 

@@ -61,20 +61,112 @@ Namespace My.Resources
         End Property
         
         '''<summary>
-        '''  Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        '''  Looks up a localized resource of type System.Byte[].
         '''</summary>
-        Friend ReadOnly Property level_music() As System.IO.UnmanagedMemoryStream
+        Friend ReadOnly Property hero_death() As Byte()
             Get
-                Return ResourceManager.GetStream("level_music", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("hero_death", resourceCulture)
+                Return CType(obj,Byte())
             End Get
         End Property
         
         '''<summary>
-        '''  Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        '''  Looks up a localized resource of type System.Byte[].
         '''</summary>
-        Friend ReadOnly Property machine_gun() As System.IO.UnmanagedMemoryStream
+        Friend ReadOnly Property hero_move() As Byte()
             Get
-                Return ResourceManager.GetStream("machine_gun", resourceCulture)
+                Dim obj As Object = ResourceManager.GetObject("hero_move", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property level_music() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("level_music", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property magic_sound() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("magic_sound", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property Monster_Alien_Roar_Aggressive() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("Monster_Alien_Roar_Aggressive", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property not_enough_magic() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("not_enough_magic", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property potion_pickup() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("potion_pickup", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property undead_attack() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("undead_attack", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property undead_death() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("undead_death", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property undead_hit() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("undead_hit", resourceCulture)
+                Return CType(obj,Byte())
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  Looks up a localized resource of type System.Byte[].
+        '''</summary>
+        Friend ReadOnly Property undead_move() As Byte()
+            Get
+                Dim obj As Object = ResourceManager.GetObject("undead_move", resourceCulture)
+                Return CType(obj,Byte())
             End Get
         End Property
     End Module
