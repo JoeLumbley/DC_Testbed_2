@@ -124,6 +124,8 @@ Public Class Form1
     Private Editor_On As Boolean = False
     Private Show_Rulers As Boolean = True
     Private Selected_Tool As ToolsEnum = ToolsEnum.Pointer
+    Private Pointer_Origin As New Point(0, 0)
+    Private Pointer_Offset As New Point(0, 0)
 
 
 
@@ -1303,67 +1305,55 @@ Public Class Form1
         MonsterInViewportCoordinates.X = Rec.X - Viewport.X
         MonsterInViewportCoordinates.Y = Rec.Y - Viewport.Y
 
-
-        'LightRec
-
-
-
-
-        If Monster_Life > 0 Then
+        'Is the editor on?
+        If Editor_On = False Then
+            'No, the editor off. The game is running.
 
 
-            If MonsterInViewportCoordinates.IntersectsWith(LightRec) = True Then
+            If Monster_Life > 0 Then
+                If MonsterInViewportCoordinates.IntersectsWith(LightRec) = True Then
 
-                g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
-                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
+                    g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
+                    g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
 
+                    'Draw shadow.
+                    Dim MyShadow As Integer
+                    Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
+                    If Distance <= Viewport.Width / 2 Then
+                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                    Else
+                        MyShadow = 255
+                    End If
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
 
-                'Draw shadow.
-                Dim MyShadow As Integer
-                Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
-                If Distance <= Viewport.Width / 2 Then
-                    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
-                Else
-                    MyShadow = 255
-                End If
-                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
+                    g.DrawRectangle(New Pen(Color.Green, 1), MonsterInViewportCoordinates)
 
-
-
-                g.DrawRectangle(New Pen(Color.Green, 1), MonsterInViewportCoordinates)
-
-            Else
-
-                g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
-
-
-
-
-                g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
-                'g.DrawRectangle(New Pen(Color.Green, 1), Rec)
-
-                'Draw shadow.
-                Dim MyShadow As Integer
-
-                Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
-
-                If Distance <= Viewport.Width / 2 Then
-                    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
                 Else
 
-                    MyShadow = 255
+                    g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
+                    g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
+
+                    'Draw shadow.
+                    Dim MyShadow As Integer
+                    Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
+                    If Distance <= Viewport.Width / 2 Then
+                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                    Else
+                        MyShadow = 255
+                    End If
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
+
                 End If
-                g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
-
-
             End If
 
 
 
+        Else
+            'Yes, the editor is on. The game is stopped.
 
-
-
-
+            g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
+            g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
+            g.DrawRectangle(New Pen(Color.Green, 1), MonsterInViewportCoordinates)
 
         End If
 
@@ -1596,11 +1586,12 @@ Public Class Form1
                 WallInViewportCoordinates = Walls(Selected_Index).Rec
                 WallInViewportCoordinates.X = Walls(Selected_Index).Rec.X - Viewport.X
                 WallInViewportCoordinates.Y = Walls(Selected_Index).Rec.Y - Viewport.Y
+
                 g.DrawRectangle(Selected_Pen, WallInViewportCoordinates)
+
                 g.FillEllipse(Brushes.Red, WallInViewportCoordinates.X - 15 \ 2, WallInViewportCoordinates.Y - 15 \ 2, 15, 15)
-                Dim MyString As String = "X " & WallInViewportCoordinates.X.ToString & ",Y " & WallInViewportCoordinates.Y
 
-
+                Dim MyString As String = "X " & Walls(Selected_Index).Rec.X.ToString & ",Y " & Walls(Selected_Index).Rec.Y.ToString
                 g.DrawString(MyString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.X, WallInViewportCoordinates.Y - 20), Center_String)
 
 
@@ -3878,24 +3869,49 @@ Public Class Form1
 
     Private Sub MenuItemEditorOn_Click(sender As Object, e As EventArgs) Handles MenuItemEditorOn.Click
 
-
+        'Toggle Editor On/Off *****************************************
+        'Is the editor off?
         If Editor_On = False Then
+            'Yes, the editor is off. The game is runnning.
+
+
+            'Turn editor on.
             Editor_On = True
+
+            'Check the editor in the menu.
             MenuItemEditorOn.Checked = True
 
 
         Else
+            'No, the editor is on. The game is stopped.
 
+            'Turn editor off.
             Editor_On = False
+
+            'Uncheck the editor in the menu.
             MenuItemEditorOn.Checked = False
+
+            'Center viewport on the hero.
+            Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+            Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+            'Keep viewport on the level.
+            If Viewport.X < Level.Rec.X Then
+                Viewport.X = Level.Rec.X
+            End If
+            If Viewport.X + Viewport.Width > Level.Rec.Width Then
+                Viewport.X = Level.Rec.Width - Viewport.Width
+            End If
+            If Viewport.Y < Level.Rec.Y Then
+                Viewport.Y = Level.Rec.Y
+            End If
+            If Viewport.Y + Viewport.Height > Level.Rec.Height Then
+                Viewport.Y = Level.Rec.Height - Viewport.Height
+            End If
 
 
         End If
-
-
-
-
-
+        '*********************************************************
 
     End Sub
 
@@ -3906,9 +3922,37 @@ Public Class Form1
 
             Mouse_Down = True
 
+            'If Selected_Tool = ToolsEnum.Pointer Then
+
+            '    'mouse
+            '    Pointer_Origin = e.Location
+
             If Selected_Tool = ToolsEnum.Pointer Then
 
+                Pointer_Origin = e.Location
+
+                'Was a wall selected?
+                If Walls IsNot Nothing Then
+                    Dim rec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                    For index = 0 To UBound(Walls)
+                        If rec.IntersectsWith(Walls(index).Rec) Then
+                            'Yes, a wall was selected.
+                            Selected_Index = index
+                            IsSelected = True
+                            Exit For
+                        End If
+                        IsSelected = False
+                    Next
+                End If
+
+                Pointer_Offset = Pointer_Origin
+
+
+
             End If
+
+
+            'End If
             If Selected_Tool = ToolsEnum.Wall Then
 
                 Wall.Rec.Width = 0
@@ -3919,6 +3963,9 @@ Public Class Form1
                 Wall_Origin.Y = e.Y + Viewport.Y
 
             End If
+
+
+
         End If
 
 
@@ -3977,6 +4024,21 @@ Public Class Form1
 
             If Mouse_Down = True Then
 
+
+                If Selected_Tool = ToolsEnum.Pointer Then
+
+
+
+
+
+
+
+                End If
+
+
+
+
+
                 If Selected_Tool = ToolsEnum.Wall Then
 
                     'Which point is the top?
@@ -3998,6 +4060,10 @@ Public Class Form1
                     Wall.Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
 
                 End If
+
+
+
+
 
 
 
