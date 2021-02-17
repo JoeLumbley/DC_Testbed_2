@@ -693,12 +693,14 @@ Public Class Form1
 
 
                     If Editor_On = True Then
+                        If Selected_Tool = ToolsEnum.Wall Then
+                            If Mouse_Down = True Then
 
-                        If Mouse_Down = True Then
+                                Draw_Wall(goBuf1, Wall.Rec)
 
-                            Draw_Wall(goBuf1, Wall.Rec)
-
+                            End If
                         End If
+
 
                     End If
 
@@ -900,13 +902,13 @@ Public Class Form1
 
 
                     If Editor_On = True Then
+                        If Selected_Tool = ToolsEnum.Wall Then
+                            If Mouse_Down = True Then
 
-                        If Mouse_Down = True Then
+                                Draw_Wall(goBuf2, Wall.Rec)
 
-                            Draw_Wall(goBuf2, Wall.Rec)
-
+                            End If
                         End If
-
                     End If
 
 
@@ -3887,13 +3889,11 @@ Public Class Form1
 
             Mouse_Down = True
 
-            'If Selected_Tool = ToolsEnum.Pointer Then
-
-            '    'mouse
-            '    Pointer_Origin = e.Location
-
+            'Is the pointer the selected tool?
             If Selected_Tool = ToolsEnum.Pointer Then
+                'Yes, the pointer is the selected tool.
 
+                'Set pointer origin to the current mouse location.
                 Pointer_Origin = e.Location
 
                 'Was a wall selected?
@@ -3910,16 +3910,17 @@ Public Class Form1
                     Next
                 End If
 
-                Pointer_Offset = Pointer_Origin
-
-
+                Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
+                Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
 
             End If
 
 
-            'End If
+
+
             If Selected_Tool = ToolsEnum.Wall Then
 
+                'Define a wall.
                 Wall.Rec.Width = 0
                 Wall.Rec.Height = 0
 
@@ -3929,13 +3930,7 @@ Public Class Form1
 
             End If
 
-
-
         End If
-
-
-
-
 
     End Sub
 
@@ -3992,9 +3987,10 @@ Public Class Form1
 
                 If Selected_Tool = ToolsEnum.Pointer Then
 
+                    'Move the wall.
 
-
-
+                    Walls(Selected_Index).Rec.X = e.X - Pointer_Offset.X
+                    Walls(Selected_Index).Rec.Y = e.Y - Pointer_Offset.Y
 
 
 
