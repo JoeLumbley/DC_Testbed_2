@@ -600,8 +600,8 @@ Public Class Form1
                         'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
                         .SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
                         .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
-                        .CompositingQuality = Drawing2D.CompositingQuality.HighSpeed
-                        .InterpolationMode = Drawing2D.InterpolationMode.Low
+                        .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
+                        .InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
                     End With
 
@@ -678,48 +678,11 @@ Public Class Form1
 
                     Draw_Monster(goBuf1, Monster)
 
-
                     Draw_Projectile(goBuf1)
-
-
-                    'If ProjectileInflight = True Then
-                    '    goBuf1.FillRectangle(Projectile_Brush, Projectile)
-                    'End If
-
-
-
-
-
-
-
-                    If Editor_On = True Then
-                        If Selected_Tool = ToolsEnum.Wall Then
-                            If Mouse_Down = True Then
-
-                                Draw_Wall(goBuf1, Wall.Rec)
-
-                            End If
-                        End If
-
-
-                    End If
-
-
 
                     Draw_Walls(goBuf1)
 
-
-
-
-
-
-
-
-
-
-
-
-
+                    Draw_Wall(goBuf1, Wall.Rec)
 
                     Draw_Monster_Life_Bar(goBuf1)
 
@@ -788,8 +751,8 @@ Public Class Form1
                         'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
                         .SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
                         .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
-                        .CompositingQuality = Drawing2D.CompositingQuality.HighSpeed
-                        .InterpolationMode = Drawing2D.InterpolationMode.Low
+                        .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
+                        .InterpolationMode = Drawing2D.InterpolationMode.NearestNeighbor
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
                     End With
 
@@ -850,172 +813,28 @@ Public Class Form1
 
                     End If
 
-                    'goBuf2.Clear(Level.BackgroundColor)
-
-
-
-
-
-
-
-                    ''Draw Wall
-                    'goBuf2.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
-
                     If Potion.Active = True Then
 
                         Draw_Potion(goBuf2, Potion.Rec)
 
                     End If
 
-
                     Draw_Monster(goBuf2, Monster)
-
-
-                    'If Monster_Life > 0 Then
-
-
-                    '    goBuf2.FillRectangle(Monster_Brush, Monster)
-
-                    '    goBuf2.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), Monster)
-
-                    '    'Monster_Font
-
-                    'End If
 
                     Draw_Projectile(goBuf2)
 
-
-                    'Draw_Hero(goBuf2, OurHero.Rec)
-
-
-
-                    'Draw Wall
-                    'goBuf2.FillRectangle(New SolidBrush(Wall.Color), Wall.Rec)
-
-
-
-
-
-
-
-
-
-
-                    If Editor_On = True Then
-                        If Selected_Tool = ToolsEnum.Wall Then
-                            If Mouse_Down = True Then
-
-                                Draw_Wall(goBuf2, Wall.Rec)
-
-                            End If
-                        End If
-                    End If
-
-
-
                     Draw_Walls(goBuf2)
 
-
-
-
-
-
-
-                    'If OurHero.Life > 0 Then
-                    '    'goBuf2.FillRectangle(Hero_Brush, Hero)
-
-
-                    '    If OurHero.Hit = False Then
-                    '        'goBuf2.FillRectangle(New SolidBrush(OurHero.Color), OurHero.Rec)
-                    '        Draw_Hero(goBuf2, OurHero.Rec)
-                    '    Else
-                    '        goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Red)), OurHero.Rec)
-
-                    '        If OurHero.HitTimer > 1 Then
-                    '            OurHero.HitTimer = 0
-                    '            OurHero.Hit = False
-                    '        End If
-
-
-
-                    '    End If
-                    'End If
-
-
+                    Draw_Wall(goBuf2, Wall.Rec)
 
                     Draw_Monster_Life_Bar(goBuf2)
 
-                    'If Monster_Life > 0 And Monster_Hit = True Then
-                    '    goBuf2.FillRectangle(Life_Frame_Brush, Monster.X, Monster.Y - 10, Monster.Width, 6)
-                    '    goBuf2.FillRectangle(Life_Brush, Monster.X, Monster.Y - 10, CInt(Monster.Width / Monster_LifeMAX * Monster_Life), 6)
-                    'End If
-
-
-
-
                     Draw_Hero(goBuf2, OurHero.Rec)
-
-                    'Viewport.Height \ Scale
-
-
 
                     goBuf2.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
 
                     Draw_Map(goBuf2, Viewport.Width - Map.Width - 10, 40, 9)
 
-                    ''Draw Map************************************************************
-                    ''Draw map background.
-                    'goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(64, Color.Black)), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-
-                    ''Wall.MapColor
-
-                    'If Wall.Revealed = True Then
-                    '    'Draw wall.
-                    '    goBuf2.FillRectangle(New SolidBrush(Wall.MapColor), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + Wall.Rec.X \ 4, 10 + Wall.Rec.Y \ 4, Wall.Rec.Width \ 4, Wall.Rec.Height \ 4))
-                    'End If
-
-
-
-
-
-
-
-                    ''Draw hero.
-                    'goBuf2.FillRectangle(New SolidBrush(OurHero.Color), New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10 + OurHero.Rec.X \ 4, 10 + OurHero.Rec.Y \ 4, OurHero.Rec.Width \ 4, OurHero.Rec.Height \ 4))
-
-                    ''Draw map border.
-                    'goBuf2.DrawRectangle(Map_Border_Pen, New Rectangle(Viewport.Width - (Viewport.Width \ 4) - 10, 10, Viewport.Width \ 4, Viewport.Height \ 4))
-                    ''********************************************************************
-
-                    'Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
-
-
-
-
-                    'Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
-
-
-
-                    'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "     Undead - Attack:" & Monster_Attack.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
-                    'To fix draw string error: "Parameters not valid." I had to set the compositing mode to source over.
-
-
-
-
-                    'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString & "    Level 1 - ", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
-
-                    'goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
-
-
-                    'If Instructions_On = True Then
-
-                    '    'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, 0)
-                    '    'goBuf2.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
-
-                    '    Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
-                    '    goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
-
-                    'End If
 
                     If Editor_On = False Then
                         Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
@@ -1025,7 +844,6 @@ Public Class Form1
                         goBuf2.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
                         If Instructions_On = True Then
-                            'goBuf1.DrawString(Instruction_Text, Instruction_Font, drawBrush, 0, Viewport.Height - 30)
 
                             Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
                             goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
@@ -1034,10 +852,6 @@ Public Class Form1
 
                     End If
 
-
-
-
-
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
                         goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
                         goBuf2.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
@@ -1045,12 +859,10 @@ Public Class Form1
 
                     If Timer2.Enabled = False Then
                         goBuf2.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport.Width, Viewport.Height)
-                        'goBuf2.TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
                         goBuf2.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
 
                     e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
-                    'e.Graphics.DrawImage(_Buffer2, 0, 0, Viewport, GraphicsUnit.Pixel)
 
                 End Using
             End Using
@@ -1431,50 +1243,18 @@ Public Class Form1
         WallInViewportCoordinates.X = Rec.X - Viewport.X
         WallInViewportCoordinates.Y = Rec.Y - Viewport.Y
 
-        'Draw Wall
-        g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
-        g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
-        'If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
+        If Editor_On = True Then
+            If Selected_Tool = ToolsEnum.Wall Then
+                If Mouse_Down = True Then
 
-        '    'Draw Wall
-        '    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                    'Draw Wall
+                    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                    g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
-        '    'Draw shadow.
-        '    Dim MyShadow As Integer
-        '    Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
-        '    If Distance <= Viewport.Width / 2 Then
-        '        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
-        '    Else
-        '        MyShadow = 255
-        '    End If
-        '    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
-
-        '    g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
-
-        'Else
-
-        '    'Draw Wall
-        '    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
-
-
-
-        '    'Draw shadow.
-        '    Dim MyShadow As Integer
-        '    Dim Distance As Double = Distance_Between_Points(Wall.Rec.Location, OurHero.Rec.Location)
-        '    If Distance <= Viewport.Width / 2 Then
-        '        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance)
-        '    Else
-        '        MyShadow = 255
-        '    End If
-        '    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), WallInViewportCoordinates)
-
-        '    'g.FillRectangle(New SolidBrush(Color.FromArgb(150, Color.Black)), Wall.Rec)
-
-        'End If
-
-
-
+                End If
+            End If
+        End If
 
     End Sub
 
@@ -3904,14 +3684,17 @@ Public Class Form1
                             'Yes, a wall was selected.
                             Selected_Index = index
                             IsSelected = True
+                            Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
+                            Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
                             Exit For
                         End If
                         IsSelected = False
+                        Selected_Index = -1
                     Next
+
                 End If
 
-                Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
-                Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
+
 
             End If
 
@@ -3983,24 +3766,20 @@ Public Class Form1
         If Editor_On = True Then
 
             If Mouse_Down = True Then
-
-
                 If Selected_Tool = ToolsEnum.Pointer Then
+                    If Walls IsNot Nothing Then
+                        If Selected_Index > -1 Then
 
-                    'Move the wall.
+                            'Move the wall.
+                            Walls(Selected_Index).Rec.X = e.X - Pointer_Offset.X
+                            Walls(Selected_Index).Rec.Y = e.Y - Pointer_Offset.Y
 
-                    Walls(Selected_Index).Rec.X = e.X - Pointer_Offset.X
-                    Walls(Selected_Index).Rec.Y = e.Y - Pointer_Offset.Y
-
-
-
+                        End If
+                    End If
                 End If
 
-
-
-
-
                 If Selected_Tool = ToolsEnum.Wall Then
+
 
                     'Which point is the top?
                     If Wall_Origin.Y > e.Y + Viewport.Y Then
@@ -4022,30 +3801,8 @@ Public Class Form1
 
                 End If
 
-
-
-
-
-
-
-
             End If
-
         End If
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     End Sub
 
