@@ -3667,8 +3667,6 @@ Public Class Form1
 
         If Editor_On = True Then
 
-            Mouse_Down = True
-
             'Is the pointer the selected tool?
             If Selected_Tool = ToolsEnum.Pointer Then
                 'Yes, the pointer is the selected tool.
@@ -3676,26 +3674,28 @@ Public Class Form1
                 'Set pointer origin to the current mouse location.
                 Pointer_Origin = e.Location
 
-                'Was a wall selected?
+                'Is there at least one wall?
                 If Walls IsNot Nothing Then
-                    Dim rec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                    For index = 0 To UBound(Walls)
-                        If rec.IntersectsWith(Walls(index).Rec) Then
+                    'Yes, there is at least one wall.
+                    Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                    'Go thru every wall in walls in reverse z order.
+                    For Index = UBound(Walls) To 0 Step -1
+                        'Was a wall selected?
+                        If MousePointerInViewPortCooridinates.IntersectsWith(Walls(Index).Rec) Then
                             'Yes, a wall was selected.
-                            Selected_Index = index
+
+                            Selected_Index = Index
                             IsSelected = True
                             Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
                             Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
                             Exit For
+
                         End If
                         IsSelected = False
                         Selected_Index = -1
                     Next
 
                 End If
-
-
-
             End If
 
 
@@ -3713,7 +3713,11 @@ Public Class Form1
 
             End If
 
+            Mouse_Down = True
+
         End If
+
+
 
     End Sub
 
@@ -3724,20 +3728,20 @@ Public Class Form1
 
             Mouse_Down = False
 
-            If Selected_Tool = ToolsEnum.Pointer Then
-                If Walls IsNot Nothing Then
-                    Dim rec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                    'IsSelected = False
-                    For index = 0 To UBound(Walls)
-                        If rec.IntersectsWith(Walls(index).Rec) Then
-                            Selected_Index = index
-                            IsSelected = True
-                            Exit For
-                        End If
-                        IsSelected = False
-                    Next
-                End If
-            End If
+            'If Selected_Tool = ToolsEnum.Pointer Then
+            '    If Walls IsNot Nothing Then
+            '        Dim rec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+            '        'IsSelected = False
+            '        For index = 0 To UBound(Walls)
+            '            If rec.IntersectsWith(Walls(index).Rec) Then
+            '                Selected_Index = index
+            '                IsSelected = True
+            '                Exit For
+            '            End If
+            '            IsSelected = False
+            '        Next
+            '    End If
+            'End If
 
             If Selected_Tool = ToolsEnum.Wall Then
                 'Has the mouse moved?
@@ -3821,28 +3825,42 @@ Public Class Form1
 
     Private Sub Remove_Wall(IndexToRemove As Integer)
 
-        'Create temporary array
-        Dim TempWalls(UBound(Walls) - 1) As WallInfo
-        Dim TempIndex As Integer = LBound(Walls)
-
-        'Copy the array without the element to the temporary array.
-        For index = LBound(Walls) To UBound(Walls)
-
-            If index <> IndexToRemove Then
-
-                TempWalls(TempIndex) = Walls(index)
-
-                TempIndex += 1
-            End If
 
 
-        Next
+        If UBound(Walls) > 0 Then
 
-        'Resize the array.
-        ReDim Walls(UBound(TempWalls))
+            'Create temporary array
+            Dim TempWalls(UBound(Walls) - 1) As WallInfo
+            Dim TempIndex As Integer = LBound(Walls)
 
-        'Copy the temporary array to the array.
-        Walls = TempWalls
+            'Copy the array without the element to the temporary array.
+            For index = LBound(Walls) To UBound(Walls)
+
+                If index <> IndexToRemove Then
+
+                    TempWalls(TempIndex) = Walls(index)
+
+                    TempIndex += 1
+                End If
+
+
+            Next
+
+            'Resize the array.
+            ReDim Walls(UBound(TempWalls))
+
+            'Copy the temporary array to the array.
+            Walls = TempWalls
+
+        Else
+
+
+            Walls = Nothing
+
+
+        End If
+
+
 
     End Sub
 
