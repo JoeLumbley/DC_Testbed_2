@@ -113,27 +113,18 @@ Public Enum DirectionEnum As Integer
     LeftUp = 7
     LeftDown = 8
 End Enum
-Public Enum MCI_NOTIFY As Integer
-    SUCCESSFUL = &H1
-    SUPERSEDED = &H2
-    ABORTED = &H4
-    FAILURE = &H8
-End Enum
+'Public Enum MCI_NOTIFY As Integer
+'    SUCCESSFUL = &H1
+'    SUPERSEDED = &H2
+'    ABORTED = &H4
+'    FAILURE = &H8
+'End Enum
 Public Class Form1
 
-    Private Editor_On As Boolean = False
-    Private Show_Rulers As Boolean = True
-    Private Selected_Tool As ToolsEnum = ToolsEnum.Pointer
-    Private Pointer_Origin As New Point(0, 0)
-    Private Pointer_Offset As New Point(0, 0)
+    Private Viewport As New Rectangle(0, 0, 640, 480)
 
 
-
-
-
-    Private Selected_Index As Integer = 0
-    Private IsSelected As Boolean = False
-    Private Selected_Pen As New Pen(Color.Blue, 5)
+    Private _BufferFlag As Boolean = True
 
 
 
@@ -141,38 +132,34 @@ Public Class Form1
 
     Private OurHero As HeroInfo
 
-    Private OurMonster As MonsterInfo
+
+    'Create and Initialize editor state data.
+    Private Editor_On As Boolean = False
+    Private Show_Rulers As Boolean = True
+    Private Selected_Tool As ToolsEnum = ToolsEnum.Pointer
+    Private Pointer_Origin As New Point(0, 0)
+    Private Pointer_Offset As New Point(0, 0)
+    Private Selected_Index As Integer = 0
+    Private IsSelected As Boolean = False
+    Private Selected_Pen As New Pen(Color.Blue, 5)
 
     Private Wall As WallInfo
     Private Wall_Origin As Point
-    'Private Walls() As Rectangle
     Private Walls() As WallInfo
-
-
-
 
     Private Potion As PotionInfo
 
-    Private Viewport As New Rectangle(0, 0, 640, 480)
-
-
     Private Map As Rectangle
 
-    'Private Viewport_Size As New Drawing.Size(640, 480)
-    Private _BufferFlag As Boolean = True
 
 
 
 
 
+    Private OurMonster As MonsterInfo
 
     Private Monster As New Rectangle(500, 500, 90, 90)
-    'Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 39, 205, 89))
-    'Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 7, 49, 19))
     Private Monster_Brush As New SolidBrush(Color.FromArgb(255, 14, 88, 34))
-
-
-
     Private Monster_LifeMAX As Integer = 50
     Private Monster_Life As Integer = Monster_LifeMAX
     Private Monster_Attack As Integer = 4
@@ -588,6 +575,8 @@ Public Class Form1
     End Sub
 
     Private Sub PictureBox1_Paint(ByVal sender As System.Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles PictureBox1.Paint
+
+
 
         If _BufferFlag = True Then
 
@@ -1192,15 +1181,15 @@ Public Class Form1
                     g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
                     g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
 
-                    'Draw shadow.
-                    Dim MyShadow As Integer
-                    Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
-                    If Distance <= Viewport.Width / 2 Then
-                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
-                    Else
-                        MyShadow = 255
-                    End If
-                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
+                    ''Draw shadow.
+                    'Dim MyShadow As Integer
+                    'Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
+                    'If Distance <= Viewport.Width / 2 Then
+                    '    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                    'Else
+                    '    MyShadow = 255
+                    'End If
+                    'g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
 
                     g.DrawRectangle(New Pen(Color.Green, 1), MonsterInViewportCoordinates)
 
@@ -1209,15 +1198,17 @@ Public Class Form1
                     g.FillRectangle(Monster_Brush, MonsterInViewportCoordinates)
                     g.DrawString("Undead", Monster_Font, New SolidBrush(Color.Black), MonsterInViewportCoordinates, Center_String)
 
-                    'Draw shadow.
-                    Dim MyShadow As Integer
-                    Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
-                    If Distance <= Viewport.Width / 2 Then
-                        MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
-                    Else
-                        MyShadow = 255
-                    End If
-                    g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
+                    ''Draw shadow.
+                    'Dim MyShadow As Integer
+                    'Dim Distance As Double = Distance_Between_Points(Monster.Location, OurHero.Rec.Location)
+                    'If Distance <= Viewport.Width / 2 Then
+                    '    MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+                    'Else
+                    '    MyShadow = 255
+                    'End If
+                    'g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), MonsterInViewportCoordinates)
+
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), MonsterInViewportCoordinates)
 
                 End If
             End If
@@ -1343,7 +1334,7 @@ Public Class Form1
                 g.FillEllipse(Brushes.Red, WallInViewportCoordinates.Right - 15 \ 2, WallInViewportCoordinates.Bottom - 15 \ 2, 15, 15)
 
                 'Draw X and Y coordinates.
-                Dim MyString As String = Walls(Selected_Index).Rec.X.ToString & "," & Walls(Selected_Index).Rec.Y.ToString
+                Dim MyString As String = Walls(Selected_Index).Rec.X.ToString & ", " & Walls(Selected_Index).Rec.Y.ToString
                 g.DrawString(MyString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.X, WallInViewportCoordinates.Y - 20), Center_String)
 
 
@@ -1862,32 +1853,33 @@ Public Class Form1
         Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
 
 
-        'Move Monster Right**************************************************************
+        'Move Monster Right **************************************************************
         'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
         'Is the monster close to the hero?
         If Horizontal_Distance(Monster_Center_X, Hero_Center_X) > 8 Then
             'No, the monster is not close to the hero.
+
             'Move the monster to the right fast.
             Monster.X += Monster_Speed
+
         Else
             'Yes, the monster is close to the hero.
+
             'Move the monster to the right slowly.
             Monster.X += 1
+
         End If
 
-        'Play undead moveing sound.
+        'Play undead moving sound.
         If GS.IsPlaying("Undead_Move") = False Then
             GS.Play("Undead_Move")
         End If
         '*********************************************************************************
 
-
-
-
-
         'Wall Collision Handler - Moving Right*****************
         If Walls IsNot Nothing Then
             For index = 0 To UBound(Walls)
+
                 'Is the monster touching the wall?
                 If Monster.IntersectsWith(Walls(index).Rec) = True Then
                     'Yes, the monster is touching the wall.
@@ -1900,21 +1892,16 @@ Public Class Form1
         End If
         '************************************************
 
-
-
-
         'Attack Right**************************************************
         'Is the monster touching the hero?
         If Monster.IntersectsWith(OurHero.Rec) = True Then
             'Yes, the monster is touching the hero.
 
-
             'Push the monster to the left of the hero.
             Monster.X = OurHero.Rec.X - Monster.Width - 1
 
-
             'Roll for initative.************************
-            If RandomNumber.Next(1, 20) > 4 Then 'Chance to hit is 1 in 20
+            If RandomNumber.Next(1, 20) > 15 Then 'Chance to hit is 1 in 20
                 Monster_Initiative = True
             Else
                 Monster_Initiative = False
@@ -1922,6 +1909,11 @@ Public Class Form1
             '*******************************************
 
             If Monster_Initiative = True Then
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
 
                 'Reset the hit total on the first hit.
                 If OurHero.Hit = False Then
@@ -1931,38 +1923,27 @@ Public Class Form1
                 'Attack the heros life points directly.
                 OurHero.Life -= Monster_Attack
 
-
-
                 If OurHero.Life < 1 Then
 
                     'Play hero death sound.
-                    'If GS.IsPlaying("Hero_Death") = False Then
-                    GS.Play("Hero_Death")
+                    If GS.IsPlaying("Hero_Death") = False Then
+                        GS.Play("Hero_Death")
+                    End If
 
                     OurHero.Life = 0
-                    'End If
-                End If
 
+                End If
 
                 OurHero.Hit = True
-
-
-                'If GS.IsPlaying("Undead_Move") = True Then
-                '    GS.Pause("Undead_Move")
-                'End If
-
-                'Play undead attack sound.
-                If GS.IsPlaying("Undead_Attack") = False Then
-                    GS.Play("Undead_Attack") 'play the Music
-                End If
 
                 'Knock hero to the right of monster.
                 OurHero.Rec.X = Monster.X + Monster.Width + 32
 
 
-                'Wall Collision Handler - Moving Right*****************
+                'Wall Collision Handler - Moving Right *******************************
                 If Walls IsNot Nothing Then
                     For index = 0 To UBound(Walls)
+
                         'Is the hero touching a wall?
                         If OurHero.Rec.IntersectsWith(Walls(index).Rec) = True Then
                             'Yes, the hero is touching a wall.
@@ -1976,7 +1957,7 @@ Public Class Form1
                         End If
                     Next
                 End If
-                '************************************************
+                '*********************************************************************
 
             End If
         End If
@@ -2096,19 +2077,25 @@ Public Class Form1
 
     Private Sub Move_Monster_Left()
 
+        Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
+        Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
+
         'Move Left************************************************************************************
         'Move the monster to the left.
         'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
         'Is the monster close to the hero?
-        If Math.Abs(Monster.X + (Monster.Width \ 2) - (OurHero.Rec.X + OurHero.Rec.Width \ 2)) > 8 Then
-
+        If Horizontal_Distance(Monster_Center_X, Hero_Center_X) > 8 Then
             'No, the monster is not close to the hero.
+
             'Move the monster to the left fast.
             Monster.X -= Monster_Speed
+
         Else
             'Yes, the monster is close to the hero.
+
             'Move the monster to the left slowly.
             Monster.X -= 1
+
         End If
 
         'Play undead moving sound.
@@ -2116,20 +2103,23 @@ Public Class Form1
             GS.Play("Undead_Move")
         End If
         '***********************************************************************************************
+
         'Wall Collision Handler Monster moving left*************************
-        'Is the monster touching the wall?
-        If Monster.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the monster is touching the wall.
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
 
-            'Push monster to the right of wall.
-            Monster.X = Wall.Rec.X + Wall.Rec.Width
+                'Is the monster touching the wall?
+                If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                    'Yes, the monster is touching the wall.
 
-            'If GS.IsPlaying("Undead_Move") = True Then
-            '    GS.Pause("Undead_Move")
-            'End If
+                    'Push monster to the right of wall.
+                    Monster.X = Walls(index).Rec.X + Walls(index).Rec.Width
 
+                End If
+            Next
         End If
         '************************************************
+
         'Attack Left************************************************************************************
         'Is the monster touching the hero?
         If Monster.IntersectsWith(OurHero.Rec) = True Then
@@ -2139,14 +2129,14 @@ Public Class Form1
             Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 1
 
             'Roll for initative.************************
-            If RandomNumber.Next(1, 20) > 5 Then 'Chance to hit is 1 in 20
+            If RandomNumber.Next(1, 20) > 15 Then 'Chance to hit is 1 in 20
                 Monster_Initiative = True
             Else
                 Monster_Initiative = False
             End If
             '*******************************************
 
-            If Monster_Initiative = False Then
+            If Monster_Initiative = True Then
 
                 'Play undead attack sound.
                 If GS.IsPlaying("Undead_Attack") = False Then
@@ -2164,7 +2154,9 @@ Public Class Form1
                 If OurHero.Life < 1 Then
 
                     'Play hero death sound.
-                    GS.Play("Hero_Death")
+                    If GS.IsPlaying("Hero_Death") = False Then
+                        GS.Play("Hero_Death")
+                    End If
 
                     OurHero.Life = 0
 
@@ -2175,20 +2167,28 @@ Public Class Form1
                 'Knock hero to the left of monster.
                 OurHero.Rec.X = Monster.X - OurHero.Rec.Width - 32
 
-                'Is the hero touching a wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching a wall.
+                'Wall Collision Handler - Moving Left *******************************
+                If Walls IsNot Nothing Then
+                    For index = 0 To UBound(Walls)
 
-                    'Knock hero to the right of wall.
-                    OurHero.Rec.X = Wall.Rec.X + Wall.Rec.Width + 1
+                        'Is the hero touching a wall?
+                        If OurHero.Rec.IntersectsWith(Walls(index).Rec) = True Then
+                            'Yes, the hero is touching a wall.
 
-                    'Knock the monster to the right of the hero.
-                    Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
+                            'Knock hero to the right of wall.
+                            OurHero.Rec.X = Walls(index).Rec.X + Walls(index).Rec.Width + 1
 
+                            'Knock the monster to the right of the hero.
+                            Monster.X = OurHero.Rec.X + OurHero.Rec.Width + 16
+
+                        End If
+                    Next
                 End If
+                '*********************************************************************
+
             End If
         End If
-        '*********************************************************************
+
     End Sub
 
     Private Sub Move_Hero_Up()
@@ -2298,51 +2298,68 @@ Public Class Form1
 
     Private Sub Move_Monster_Up()
 
+        Dim Monster_Center_Y As Integer = Monster.Y + Monster.Height \ 2
+        Dim Hero_Center_Y As Integer = OurHero.Rec.Y + OurHero.Rec.Height \ 2
 
-
-
-        'If OurMonster.WallCollision = False Then
-
-
-        'Move the monster up.
+        'Move Monster Up. **************************************************************
+        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
         'Is the monster close to the hero?
-        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
+        If Vertical_Distance(Monster_Center_Y, Hero_Center_Y) > 8 Then
             'No, the monster is not close to the hero.
+
             'Move the monster up fast.
             Monster.Y -= Monster_Speed
+
         Else
             'Yes, the monster is close to the hero.
+
             'Move the monster up slowly.
             Monster.Y -= 1
+
         End If
 
-        'Play undead moveing sound.
+        'Play undead moving sound.
         If GS.IsPlaying("Undead_Move") = False Then
             GS.Play("Undead_Move")
         End If
+        '*********************************************************************************
 
         'Wall Collision Handler - Monster moving up *************************
-        'Is the monster touching the wall?
-        If Monster.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the monster is touching the wall.
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
 
-            'Push the hero below the wall.
-            Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+                'Is the monster touching the wall?
+                If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                    'Yes, the monster is touching the wall.
 
-            'If GS.IsPlaying("Undead_Move") = True Then
-            '    GS.Pause("Undead_Move")
-            'End If
+                    'Push the hero below the wall.
+                    Monster.Y = Walls(index).Rec.Y + Walls(index).Rec.Height
 
+                End If
+            Next
         End If
         '************************************************
+
         'Attack Up************************************************************************************
         If Monster.IntersectsWith(OurHero.Rec) = True Then
 
             'Push the monster below the hero.
             Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 1
 
-            If OurHero.Initiative = False Then
+            'Roll for initative.************************
+            If RandomNumber.Next(1, 20) > 15 Then 'Chance to hit is 1 in 20
+                Monster_Initiative = True
+            Else
+                Monster_Initiative = False
+            End If
+            '*******************************************
 
+            If Monster_Initiative = True Then
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
 
                 'Reset the hit total on the first hit.
                 If OurHero.Hit = False Then
@@ -2352,37 +2369,48 @@ Public Class Form1
                 'Attack the heros life points directly.
                 OurHero.Life -= Monster_Attack
 
+                If OurHero.Life < 1 Then
+
+                    'Play hero death sound.
+                    If GS.IsPlaying("Hero_Death") = False Then
+                        GS.Play("Hero_Death")
+                    End If
+
+                    OurHero.Life = 0
+
+                End If
+
                 OurHero.Hit = True
 
-                'Play undead attack sound.
-                If GS.IsPlaying("Undead_Attack") = False Then
-                    GS.Play("Undead_Attack") 'play the Music
-                End If
+                ''Play undead attack sound.
+                'If GS.IsPlaying("Undead_Attack") = False Then
+                '    GS.Play("Undead_Attack") 'play the Music
+                'End If
 
                 'Knock hero above the monster.
                 OurHero.Rec.Y = Monster.Y - OurHero.Rec.Height - 32
 
-                'Is the hero touching a wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching a wall.
+                'Wall Collision Handler - Moving Up *******************************
+                If Walls IsNot Nothing Then
+                    For index = 0 To UBound(Walls)
 
-                    'Knock hero below the wall.
-                    OurHero.Rec.Y = Wall.Rec.Y + Wall.Rec.Height + 1
+                        'Is the hero touching a wall?
+                        If OurHero.Rec.IntersectsWith(Walls(index).Rec) = True Then
+                            'Yes, the hero is touching a wall.
 
-                    'Knock the monster below the hero.
-                    Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
+                            'Knock hero below the wall.
+                            OurHero.Rec.Y = Walls(index).Rec.Y + Walls(index).Rec.Height + 1
 
+                            'Knock the monster below the hero.
+                            Monster.Y = OurHero.Rec.Y + OurHero.Rec.Height + 16
+
+                        End If
+                    Next
                 End If
+                '*********************************************************************
+
             End If
         End If
-
-
-        'End If
-
-
-
-
-
 
     End Sub
 
@@ -2456,7 +2484,7 @@ Public Class Form1
                                 Monster.Y = Walls(index).Rec.Y - Monster.Height - 1
 
                                 'Knock the hero above the monster.
-                                OurHero.Rec.Y = Monster.Y + Monster.Height + 16
+                                OurHero.Rec.Y = Monster.Y - Monster.Height - 16
 
                             End If
                         Next
@@ -2507,51 +2535,68 @@ Public Class Form1
 
     Private Sub Move_Monster_Down()
 
+        Dim Monster_Center_Y As Integer = Monster.Y + Monster.Height \ 2
+        Dim Hero_Center_Y As Integer = OurHero.Rec.Y + OurHero.Rec.Height \ 2
 
-        'Move monster down.
-        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.**************
+        'Move Monster Down. **************************************************************
+        'Proximity based speed controller. - Fixes Bug: The monster sometimes oscillates.
         'Is the monster close to the hero?
-        If Math.Abs(Monster.Y + (Monster.Height \ 2) - (OurHero.Rec.Y + OurHero.Rec.Height \ 2)) > 8 Then
+        If Vertical_Distance(Monster_Center_Y, Hero_Center_Y) > 8 Then
             'No, the monster is not close to the hero.
 
             'Move the monster down fast.
             Monster.Y += Monster_Speed
+
         Else
             'Yes, the monster is close to the hero.
+
             'Move the monster down slowly.
             Monster.Y += 1
 
         End If
 
-        'Play undead moveing sound.
+        'Play undead moving sound.
         If GS.IsPlaying("Undead_Move") = False Then
             GS.Play("Undead_Move")
         End If
         '***********************************************************************************************
 
         'Wall Collision Handler - Moving Down ********************************************************
-        'Is the monster touching the wall?
-        If Monster.IntersectsWith(Wall.Rec) = True Then
-            'Yes, the monster is touching the wall.
+        If Walls IsNot Nothing Then
+            For index = 0 To UBound(Walls)
 
-            'Push the monster above the wall.
-            Monster.Y = Wall.Rec.Y - Monster.Height - 1
+                'Is the monster touching the wall?
+                If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                    'Yes, the monster is touching the wall.
 
-            'If GS.IsPlaying("Undead_Move") = True Then
-            '    GS.Pause("Undead_Move")
-            'End If
+                    'Push the monster above the wall.
+                    Monster.Y = Walls(index).Rec.Y - Monster.Height - 1
 
+                End If
+            Next
         End If
         '************************************************
 
-
+        'Attack Down ************************************************************************************
         If Monster.IntersectsWith(OurHero.Rec) = True Then
 
             'Push to monster above the hero.
             Monster.Y = OurHero.Rec.Y - Monster.Height - 1
 
+            'Roll for initative.************************
+            If RandomNumber.Next(1, 20) > 15 Then 'Chance to hit is 1 in 20
+                Monster_Initiative = True
+            Else
+                Monster_Initiative = False
+            End If
+            '*******************************************
 
-            If OurHero.Initiative = False Then
+            If Monster_Initiative = True Then
+
+                'Play undead attack sound.
+                If GS.IsPlaying("Undead_Attack") = False Then
+                    GS.Play("Undead_Attack") 'play the Music
+                End If
 
                 'Reset the hit total on the first hit.
                 If OurHero.Hit = False Then
@@ -2561,28 +2606,47 @@ Public Class Form1
                 'Attack the heros life points directly.
                 OurHero.Life -= Monster_Attack
 
+                If OurHero.Life < 1 Then
+
+                    'Play hero death sound.
+                    If GS.IsPlaying("Hero_Death") = False Then
+                        GS.Play("Hero_Death")
+                    End If
+
+                    OurHero.Life = 0
+
+                End If
+
 
                 OurHero.Hit = True
 
-                'Play undead attack sound.
-                If GS.IsPlaying("Undead_Attack") = False Then
-                    GS.Play("Undead_Attack") 'play the Music
-                End If
+                ''Play undead attack sound.
+                'If GS.IsPlaying("Undead_Attack") = False Then
+                '    GS.Play("Undead_Attack") 'play the Music
+                'End If
 
                 'Knock hero below monster.
                 OurHero.Rec.Y = Monster.Y + Monster.Height + 32
 
-                'Is the hero touching a wall?
-                If OurHero.Rec.IntersectsWith(Wall.Rec) = True Then
-                    'Yes, the hero is touching a wall.
+                'Wall Collision Handler - Moving Down *******************************
+                If Walls IsNot Nothing Then
+                    For index = 0 To UBound(Walls)
 
-                    'Knock hero above the wall.
-                    OurHero.Rec.Y = Wall.Rec.Y - OurHero.Rec.Height - 1
+                        'Is the hero touching a wall?
+                        If OurHero.Rec.IntersectsWith(Walls(index).Rec) = True Then
+                            'Yes, the hero is touching a wall.
 
-                    'Knock the monster above the hero.
-                    Monster.Y = OurHero.Rec.Y - Monster.Height - 16
+                            'Knock hero above the wall.
+                            OurHero.Rec.Y = Walls(index).Rec.Y - OurHero.Rec.Height - 1
 
+                            'Knock the monster above the hero.
+                            Monster.Y = OurHero.Rec.Y - Monster.Height - 16
+
+                        End If
+                    Next
                 End If
+                '*********************************************************************
+
             End If
         End If
 
@@ -2824,13 +2888,19 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Moving Right*****************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
 
-                                    'Push monster to the left of wall.
-                                    Monster.X = Wall.Rec.X - Monster.Width - 1
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
+
+                                            'Push monster to the left of wall.
+                                            Monster.X = Walls(index).Rec.X - Monster.Width - 1
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
 
@@ -2864,21 +2934,21 @@ Public Class Form1
                                 Monster.X -= CInt(Projectile_Speed / 3)
 
 
-                                'Wall Collision Handler Monster moing left*************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                'Wall Collision Handler Monster moving left*************************
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push monster to the right of wall.
-                                    Monster.X = Wall.Rec.X + Wall.Rec.Width
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push monster to the right of wall.
+                                            Monster.X = Walls(index).Rec.X + Walls(index).Rec.Width
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
-
-
-
-
-
 
                             End If
                         End If
@@ -2913,18 +2983,21 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Monster moving up *************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push the hero below the wall.
-                                    Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push the hero below the wall.
+                                            Monster.Y = Walls(index).Rec.Y + Walls(index).Rec.Height
+
+                                        End If
+
+                                    Next
                                 End If
                                 '************************************************
-
-
-
 
                             End If
                         End If
@@ -2956,19 +3029,20 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Moving Down ********************************************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push the monster above the wall.
-                                    Monster.Y = Wall.Rec.Y - Monster.Height - 1
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push the monster above the wall.
+                                            Monster.Y = Walls(index).Rec.Y - Monster.Height - 1
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
-
-
-
-
 
                             End If
                         End If
@@ -2998,13 +3072,19 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Moving Right*****************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push monster to the left of wall.
-                                    Monster.X = Wall.Rec.X - Monster.Width - 1
 
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
+
+                                            'Push monster to the left of wall.
+                                            Monster.X = Walls(index).Rec.X - Monster.Width - 1
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
 
@@ -3016,13 +3096,18 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Monster moving up *************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push the hero below the wall.
-                                    Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push the hero below the wall.
+                                            Monster.Y = Walls(index).Rec.Y + Walls(index).Rec.Height
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
 
@@ -3060,13 +3145,18 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Moving Right*****************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push monster to the left of wall.
-                                    Monster.X = Wall.Rec.X - Monster.Width - 1
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push monster to the left of wall.
+                                            Monster.X = Walls(index).Rec.X - Monster.Width - 1
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
 
@@ -3078,13 +3168,18 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Moving Down ********************************************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push the monster above the wall.
-                                    Monster.Y = Wall.Rec.Y - Monster.Height - 1
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push the monster above the wall.
+                                            Monster.Y = Walls(index).Rec.Y - Monster.Height - 1
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
 
@@ -3120,13 +3215,18 @@ Public Class Form1
 
 
                                 'Wall Collision Handler Monster moving left*************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push monster to the right of wall.
-                                    Monster.X = Wall.Rec.X + Wall.Rec.Width
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push monster to the right of wall.
+                                            Monster.X = Walls(index).Rec.X + Walls(index).Rec.Width
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
 
@@ -3139,24 +3239,20 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Monster moving up *************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push the hero below the wall.
-                                    Monster.Y = Wall.Rec.Y + Wall.Rec.Height
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push the hero below the wall.
+                                            Monster.Y = Walls(index).Rec.Y + Walls(index).Rec.Height
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
-
-
-
-
-
-
-
-
-
 
                             End If
                         End If
@@ -3195,19 +3291,20 @@ Public Class Form1
 
 
                                 'Wall Collision Handler Monster moving left*************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push monster to the right of wall.
-                                    Monster.X = Wall.Rec.X + Wall.Rec.Width
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push monster to the right of wall.
+                                            Monster.X = Walls(index).Rec.X + Walls(index).Rec.Width
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
-
-
-
-
 
 
                                 'Knock the monster below the hero.
@@ -3217,19 +3314,20 @@ Public Class Form1
 
 
                                 'Wall Collision Handler - Moving Down ********************************************************
-                                'Is the monster touching the wall?
-                                If Monster.IntersectsWith(Wall.Rec) = True Then
-                                    'Yes, the monster is touching the wall.
+                                If Walls IsNot Nothing Then
+                                    For index = 0 To UBound(Walls)
 
-                                    'Push the monster above the wall.
-                                    Monster.Y = Wall.Rec.Y - Monster.Height - 1
+                                        'Is the monster touching the wall?
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                            'Yes, the monster is touching the wall.
 
+                                            'Push the monster above the wall.
+                                            Monster.Y = Walls(index).Rec.Y - Monster.Height - 1
+
+                                        End If
+                                    Next
                                 End If
                                 '************************************************
-
-
-
-
 
                             End If
                         End If
@@ -3703,6 +3801,9 @@ Public Class Form1
 
             If Selected_Tool = ToolsEnum.Wall Then
 
+                IsSelected = False
+                Selected_Index = -1
+
                 'Define a wall.
                 Wall.Rec.Width = 0
                 Wall.Rec.Height = 0
@@ -3747,6 +3848,7 @@ Public Class Form1
                 'Has the mouse moved?
                 If Wall.Rec.Width > 10 And Wall.Rec.Height > 10 Then
                     'Yes, the mouse moved.
+
                     Add_Wall(New System.Drawing.Rectangle(Wall.Rec.Location, Wall.Rec.Size))
 
                     If MenuItemWall.Checked = True Then
@@ -3825,42 +3927,46 @@ Public Class Form1
 
     Private Sub Remove_Wall(IndexToRemove As Integer)
 
+        'Is this the last wall?
+        If UBound(Walls) > 0 Then 'Arrays start at zero.
+            'No, this is not the last wall.
 
-
-        If UBound(Walls) > 0 Then
-
-            'Create temporary array
+            'Create temporary walls array. Set to the size of the walls array minus one wall.
             Dim TempWalls(UBound(Walls) - 1) As WallInfo
+
+            'Create temporary walls array index. Set the temporary array index to the first wall.
             Dim TempIndex As Integer = LBound(Walls)
 
             'Copy the array without the element to the temporary array.
+            'Go thur the walls array, one by one, start to end.
             For index = LBound(Walls) To UBound(Walls)
 
+                'Is the current wall selected for removal.
                 If index <> IndexToRemove Then
+                    'No, the current wall is not selected for removal.
 
+                    'Copy the current wall from walls to the temporary walls array.
                     TempWalls(TempIndex) = Walls(index)
 
+                    'Advance the temporary index.
                     TempIndex += 1
+
                 End If
-
-
             Next
 
-            'Resize the array.
+            'Resize the walls array to match the temporary walls array size.
             ReDim Walls(UBound(TempWalls))
 
-            'Copy the temporary array to the array.
+            'Copy the temporary walls array back to the walls array.
             Walls = TempWalls
 
         Else
+            'Yes, this is the last wall.
 
-
-            Walls = Nothing
+            Walls = Nothing 'Reset walls to default value.
 
 
         End If
-
-
 
     End Sub
 
@@ -3901,6 +4007,14 @@ Public Class Form1
     End Sub
 
 End Class
+
+Public Enum MCI_NOTIFY As Integer
+    SUCCESSFUL = &H1
+    SUPERSEDED = &H2
+    ABORTED = &H4
+    FAILURE = &H8
+End Enum
+
 Public Class GameSounds
     Inherits NativeWindow
 
