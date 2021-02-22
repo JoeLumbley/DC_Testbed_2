@@ -10,6 +10,94 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\hero_death.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\undead_move.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\undead_hit.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\undead_death.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\undead_attack.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\potion_pickup.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\not_enough_magic.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\Monster Alien Roar Aggressive.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\magic_sound.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\level_music.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Old - Sound Files\hero_move.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\hero_move.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\hero_death.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\undead_move.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\undead_hit.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\undead_death.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\undead_attack.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\potion_pickup.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\not_enough_magic.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\Monster Alien Roar Aggressive.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\magic_sound.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="bin\Debug\net5.0-windows\level_music.mp3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Import Include="System.Data" />
     <Import Include="System.Drawing" />
     <Import Include="System.Windows.Forms" />

@@ -118,10 +118,37 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="level_music" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\level_music.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="hero_death" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\hero_death.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="machine_gun" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\machine_gun.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="hero_move" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\hero_move.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="level_music" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\level_music.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="magic_sound" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\magic_sound.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Monster_Alien_Roar_Aggressive" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Monster Alien Roar Aggressive.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="not_enough_magic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\not_enough_magic.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="potion_pickup" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\potion_pickup.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="undead_attack" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\undead_attack.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="undead_death" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\undead_death.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="undead_hit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\undead_hit.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="undead_move" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\undead_move.mp3;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>
