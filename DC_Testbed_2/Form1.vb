@@ -4,7 +4,7 @@
 'A work in progress...
 'This is a simple action role-playing game in which the hero navigates a labyrinth,
 'battles various monsters, avoids traps, solves puzzles, and loots any treasure that is found.
-'Coded by Joseph Lumbley.
+'Coded by Joseph Lumbley. Copyright 2021
 
 Imports System.Math
 Imports System.Drawing
@@ -120,7 +120,7 @@ Public Class Form1
 
     Private Viewport As New Rectangle(0, 0, 640, 480)
 
-    Private _BufferFlag As Boolean = True
+    Private Swap_Buffer As Boolean = True
 
     Private Level As LevelInfo
 
@@ -367,69 +367,14 @@ Public Class Form1
 
     End Sub
 
-    Private Shared Sub CreateSoundFileFromResource()
-
-        'Create a level music file in the games start up path.
-        Dim file As String = System.IO.Path.Combine(Application.StartupPath, "level_music.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.level_music)
-        End If
-        'Create a hero move file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "hero_move.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.hero_move)
-        End If
-        'Create a undead move sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "undead_move.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.undead_move)
-        End If
-        'Create a undead attack sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "undead_attack.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.undead_attack)
-        End If
-        'Create a undead hit sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "undead_hit.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.undead_hit)
-        End If
-        'Create a undead death sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "undead_death.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.undead_death)
-        End If
-        'Create a magic sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "magic_sound.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.magic_sound)
-        End If
-        'Create a not enough magic sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "not_enough_magic.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.not_enough_magic)
-        End If
-        'Create a potion pickup sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "potion_pickup.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.potion_pickup)
-        End If
-        'Create a hero death sound file in the games start up path.
-        file = System.IO.Path.Combine(Application.StartupPath, "hero_death.mp3")
-        If (Not System.IO.File.Exists(file)) Then
-            System.IO.File.WriteAllBytes(file, My.Resources.hero_death)
-        End If
-
-    End Sub
-
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
         'Display timer
 
         'Swap Buffers
-        If _BufferFlag = True Then
-            _BufferFlag = False
+        If Swap_Buffer = True Then
+            Swap_Buffer = False
         Else
-            _BufferFlag = True
+            Swap_Buffer = True
         End If
 
         'Update the display.
@@ -439,11 +384,17 @@ Public Class Form1
 
     Private Sub PictureBox1_Paint(ByVal sender As System.Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles PictureBox1.Paint
 
-        If _BufferFlag = True Then
+        'Draw buffer one or two?
+        If Swap_Buffer = True Then
+            'Draw to buffer one.
 
-            Using Buffer1_BMP As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
+            'Create a bitmap for buffer one.
+            Using Buffer1_Bitmap As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
 
-                Using goBuf1 As Graphics = Graphics.FromImage(Buffer1_BMP)
+                'Create a graphics object for the bitmap.
+                Using goBuf1 As Graphics = Graphics.FromImage(Buffer1_Bitmap)
+
+                    'Use these settings when drawing to the backbuffer.
                     With goBuf1
                         .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug Fix
                         'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
@@ -454,6 +405,7 @@ Public Class Form1
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
                     End With
 
+                    'Use these settings when drawing to the screen.
                     With e.Graphics
                         .CompositingMode = Drawing2D.CompositingMode.SourceCopy
                         .SmoothingMode = Drawing2D.SmoothingMode.None
@@ -548,7 +500,7 @@ Public Class Form1
                         goBuf1.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
 
-                    e.Graphics.DrawImageUnscaled(Buffer1_BMP, 0, 0)
+                    e.Graphics.DrawImageUnscaled(Buffer1_Bitmap, 0, 0)
 
                 End Using
             End Using
@@ -2734,6 +2686,7 @@ Public Class Form1
         End If
 
     End Sub
+
     Private Sub Timer3_Tick(sender As Object, e As EventArgs) Handles Timer3.Tick
 
         If Monster_Life = -1 Then
@@ -2759,6 +2712,7 @@ Public Class Form1
         Timer3.Stop()
 
     End Sub
+
     Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles MyBase.KeyDown
 
         If e.KeyValue = Keys.Left Then
@@ -2854,22 +2808,7 @@ Public Class Form1
 
     End Sub
 
-    Private Sub MoveViewport(direction As DirectionEnum)
 
-        If direction = DirectionEnum.Left Then
-            Viewport.X -= 10
-        End If
-        If direction = DirectionEnum.Right Then
-            Viewport.X += 10
-        End If
-        If direction = DirectionEnum.Up Then
-            Viewport.Y -= 10
-        End If
-        If direction = DirectionEnum.Down Then
-            Viewport.Y += 10
-        End If
-
-    End Sub
 
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
 
@@ -2901,6 +2840,7 @@ Public Class Form1
         End Select
 
     End Sub
+
     Private Sub Form1_Resize(sender As Object, e As EventArgs) Handles MyBase.Resize
 
         'viewport
@@ -2918,149 +2858,18 @@ Public Class Form1
         Magic_Bar_Frame.Height = 20
 
     End Sub
-    Private Function Distance_Between_Points(Point1 As Point, Point2 As Point) As Double
 
-        'Returns the distance between two points.
-        Distance_Between_Points = Sqrt((Abs(Point2.X - Point1.X) ^ 2) + (Abs(Point2.Y - Point1.Y) ^ 2))
-
-
-        'd = √((x2 - x1)² + (y2 - y1)²) Distance Formula - khanacademy.org
-        'Distance = Sqr((Abs(x2 - x1) ^ 2) + (Abs(y2 - y1) ^ 2)) Killer42 - bytes.com
-        'Application of the Pythagorean Theorem. - Analytic Geometry
-
-    End Function
-    Private Function Horizontal_Distance(X1 As Integer, X2 As Integer) As Double
-
-        Horizontal_Distance = Abs(X1 - X2)
-
-    End Function
-    Private Function Vertical_Distance(Y1 As Integer, Y2 As Integer) As Double
-
-        Vertical_Distance = Abs(Y1 - Y2)
-
-    End Function
     Private Sub Form1_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
         Me.Form1_Resize(sender, e)
 
         CtrlDown = False
 
     End Sub
-    Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
-        GS.Dispose() 'make sure you call dispose on the new GameSounds class when closing form
-    End Sub
-    Private Function Get_Hero_Direction() As DirectionEnum
 
-        If MoveRight = True Then
-            If MoveUp = True Then
-                Get_Hero_Direction = DirectionEnum.RightUP
-                Exit Function
-            ElseIf MoveDown = True Then
-                Get_Hero_Direction = DirectionEnum.RightDown
-                Exit Function
-            Else
-                Get_Hero_Direction = DirectionEnum.Right
-                Exit Function
-            End If
-        ElseIf MoveLeft = True Then
-            If MoveUp = True Then
-                Get_Hero_Direction = DirectionEnum.LeftUp
-                Exit Function
-            ElseIf MoveDown = True Then
-                Get_Hero_Direction = DirectionEnum.LeftDown
-                Exit Function
-            Else
-                Get_Hero_Direction = DirectionEnum.Left
-                Exit Function
-            End If
-        ElseIf MoveUp = True Then
-            Get_Hero_Direction = DirectionEnum.Up
-            Exit Function
-        ElseIf MoveDown = True Then
-            Get_Hero_Direction = DirectionEnum.Down
-            Exit Function
-        Else
-            Get_Hero_Direction = DirectionEnum.None
-            Exit Function
-        End If
 
-    End Function
-    Private Sub MoveHero(Direction As DirectionEnum)
 
-        Select Case Direction
-            Case DirectionEnum.Right
-                'Move hero to the right.
-                OurHero.Rec.X += OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.Left
-                'Move hero to the left.
-                OurHero.Rec.X -= OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.Up
-                'Move hero up.
-                OurHero.Rec.Y -= OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.Down
-                'Move hero down.
-                OurHero.Rec.Y += OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.RightUP
-                'Move hero to the right.
-                OurHero.Rec.X += OurHero.Speed
-                'Move hero up.
-                OurHero.Rec.Y -= OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.RightDown
-                'Move hero to the right.
-                OurHero.Rec.X += OurHero.Speed
-                'Move hero down.
-                OurHero.Rec.Y += OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.LeftUp
-                'Move hero to the left.
-                OurHero.Rec.X -= OurHero.Speed
-                'Move hero up.
-                OurHero.Rec.Y -= OurHero.Speed
-                Exit Sub
-            Case DirectionEnum.LeftDown
-                'Move hero to the left.
-                OurHero.Rec.X -= OurHero.Speed
-                'Move hero down.
-                OurHero.Rec.Y += OurHero.Speed
-                Exit Sub
-        End Select
 
-    End Sub
-    Private Sub Write_AudioFile_to_Path(MStream As MemoryStream, Path As String)
-        'This sub procedure takes a memory stream from an audio resource
-        'and saves it as an audio file at the path.
-        '
-        'A example call would look like this.
-        '
-        'Dim ms As New MemoryStream 'Create memory stream.
-        'My.Resources.level_music.CopyTo(ms) 'Copy audio resource into memory stream.
-        'Write_AudioFile_to_Path(ms, Application.StartupPath & "\level_music.wav")
 
-        Dim AudioFile() As Byte = MStream.ToArray 'Copy memory stream into byte array.
-        File.WriteAllBytes(Path, AudioFile) 'Write the byte array to the drive path.
-
-        'Create a level music file in the apps start up path.
-        'Dim ms As New MemoryStream
-        'My.Resources.level_music.CopyTo(ms)
-        'Dim AudioFile() As Byte = ms.ToArray
-        'File.WriteAllBytes(Application.StartupPath & "\level_music.wav", AudioFile)
-        'ms.Dispose()
-
-    End Sub
-
-    Private Sub GS_SoundEnded(ByVal SndName As String)
-
-        If GS.IsPlaying("Music") = False Then
-
-            GS.Play("Music")
-
-        End If
-
-    End Sub
 
     Private Sub MenuItemEditorOn_Click(sender As Object, e As EventArgs) Handles MenuItemEditorOn.Click
 
@@ -3348,6 +3157,143 @@ Public Class Form1
 
     End Sub
 
+
+
+    Private Sub MenuItemShowHideRulers_Click(sender As Object, e As EventArgs) Handles MenuItemShowHideRulers.Click
+
+        If Show_Rulers = True Then
+            Show_Rulers = False
+            MenuItemShowHideRulers.Checked = False
+        Else
+            Show_Rulers = True
+            MenuItemShowHideRulers.Checked = True
+        End If
+
+    End Sub
+
+    Private Sub MenuItemPointer_Click(sender As Object, e As EventArgs) Handles MenuItemPointer.Click
+
+        Selected_Tool = ToolsEnum.Pointer
+        MenuItemPointer.Checked = True
+
+        If MenuItemWall.Checked = True Then
+            MenuItemWall.Checked = False
+        End If
+
+    End Sub
+
+    Private Sub MenuItemWall_Click(sender As Object, e As EventArgs) Handles MenuItemWall.Click
+
+        Selected_Tool = ToolsEnum.Wall
+        MenuItemWall.Checked = True
+
+        If MenuItemPointer.Checked = True Then
+            MenuItemPointer.Checked = False
+        End If
+
+    End Sub
+
+    Private Function Get_Hero_Direction() As DirectionEnum
+
+        If MoveRight = True Then
+            If MoveUp = True Then
+                Get_Hero_Direction = DirectionEnum.RightUP
+                Exit Function
+            ElseIf MoveDown = True Then
+                Get_Hero_Direction = DirectionEnum.RightDown
+                Exit Function
+            Else
+                Get_Hero_Direction = DirectionEnum.Right
+                Exit Function
+            End If
+        ElseIf MoveLeft = True Then
+            If MoveUp = True Then
+                Get_Hero_Direction = DirectionEnum.LeftUp
+                Exit Function
+            ElseIf MoveDown = True Then
+                Get_Hero_Direction = DirectionEnum.LeftDown
+                Exit Function
+            Else
+                Get_Hero_Direction = DirectionEnum.Left
+                Exit Function
+            End If
+        ElseIf MoveUp = True Then
+            Get_Hero_Direction = DirectionEnum.Up
+            Exit Function
+        ElseIf MoveDown = True Then
+            Get_Hero_Direction = DirectionEnum.Down
+            Exit Function
+        Else
+            Get_Hero_Direction = DirectionEnum.None
+            Exit Function
+        End If
+
+    End Function
+
+    Private Sub MoveHero(Direction As DirectionEnum)
+
+        Select Case Direction
+            Case DirectionEnum.Right
+                'Move hero to the right.
+                OurHero.Rec.X += OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.Left
+                'Move hero to the left.
+                OurHero.Rec.X -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.Up
+                'Move hero up.
+                OurHero.Rec.Y -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.Down
+                'Move hero down.
+                OurHero.Rec.Y += OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.RightUP
+                'Move hero to the right.
+                OurHero.Rec.X += OurHero.Speed
+                'Move hero up.
+                OurHero.Rec.Y -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.RightDown
+                'Move hero to the right.
+                OurHero.Rec.X += OurHero.Speed
+                'Move hero down.
+                OurHero.Rec.Y += OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.LeftUp
+                'Move hero to the left.
+                OurHero.Rec.X -= OurHero.Speed
+                'Move hero up.
+                OurHero.Rec.Y -= OurHero.Speed
+                Exit Sub
+            Case DirectionEnum.LeftDown
+                'Move hero to the left.
+                OurHero.Rec.X -= OurHero.Speed
+                'Move hero down.
+                OurHero.Rec.Y += OurHero.Speed
+                Exit Sub
+        End Select
+
+    End Sub
+
+    Private Sub MoveViewport(direction As DirectionEnum)
+
+        If direction = DirectionEnum.Left Then
+            Viewport.X -= 10
+        End If
+        If direction = DirectionEnum.Right Then
+            Viewport.X += 10
+        End If
+        If direction = DirectionEnum.Up Then
+            Viewport.Y -= 10
+        End If
+        If direction = DirectionEnum.Down Then
+            Viewport.Y += 10
+        End If
+
+    End Sub
+
     Private Sub Add_Wall(ByVal Wall As Rectangle)
 
         If Walls IsNot Nothing Then
@@ -3404,36 +3350,117 @@ Public Class Form1
 
     End Sub
 
-    Private Sub MenuItemShowHideRulers_Click(sender As Object, e As EventArgs) Handles MenuItemShowHideRulers.Click
+    Private Function Distance_Between_Points(Point1 As Point, Point2 As Point) As Double
 
-        If Show_Rulers = True Then
-            Show_Rulers = False
-            MenuItemShowHideRulers.Checked = False
-        Else
-            Show_Rulers = True
-            MenuItemShowHideRulers.Checked = True
+        'Returns the distance between two points.
+        Distance_Between_Points = Sqrt((Abs(Point2.X - Point1.X) ^ 2) + (Abs(Point2.Y - Point1.Y) ^ 2))
+
+
+        'd = √((x2 - x1)² + (y2 - y1)²) Distance Formula - khanacademy.org
+        'Distance = Sqr((Abs(x2 - x1) ^ 2) + (Abs(y2 - y1) ^ 2)) Killer42 - bytes.com
+        'Application of the Pythagorean Theorem. - Analytic Geometry
+
+    End Function
+
+    Private Function Horizontal_Distance(X1 As Integer, X2 As Integer) As Double
+
+        Horizontal_Distance = Abs(X1 - X2)
+
+    End Function
+
+    Private Function Vertical_Distance(Y1 As Integer, Y2 As Integer) As Double
+
+        Vertical_Distance = Abs(Y1 - Y2)
+
+    End Function
+
+    Private Sub GS_SoundEnded(ByVal SndName As String)
+
+        If GS.IsPlaying("Music") = False Then
+
+            GS.Play("Music")
+
         End If
 
     End Sub
 
-    Private Sub MenuItemPointer_Click(sender As Object, e As EventArgs) Handles MenuItemPointer.Click
+    Private Sub Form1_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+        GS.Dispose() 'make sure you call dispose on the new GameSounds class when closing form
+    End Sub
 
-        Selected_Tool = ToolsEnum.Pointer
-        MenuItemPointer.Checked = True
+    Private Sub Write_AudioFile_to_Path(MStream As MemoryStream, Path As String)
+        'This sub procedure takes a memory stream from an audio resource
+        'and saves it as an audio file at the path.
+        '
+        'A example call would look like this.
+        '
+        'Dim ms As New MemoryStream 'Create memory stream.
+        'My.Resources.level_music.CopyTo(ms) 'Copy audio resource into memory stream.
+        'Write_AudioFile_to_Path(ms, Application.StartupPath & "\level_music.wav")
 
-        If MenuItemWall.Checked = True Then
-            MenuItemWall.Checked = False
-        End If
+        Dim AudioFile() As Byte = MStream.ToArray 'Copy memory stream into byte array.
+        File.WriteAllBytes(Path, AudioFile) 'Write the byte array to the drive path.
+
+        'Create a level music file in the apps start up path.
+        'Dim ms As New MemoryStream
+        'My.Resources.level_music.CopyTo(ms)
+        'Dim AudioFile() As Byte = ms.ToArray
+        'File.WriteAllBytes(Application.StartupPath & "\level_music.wav", AudioFile)
+        'ms.Dispose()
 
     End Sub
 
-    Private Sub MenuItemWall_Click(sender As Object, e As EventArgs) Handles MenuItemWall.Click
+    Private Shared Sub CreateSoundFileFromResource()
 
-        Selected_Tool = ToolsEnum.Wall
-        MenuItemWall.Checked = True
-
-        If MenuItemPointer.Checked = True Then
-            MenuItemPointer.Checked = False
+        'Create a level music file in the games start up path.
+        Dim file As String = System.IO.Path.Combine(Application.StartupPath, "level_music.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.level_music)
+        End If
+        'Create a hero move file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "hero_move.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.hero_move)
+        End If
+        'Create a undead move sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_move.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_move)
+        End If
+        'Create a undead attack sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_attack.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_attack)
+        End If
+        'Create a undead hit sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_hit.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_hit)
+        End If
+        'Create a undead death sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "undead_death.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.undead_death)
+        End If
+        'Create a magic sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "magic_sound.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.magic_sound)
+        End If
+        'Create a not enough magic sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "not_enough_magic.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.not_enough_magic)
+        End If
+        'Create a potion pickup sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "potion_pickup.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.potion_pickup)
+        End If
+        'Create a hero death sound file in the games start up path.
+        file = System.IO.Path.Combine(Application.StartupPath, "hero_death.mp3")
+        If (Not System.IO.File.Exists(file)) Then
+            System.IO.File.WriteAllBytes(file, My.Resources.hero_death)
         End If
 
     End Sub
