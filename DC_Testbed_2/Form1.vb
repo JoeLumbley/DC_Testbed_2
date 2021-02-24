@@ -729,30 +729,53 @@ Public Class Form1
 
         'Is the heros magic points critically low?
         If OurHero.Magic >= OurHero.MaxMagic \ 4 Then
-            g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
-            g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
-        Else
-            'Yes, the heros life points are critically low?
+            'No, the heros magic points are not critically low.
 
+            'Draw magic bar.
+            g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+
+            'Draw magic bar outline.
+            g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+
+        Else
+            'Yes, the heros magic points are critically low.
+
+            'Make the magic bar blink to indicate to the player that their life points are critically low.
             Select Case Magic_Blink_Counter
+                'For frames 0 to 8
                 Case 0 To 8
+
+                    'Draw magic bar.
                     g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+
+                    'Draw magic bar outline.
                     g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
+                    'Advance the frame counter by one frame.
                     Magic_Blink_Counter += 1
 
+                    'For frames 9 to 18
                 Case 9 To 18
 
+                    'Draw magic bar with the blink color.
                     g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+
+                    'Draw magic bar outline.
                     g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
+                    'Advance the frame counter by one frame.
                     Magic_Blink_Counter += 1
+
 
                 Case Else
 
-                    g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                    'Draw magic bar with the blink color.
+                    g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+
+                    'Draw magic bar outline.
                     g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
+                    'Reset the frame counter.
                     Magic_Blink_Counter = 0
 
             End Select
@@ -762,49 +785,54 @@ Public Class Form1
 
     Private Sub Draw_Potion(g As Graphics, Rec As Rectangle)
 
+        'Transform the potions level coorinates into viewport coordinates.
         Dim PotionInViewportCoordinates As Rectangle
         PotionInViewportCoordinates = Potion.Rec
         PotionInViewportCoordinates.X = Potion.Rec.X - Viewport.X
         PotionInViewportCoordinates.Y = Potion.Rec.Y - Viewport.Y
 
-        If PotionInViewportCoordinates.IntersectsWith(LightRec) = True Then
+        'Is the editor on?
+        If Editor_On = False Then
+            'No, the editor off. The game is running.
 
-            g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
-            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
+            'Is the potion in the heros light radius?
+            If PotionInViewportCoordinates.IntersectsWith(LightRec) = True Then
+                'Yes, the potion is in the heros light radius.
 
+                'Draw potion hit box.
+                g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
 
-            'Draw shadow.
-            Dim MyShadow As Integer
+                'Draw Potion text.
+                g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
 
-            Dim Distance As Double = Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location)
+                'Draw Potion outline.
+                g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
 
-            If Distance <= Viewport.Width / 2 Then
-                MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location))
             Else
+                'No, the potion is not in the heros light radius.
 
-                MyShadow = 255
+                'Draw potion hit box.
+                g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, PotionInViewportCoordinates.Height)
+
+                'Draw Potion text.
+                g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
+
+                'Draw shadow.
+                g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), PotionInViewportCoordinates)
+
             End If
-            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), PotionInViewportCoordinates)
-
-            g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
 
         Else
+            'Yes, the editor is on. The game is stopped.
 
-            g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, PotionInViewportCoordinates.Height)
+            'Draw potion hit box.
+            g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
+
+            'Draw Potion text.
             g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
 
-            'Draw shadow.
-            Dim MyShadow As Integer
-
-            Dim Distance As Double = Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location)
-
-            If Distance <= Viewport.Width / 2 Then
-                MyShadow = CInt((255 / (Viewport.Width / 2)) * Distance_Between_Points(Potion.Rec.Location, OurHero.Rec.Location))
-            Else
-
-                MyShadow = 255
-            End If
-            g.FillRectangle(New SolidBrush(Color.FromArgb(MyShadow, Color.Black)), PotionInViewportCoordinates)
+            'Draw Potion outline.
+            g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
 
         End If
 
@@ -2202,7 +2230,7 @@ Public Class Form1
     Private Sub Do_Hero_Shots()
 
         'Does the hero have enough magic to cast?
-        If OurHero.Magic >= 25 Then
+        If OurHero.Magic >= 15 Then
             'Yes, the hero has enough magic to cast.
 
             'Does the player want to cast a spell and isn't already casting a spell.
@@ -2243,7 +2271,7 @@ Public Class Form1
                     ProjectileInflight = True
 
                     'Subtract the cost of magic.
-                    OurHero.Magic -= 25
+                    OurHero.Magic -= 15
                     If OurHero.Magic < 1 Then
                         OurHero.Magic = 0
                     End If
