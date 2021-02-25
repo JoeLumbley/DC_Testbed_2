@@ -452,11 +452,11 @@ Public Class Form1
 
                     End If
 
-                    If Potion.Active = True Then
+                    'If Potion.Active = True Then
 
-                        Draw_Potion(goBuf1, Potion.Rec)
+                    Draw_Potion(goBuf1, Potion.Rec)
 
-                    End If
+                    'End If
 
                     Draw_Monster(goBuf1, Monster)
 
@@ -567,11 +567,11 @@ Public Class Form1
 
                     End If
 
-                    If Potion.Active = True Then
+                    'If Potion.Active = True Then
 
-                        Draw_Potion(goBuf2, Potion.Rec)
+                    Draw_Potion(goBuf2, Potion.Rec)
 
-                    End If
+                    'End If
 
                     Draw_Monster(goBuf2, Monster)
 
@@ -718,7 +718,7 @@ Public Class Form1
 
         End If
 
-        g.DrawString("Life " & OurHero.Life.ToString & " / " & OurHero.MaxLife.ToString, Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
+        g.DrawString(OurHero.Life.ToString & "/" & OurHero.MaxLife.ToString & " Life", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
     End Sub
 
@@ -781,23 +781,60 @@ Public Class Form1
             End Select
         End If
 
+
+        g.DrawString(OurHero.Magic.ToString & "/" & OurHero.MaxMagic.ToString & " Magic", Life_Bar_Font, drawBrush, Magic_Bar_Frame.X + Magic_Bar_Frame.Width + 5, Magic_Bar_Frame.Y - 4)
+
     End Sub
 
     Private Sub Draw_Potion(g As Graphics, Rec As Rectangle)
 
-        'Transform the potions level coorinates into viewport coordinates.
-        Dim PotionInViewportCoordinates As Rectangle
-        PotionInViewportCoordinates = Potion.Rec
-        PotionInViewportCoordinates.X = Potion.Rec.X - Viewport.X
-        PotionInViewportCoordinates.Y = Potion.Rec.Y - Viewport.Y
+        If Potion.Active = True Then
 
-        'Is the editor on?
-        If Editor_On = False Then
-            'No, the editor off. The game is running.
+            'Transform the potions level coorinates into viewport coordinates.
+            Dim PotionInViewportCoordinates As Rectangle
+            PotionInViewportCoordinates = Potion.Rec
+            PotionInViewportCoordinates.X = Potion.Rec.X - Viewport.X
+            PotionInViewportCoordinates.Y = Potion.Rec.Y - Viewport.Y
 
-            'Is the potion in the heros light radius?
-            If PotionInViewportCoordinates.IntersectsWith(LightRec) = True Then
-                'Yes, the potion is in the heros light radius.
+            'Is the editor off?
+            If Editor_On = False Then
+                'Yes, the editor is off and the game is running. - Game On
+
+                'Is the potion in the viewport?
+                If Potion.Rec.IntersectsWith(Viewport) = True Then
+                    'Yes, the potion is in the viewport.
+
+                    'Is the potion in the heros light radius?
+                    If PotionInViewportCoordinates.IntersectsWith(LightRec) = True Then
+                        'Yes, the potion is in the heros light radius.
+
+                        'Draw potion hit box.
+                        g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
+
+                        'Draw Potion text.
+                        g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
+
+                        'Draw Potion outline.
+                        g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
+
+                    Else
+                        'No, the potion is not in the heros light radius.
+
+                        'Draw potion hit box.
+                        g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, PotionInViewportCoordinates.Height)
+
+                        'Draw Potion text.
+                        g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
+
+                        'Draw shadow.
+                        g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), PotionInViewportCoordinates)
+
+                    End If
+
+                End If
+
+            Else
+                'No, the editor is on. The game is stopped. - Editor On
 
                 'Draw potion hit box.
                 g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
@@ -808,31 +845,7 @@ Public Class Form1
                 'Draw Potion outline.
                 g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
 
-            Else
-                'No, the potion is not in the heros light radius.
-
-                'Draw potion hit box.
-                g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, PotionInViewportCoordinates.Height)
-
-                'Draw Potion text.
-                g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
-
-                'Draw shadow.
-                g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), PotionInViewportCoordinates)
-
             End If
-
-        Else
-            'Yes, the editor is on. The game is stopped.
-
-            'Draw potion hit box.
-            g.FillRectangle(New SolidBrush(Potion.Color), PotionInViewportCoordinates.X, PotionInViewportCoordinates.Y, PotionInViewportCoordinates.Width, Rec.Height)
-
-            'Draw Potion text.
-            g.DrawString("Potion", Monster_Font, New SolidBrush(Color.Black), PotionInViewportCoordinates, Center_String)
-
-            'Draw Potion outline.
-            g.DrawRectangle(New Pen(Potion.OutlineColor, 1), PotionInViewportCoordinates)
 
         End If
 
@@ -903,25 +916,30 @@ Public Class Form1
 
     Private Sub Draw_Walls(g As Graphics)
 
-        Dim WallInViewportCoordinates As Rectangle
-
         'Is the editor on?
         If Editor_On = False Then
             'No, the editor off. The game is running.
 
-            'Do we have at least one wall?
+            'Is there at least one wall?
             If Walls IsNot Nothing Then
                 'Yes, we have at least one wall.
 
-                'Draw every wall in walls.
+
                 For index = 0 To UBound(Walls)
+
+                    'Transform the walls level coorinates into viewport coordinates.
+                    Dim WallInViewportCoordinates As Rectangle
                     WallInViewportCoordinates = Walls(index).Rec
                     WallInViewportCoordinates.X = Walls(index).Rec.X - Viewport.X
                     WallInViewportCoordinates.Y = Walls(index).Rec.Y - Viewport.Y
 
+                    'Is the wall in the viewport?
                     If Walls(index).Rec.IntersectsWith(Viewport) = True Then
+                        'Yes, the wall is in the viewport.
 
+                        'Is the wall in the heros light radius?
                         If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
+                            'Yes, the wall is in the heros light radius.
 
                             'Draw wall.
                             g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
@@ -937,36 +955,47 @@ Public Class Form1
                             g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), WallInViewportCoordinates)
 
                         End If
+
                     End If
+
                 Next
+
             End If
 
         Else
             'Yes, the editor is on. The game is stopped.
 
-            'Draw every wall in walls.
+            'Is there at least one wall?
             If Walls IsNot Nothing Then
+                'Yes, there is at least one wall.
+
+                'Go thru every wall in the walls array. One by one. Start to end.
                 For index = 0 To UBound(Walls)
+
+                    'Transform the wall level coorinates into viewport coordinates.
+                    Dim WallInViewportCoordinates As Rectangle
                     WallInViewportCoordinates = Walls(index).Rec
                     WallInViewportCoordinates.X = Walls(index).Rec.X - Viewport.X
                     WallInViewportCoordinates.Y = Walls(index).Rec.Y - Viewport.Y
 
-                    'Draw wall.
+                    'Draw wall hit box.
                     g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
 
-                    'Draw outline.
+                    'Draw wall outline.
                     g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
                     'Draw wall number.
                     g.DrawString(index.ToString, Monster_Font, New SolidBrush(Color.Black), WallInViewportCoordinates, Center_String)
 
                 Next
+
             End If
 
 
             If IsSelected = True Then
 
-                'Draw selection outline.
+                'Transform the walls level coorinates into viewport coordinates.
+                Dim WallInViewportCoordinates As Rectangle
                 WallInViewportCoordinates = Walls(Selected_Index).Rec
                 WallInViewportCoordinates.X = Walls(Selected_Index).Rec.X - Viewport.X
                 WallInViewportCoordinates.Y = Walls(Selected_Index).Rec.Y - Viewport.Y
@@ -986,10 +1015,15 @@ Public Class Form1
                 g.FillEllipse(Brushes.Red, WallInViewportCoordinates.Right - 15 \ 2, WallInViewportCoordinates.Bottom - 15 \ 2, 15, 15)
 
                 'Draw X and Y coordinates.
-                Dim MyString As String = Walls(Selected_Index).Rec.X.ToString & ", " & Walls(Selected_Index).Rec.Y.ToString
-                g.DrawString(MyString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.X, WallInViewportCoordinates.Y - 20), Center_String)
+                Dim PositionString As String = Walls(Selected_Index).Rec.X.ToString & ", " & Walls(Selected_Index).Rec.Y.ToString
+                g.DrawString(PositionString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.X, WallInViewportCoordinates.Y - 20), Center_String)
+
+                'Draw width and height.
+                Dim SizeString As String = Walls(Selected_Index).Rec.Width.ToString & ", " & Walls(Selected_Index).Rec.Height.ToString
+                g.DrawString(SizeString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.Right, WallInViewportCoordinates.Bottom + 45), Center_String)
 
             End If
+
         End If
 
     End Sub
@@ -2312,32 +2346,39 @@ Public Class Form1
                         'The player is casting to the right.
                         'Move the projectile to the right.
                         Projectile.X += Projectile_Speed
+
+
+
+                        'ToDo: 'Go thur the monsters one by one, start to end.
+                        'ToDo: If Monsters IsNot Nothing Then
+                        'ToDo: For MonIndex = 0 To UBound(Monsters)
                         'Is the monster alive?
-                        If Monster_Life > 0 Then
+                        If Monster_Life > 0 Then 'If Monsters(MonIndex).Life > 0 Then
                             'Yes, the monster is alive.
                             'Is the projectile touching the monster?
-                            If Projectile.IntersectsWith(Monster) = True Then
+                            If Projectile.IntersectsWith(Monster) = True Then 'ToDo: If Projectile.IntersectsWith(Monsters(MonIndex).Rec) = True Then
                                 'Yes, the hero is touching the monster.
-                                Monster_Hit = True
+
+                                Monster_Hit = True 'ToDo: Monsters(MonIndex).Hit = True
                                 'Attack the monsters life points directly.
-                                Monster_Life -= Projectile_Attack
+                                Monster_Life -= Projectile_Attack 'ToDo: Monsters(MonIndex).Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
                                     Monster_Life = 0
                                 End If
 
                                 'Knock monster to the right of hero.
-                                Monster.X += CInt(Projectile_Speed / 3)
+                                Monster.X += CInt(Projectile_Speed / 3) 'ToDo: Monsters(MonIndex).X += CInt(Projectile_Speed / 3)
 
                                 'Wall Collision Handler - Moving Right*****************
                                 If Walls IsNot Nothing Then
                                     For index = 0 To UBound(Walls)
 
                                         'Is the monster touching the wall?
-                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then
+                                        If Monster.IntersectsWith(Walls(index).Rec) = True Then 'ToDo: If Monsters(MonIndex).IntersectsWith(Walls(index).Rec) = True Then
                                             'Yes, the monster is touching the wall.
 
                                             'Push monster to the left of wall.
-                                            Monster.X = Walls(index).Rec.X - Monster.Width - 1
+                                            Monster.X = Walls(index).Rec.X - Monster.Width - 1 'ToDo: Monsters(MonIndex).X = Walls(index).Rec.X - Monsters(MonIndex).Width - 1
 
                                         End If
                                     Next
@@ -2346,6 +2387,9 @@ Public Class Form1
 
                             End If
                         End If
+                        'ToDo: Next
+                        'ToDo: End if
+
                     Case DirectionEnum.Left
                         'Move projectile to the left.
                         Projectile.X -= Projectile_Speed
