@@ -415,48 +415,13 @@ Public Class Form1
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.HighSpeed
                     End With
 
-                    If Editor_On = False Then
+                    goBuf1.Clear(Level.BackgroundColor)
 
-                        goBuf1.Clear(Level.BackgroundColor)
+                    Draw_Hero_Light(goBuf1, OurHero.Rec)
 
-                        Draw_Hero_Light(goBuf1, OurHero.Rec)
-
-                    Else
-
-                        goBuf1.Clear(Level.BackgroundColor)
-
-                        'Vertical lines
-                        For index = 0 To Level.Rec.Width Step 100
-                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
-
-                            If Show_Rulers = True Then
-                                If index <> Level.Rec.Width Then
-                                    goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
-                                End If
-                            End If
-
-                        Next
-
-                        'Horizontal lines
-                        For index = 0 To Level.Rec.Width Step 100
-
-                            goBuf1.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
-
-                            If Show_Rulers = True Then
-                                If index <> 0 And index <> Level.Rec.Width Then
-                                    goBuf1.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
-                                End If
-                            End If
-
-                        Next
-
-                    End If
-
-                    'If Potion.Active = True Then
+                    Draw_Grid(goBuf1)
 
                     Draw_Potion(goBuf1, Potion.Rec)
-
-                    'End If
 
                     Draw_Monster(goBuf1, Monster)
 
@@ -530,48 +495,13 @@ Public Class Form1
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.HighSpeed
                     End With
 
-                    If Editor_On = False Then
+                    goBuf2.Clear(Level.BackgroundColor)
 
-                        goBuf2.Clear(Level.BackgroundColor)
+                    Draw_Hero_Light(goBuf2, OurHero.Rec)
 
-                        Draw_Hero_Light(goBuf2, OurHero.Rec)
-
-                    Else
-
-                        goBuf2.Clear(Level.BackgroundColor)
-
-                        'Vertical lines
-                        For index = 0 To Level.Rec.Width Step 100
-                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
-
-                            If Show_Rulers = True Then
-                                If index <> Level.Rec.Width Then
-                                    goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
-                                End If
-                            End If
-
-                        Next
-
-                        'Horizontal lines
-                        For index = 0 To Level.Rec.Width Step 100
-
-                            goBuf2.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
-
-                            If Show_Rulers = True Then
-                                If index <> 0 And index <> Level.Rec.Width Then
-                                    goBuf2.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
-                                End If
-                            End If
-
-                        Next
-
-                    End If
-
-                    'If Potion.Active = True Then
+                    Draw_Grid(goBuf2)
 
                     Draw_Potion(goBuf2, Potion.Rec)
-
-                    'End If
 
                     Draw_Monster(goBuf2, Monster)
 
@@ -617,6 +547,39 @@ Public Class Form1
 
                 End Using
             End Using
+        End If
+
+    End Sub
+
+    Private Sub Draw_Grid(g As Graphics)
+
+        If Editor_On = True Then
+
+            'Vertical lines
+            For index = 0 To Level.Rec.Width Step 100
+                g.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
+
+                If Show_Rulers = True Then
+                    If index <> Level.Rec.Width Then
+                        g.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+                    End If
+                End If
+
+            Next
+
+            'Horizontal lines
+            For index = 0 To Level.Rec.Width Step 100
+
+                g.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
+
+                If Show_Rulers = True Then
+                    If index <> 0 And index <> Level.Rec.Width Then
+                        g.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+                    End If
+                End If
+
+            Next
+
         End If
 
     End Sub
@@ -918,16 +881,16 @@ Public Class Form1
 
         'Is the editor on?
         If Editor_On = False Then
-            'No, the editor off. The game is running.
+            'No, the editor off. The game is running. - Game On
 
             'Is there at least one wall?
             If Walls IsNot Nothing Then
                 'Yes, we have at least one wall.
 
-
+                'Go thur every wall in the walls array. One by one. Start to end.
                 For index = 0 To UBound(Walls)
 
-                    'Transform the walls level coorinates into viewport coordinates.
+                    'Transform the wall level coorinates into viewport coordinates.
                     Dim WallInViewportCoordinates As Rectangle
                     WallInViewportCoordinates = Walls(index).Rec
                     WallInViewportCoordinates.X = Walls(index).Rec.X - Viewport.X
@@ -963,7 +926,7 @@ Public Class Form1
             End If
 
         Else
-            'Yes, the editor is on. The game is stopped.
+            'Yes, the editor is on. The game is stopped. - Editor On
 
             'Is there at least one wall?
             If Walls IsNot Nothing Then
@@ -1003,22 +966,22 @@ Public Class Form1
                 'Draw selection outline.
                 g.DrawRectangle(New Pen(Color.White, 5), WallInViewportCoordinates)
 
-                'Draw outline.
+                'Draw the walls outline.
                 Dim Outline_Pen As New Pen(Color.Red, 2)
                 Outline_Pen.DashStyle = DashStyle.Dash
                 g.DrawRectangle(Outline_Pen, WallInViewportCoordinates)
 
-                'Draw top/left control handle.
+                'Draw the walls top-left control handle.
                 g.FillEllipse(Brushes.Red, WallInViewportCoordinates.X - 15 \ 2, WallInViewportCoordinates.Y - 15 \ 2, 15, 15)
 
-                'Draw bottom/right control handle.
+                'Draw the walls bottom-right control handle.
                 g.FillEllipse(Brushes.Red, WallInViewportCoordinates.Right - 15 \ 2, WallInViewportCoordinates.Bottom - 15 \ 2, 15, 15)
 
-                'Draw X and Y coordinates.
+                'Draw the walls X and Y coordinates text.
                 Dim PositionString As String = Walls(Selected_Index).Rec.X.ToString & ", " & Walls(Selected_Index).Rec.Y.ToString
                 g.DrawString(PositionString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.X, WallInViewportCoordinates.Y - 20), Center_String)
 
-                'Draw width and height.
+                'Draw the walls width and height text.
                 Dim SizeString As String = Walls(Selected_Index).Rec.Width.ToString & ", " & Walls(Selected_Index).Rec.Height.ToString
                 g.DrawString(SizeString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.Right, WallInViewportCoordinates.Bottom + 45), Center_String)
 
@@ -1030,51 +993,74 @@ Public Class Form1
 
     Private Sub Draw_Hero_Light(g As Graphics, Rec As Rectangle)
 
-        Dim HeroInViewportCoordinates As Rectangle
-        HeroInViewportCoordinates = Rec
-        HeroInViewportCoordinates.X = Rec.X - Viewport.X
-        HeroInViewportCoordinates.Y = Rec.Y - Viewport.Y
+        'Is the editor off?
+        If Editor_On = False Then
+            'Yes, the editor is off.
 
-        If ProjectileInflight = True Then
+            'Transform the heros level coorinates into viewport coordinates.
+            Dim HeroInViewportCoordinates As Rectangle
+            HeroInViewportCoordinates = Rec
+            HeroInViewportCoordinates.X = Rec.X - Viewport.X
+            HeroInViewportCoordinates.Y = Rec.Y - Viewport.Y
 
-            LightRec = HeroInViewportCoordinates
+            'Is the player casting magic?
+            If ProjectileInflight = True Then
+                'Yes, the hero is casting magic.
 
-            LightRec.Inflate(300, 300)
+                'Set the heros light rectangle to the size and position of the heros rectangle.
+                LightRec = HeroInViewportCoordinates
 
-            'Create a path
-            Dim path As New GraphicsPath()
-            path.AddEllipse(LightRec)
+                'Set the heros light rectangle to the size and position of the heros rectangle.
+                LightRec.Inflate(300, 300)
 
-            'Create a path gradient brush
-            Dim pgBrush As New PathGradientBrush(path)
+                'Create a graphics path.
+                Dim path As New GraphicsPath()
 
-            pgBrush.CenterColor = Color.FromArgb(255, 255, 255, 255)
+                'Add an ellipse the size and position of the heros light rectangle to the path.
+                path.AddEllipse(LightRec)
 
-            Dim list As Color() = New Color() {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+                'Create a path gradient brush
+                Dim pgBrush As New PathGradientBrush(path)
 
-            pgBrush.SurroundColors = list
+                'Set the center color of the path gradient brush.
+                pgBrush.CenterColor = Color.FromArgb(255, 255, 255, 255)
 
-            g.FillPath(pgBrush, path)
+                'Set the surrounding colors of the path gradient brush.
+                Dim list As Color() = New Color() {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+                pgBrush.SurroundColors = list
 
-        Else
+                'Draw the heros light radius.
+                g.FillPath(pgBrush, path)
 
-            LightRec = HeroInViewportCoordinates
+            Else
+                'No, the player is not casting magic.
 
-            LightRec.Inflate(300, 300)
+                'Set the heros light rectangle to the size and position of the heros rectangle.
+                LightRec = HeroInViewportCoordinates
 
-            'Create a path
-            Dim path As New GraphicsPath()
-            path.AddEllipse(LightRec)
+                'Set the heros light rectangle to the size and position of the heros rectangle.
+                LightRec.Inflate(300, 300)
 
-            'Create a path gradient brush
-            Dim pgBrush As New PathGradientBrush(path)
+                'Create a graphics path.
+                Dim path As New GraphicsPath()
 
-            pgBrush.CenterColor = Color.FromArgb(90, Color.White)
+                'Add an ellipse the size and position of the heros light rectangle to the path.
+                path.AddEllipse(LightRec)
 
-            Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
-            pgBrush.SurroundColors = list
+                'Create a path gradient brush.
+                Dim pgBrush As New PathGradientBrush(path)
 
-            g.FillPath(pgBrush, path)
+                'Set the center color of the path gradient brush.
+                pgBrush.CenterColor = Color.FromArgb(90, Color.White)
+
+                'Set the surrounding colors of the path gradient brush.
+                Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+                pgBrush.SurroundColors = list
+
+                'Draw the heros light radius.
+                g.FillPath(pgBrush, path)
+
+            End If
 
         End If
 
