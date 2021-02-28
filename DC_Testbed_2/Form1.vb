@@ -439,25 +439,29 @@ Public Class Form1
 
                     Draw_Map(goBuf1, Viewport.Width - Map.Width - 10, 40, 9)
 
-                    If Editor_On = False Then
-                        Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
+                    'If Editor_On = False Then
 
-                        Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
+                    Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
-                        If Instructions_On = True Then
+                    Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
 
-                            Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
-                            goBuf1.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+                    Draw_Instructions(goBuf1)
 
-                        End If
+                    'If Instructions_On = True Then
 
-                    End If
+                    '    Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                    '    goBuf1.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+
+                    'End If
+
+                    'End If
 
                     'Draw die screen.
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
                         goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
                         goBuf1.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
                     End If
+
 
                     'Draw paused screen.
                     If Timer2.Enabled = False Then
@@ -519,19 +523,16 @@ Public Class Form1
 
                     Draw_Map(goBuf2, Viewport.Width - Map.Width - 10, 40, 9)
 
-                    If Editor_On = False Then
-                        Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
+                    'If Editor_On = False Then
+                    Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
 
-                        Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
+                    Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
 
-                        If Instructions_On = True Then
+                    'Draw_Instructions
 
-                            Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
-                            goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+                    Draw_Instructions(goBuf2)
 
-                        End If
-
-                    End If
+                    'End If
 
                     If OurHero.Life < 1 And Timer2.Enabled = True Then
                         goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
@@ -547,6 +548,21 @@ Public Class Form1
 
                 End Using
             End Using
+        End If
+
+    End Sub
+
+    Private Sub Draw_Instructions(goBuf2 As Graphics)
+
+        If Editor_On = False Then
+
+            If Instructions_On = True Then
+
+                Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
+
+            End If
+
         End If
 
     End Sub
@@ -650,102 +666,109 @@ Public Class Form1
 
     Private Sub Draw_HeroLife_Bar(g As Graphics, Bar As Rectangle)
 
-        'Draw hero life bar frame.
-        g.FillRectangle(Life_Frame_Brush, Bar)
+        If Editor_On = False Then
 
-        'Is the heros life points critically low?
-        If OurHero.Life > OurHero.MaxLife \ 4 Then
-            'No, the heros life points are not critically low.
+            'Draw hero life bar frame.
+            g.FillRectangle(Life_Frame_Brush, Bar)
 
-            g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
-            g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
+            'Is the heros life points critically low?
+            If OurHero.Life > OurHero.MaxLife \ 4 Then
+                'No, the heros life points are not critically low.
 
-        Else
-            'Yes, the heros life points are critically low.
+                g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
 
-            'Make the life bar blink.
-            Select Case Life_Blink_Counter
-                Case 0 To 8
-                    g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
-                    g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
-                    Life_Blink_Counter += 1
-                Case 9 To 18
-                    g.FillRectangle(Life_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
-                    g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
-                    Life_Blink_Counter += 1
-                Case Else
-                    g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
-                    g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
-                    Life_Blink_Counter = 0
-            End Select
+            Else
+                'Yes, the heros life points are critically low.
+
+                'Make the life bar blink.
+                Select Case Life_Blink_Counter
+                    Case 0 To 8
+                        g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                        g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
+                        Life_Blink_Counter += 1
+                    Case 9 To 18
+                        g.FillRectangle(Life_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                        g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
+                        Life_Blink_Counter += 1
+                    Case Else
+                        g.FillRectangle(Life_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height)
+                        g.DrawRectangle(Life_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxLife * OurHero.Life), Bar.Height - 1)
+                        Life_Blink_Counter = 0
+                End Select
+
+            End If
+
+            g.DrawString(OurHero.Life.ToString & "/" & OurHero.MaxLife.ToString & " Life", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
         End If
-
-        g.DrawString(OurHero.Life.ToString & "/" & OurHero.MaxLife.ToString & " Life", Life_Bar_Font, drawBrush, Life_Bar_Frame.X + Life_Bar_Frame.Width + 5, Life_Bar_Frame.Y - 4)
 
     End Sub
 
     Private Sub Draw_Hero_Magic_Bar(g As Graphics, Bar As Rectangle)
 
-        'Draw hero magic bar frame.
-        g.FillRectangle(Magic_Frame_Brush, Bar)
+        If Editor_On = False Then
 
-        'Is the heros magic points critically low?
-        If OurHero.Magic >= OurHero.MaxMagic \ 4 Then
-            'No, the heros magic points are not critically low.
+            'Draw hero magic bar frame.
+            g.FillRectangle(Magic_Frame_Brush, Bar)
 
-            'Draw magic bar.
-            g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+            'Is the heros magic points critically low?
+            If OurHero.Magic >= OurHero.MaxMagic \ 4 Then
+                'No, the heros magic points are not critically low.
 
-            'Draw magic bar outline.
-            g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+                'Draw magic bar.
+                g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
 
-        Else
-            'Yes, the heros magic points are critically low.
+                'Draw magic bar outline.
+                g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
-            'Make the magic bar blink to indicate to the player that their life points are critically low.
-            Select Case Magic_Blink_Counter
+            Else
+                'Yes, the heros magic points are critically low.
+
+                'Make the magic bar blink to indicate to the player that their life points are critically low.
+                Select Case Magic_Blink_Counter
                 'For frames 0 to 8
-                Case 0 To 8
+                    Case 0 To 8
 
-                    'Draw magic bar.
-                    g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                        'Draw magic bar.
+                        g.FillRectangle(Magic_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
 
-                    'Draw magic bar outline.
-                    g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+                        'Draw magic bar outline.
+                        g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
-                    'Advance the frame counter by one frame.
-                    Magic_Blink_Counter += 1
+                        'Advance the frame counter by one frame.
+                        Magic_Blink_Counter += 1
 
                     'For frames 9 to 18
-                Case 9 To 18
+                    Case 9 To 18
 
-                    'Draw magic bar with the blink color.
-                    g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                        'Draw magic bar with the blink color.
+                        g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
 
-                    'Draw magic bar outline.
-                    g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+                        'Draw magic bar outline.
+                        g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
-                    'Advance the frame counter by one frame.
-                    Magic_Blink_Counter += 1
+                        'Advance the frame counter by one frame.
+                        Magic_Blink_Counter += 1
 
 
-                Case Else
+                    Case Else
 
-                    'Draw magic bar with the blink color.
-                    g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
+                        'Draw magic bar with the blink color.
+                        g.FillRectangle(Magic_Blink_Brush, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height)
 
-                    'Draw magic bar outline.
-                    g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
+                        'Draw magic bar outline.
+                        g.DrawRectangle(Magic_Outline_Pen, Bar.X, Bar.Y, CInt((Bar.Width) / OurHero.MaxMagic * OurHero.Magic), Bar.Height - 1)
 
-                    'Reset the frame counter.
-                    Magic_Blink_Counter = 0
+                        'Reset the frame counter.
+                        Magic_Blink_Counter = 0
 
-            End Select
+                End Select
+            End If
+
+            g.DrawString(OurHero.Magic.ToString & "/" & OurHero.MaxMagic.ToString & " Magic", Life_Bar_Font, drawBrush, Magic_Bar_Frame.X + Magic_Bar_Frame.Width + 5, Magic_Bar_Frame.Y - 4)
+
         End If
-
-
-        g.DrawString(OurHero.Magic.ToString & "/" & OurHero.MaxMagic.ToString & " Magic", Life_Bar_Font, drawBrush, Magic_Bar_Frame.X + Magic_Bar_Frame.Width + 5, Magic_Bar_Frame.Y - 4)
 
     End Sub
 
@@ -972,10 +995,10 @@ Public Class Form1
                 g.DrawRectangle(Outline_Pen, WallInViewportCoordinates)
 
                 'Draw the walls top-left control handle.
-                g.FillEllipse(Brushes.Red, WallInViewportCoordinates.X - 15 \ 2, WallInViewportCoordinates.Y - 15 \ 2, 15, 15)
+                g.FillEllipse(Brushes.Red, WallInViewportCoordinates.X - 20 \ 2, WallInViewportCoordinates.Y - 20 \ 2, 20, 20)
 
                 'Draw the walls bottom-right control handle.
-                g.FillEllipse(Brushes.Red, WallInViewportCoordinates.Right - 15 \ 2, WallInViewportCoordinates.Bottom - 15 \ 2, 15, 15)
+                g.FillEllipse(Brushes.Red, WallInViewportCoordinates.Right - 20 \ 2, WallInViewportCoordinates.Bottom - 20 \ 2, 20, 20)
 
                 'Draw the walls X and Y coordinates text.
                 Dim PositionString As String = Walls(Selected_Index).Rec.X.ToString & ", " & Walls(Selected_Index).Rec.Y.ToString
@@ -2774,26 +2797,65 @@ Public Class Form1
     Private Sub Form1_KeyDown(sender As Object, e As KeyEventArgs) Handles MyBase.KeyDown
 
         If e.KeyValue = Keys.Left Then
+
             If Editor_On = False Then
+
                 MoveLeft = True
+
             Else
-                MoveViewport(DirectionEnum.Left)
+
+                If IsSelected = True Then
+
+                    Walls(Selected_Index).Rec.X -= 1
+
+                Else
+
+                    MoveViewport(DirectionEnum.Left)
+
+                End If
+
+
+
             End If
+
         End If
 
         If e.KeyValue = Keys.Right Then
+
             If Editor_On = False Then
+
                 MoveRight = True
+
             Else
-                MoveViewport(DirectionEnum.Right)
+
+                If IsSelected = True Then
+
+                    Walls(Selected_Index).Rec.X += 1
+
+                Else
+
+                    MoveViewport(DirectionEnum.Right)
+
+                End If
+
             End If
+
         End If
 
         If e.KeyValue = Keys.Up Then
             If Editor_On = False Then
                 MoveUp = True
             Else
-                MoveViewport(DirectionEnum.Up)
+
+                If IsSelected = True Then
+
+                    Walls(Selected_Index).Rec.Y -= 1
+
+                Else
+                    MoveViewport(DirectionEnum.Up)
+
+                End If
+
             End If
         End If
 
@@ -2801,7 +2863,18 @@ Public Class Form1
             If Editor_On = False Then
                 MoveDown = True
             Else
-                MoveViewport(DirectionEnum.Down)
+                If IsSelected = True Then
+
+                    'Selected_Index
+                    Walls(Selected_Index).Rec.Y += 1
+
+
+                Else
+
+                    MoveViewport(DirectionEnum.Down)
+
+                End If
+
             End If
         End If
 
@@ -3016,9 +3089,9 @@ Public Class Form1
                     'Is the mouse pointer selecting a control handle?
                     Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
 
-                    Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.X - 5, Walls(Selected_Index).Rec.Y - 5, 10, 10)
+                    Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.X - 10, Walls(Selected_Index).Rec.Y - 10, 20, 20)
 
-                    Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.Right - 5, Walls(Selected_Index).Rec.Bottom - 5, 10, 10)
+                    Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.Right - 10, Walls(Selected_Index).Rec.Bottom - 10, 20, 20)
 
                     If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
 
