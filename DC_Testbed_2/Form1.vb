@@ -126,6 +126,8 @@ Public Class Form1
 
     Private OurHero As HeroInfo
 
+    Private Movement_Target As Point = New Point(0, 0)
+
     'Create and Initialize editor state data.
     Private Editor_On As Boolean = False
     Private Show_Rulers As Boolean = True
@@ -314,15 +316,15 @@ Public Class Form1
         SetStyle(ControlStyles.OptimizedDoubleBuffer, True)
         SetStyle(ControlStyles.UserPaint, False)
 
-        SetStyle(ControlStyles.FixedHeight, True)
-        SetStyle(ControlStyles.FixedWidth, True)
+        'SetStyle(ControlStyles.FixedHeight, True)
+        'SetStyle(ControlStyles.FixedWidth, True)
 
         WindowState = FormWindowState.Maximized
 
         'Load sound files
         GS.AddSound("Music", Application.StartupPath & "level_music.mp3") 'Worse - The Tower of Light from the YouTube Audio library.
         GS.AddSound("Magic", Application.StartupPath & "magic_sound.mp3")
-        GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3")
+        'GS.AddSound("Monster", Application.StartupPath & "Monster Alien Roar Aggressive.mp3")
         GS.AddSound("Undead_Move", Application.StartupPath & "undead_move.mp3")
         GS.AddSound("Undead_Attack", Application.StartupPath & "undead_attack.mp3")
         GS.AddSound("Potion_Pickup", Application.StartupPath & "potion_pickup.mp3")
@@ -335,7 +337,7 @@ Public Class Form1
         'Set set volume 
         GS.SetVolume("Music", 150)
         GS.SetVolume("Magic", 500)
-        GS.SetVolume("Monster", 900)
+        'GS.SetVolume("Monster", 900)
         GS.SetVolume("Undead_Move", 500)
         GS.SetVolume("Undead_Attack", 400)
         GS.SetVolume("Potion_Pickup", 1000)
@@ -446,6 +448,15 @@ Public Class Form1
 
                     Draw_Paused_Screen(goBuf1)
 
+                    'Transform the movement targets level coordinates into viewport coordinates.
+                    Dim MovementTargetInViewportCordinates As Point
+                    MovementTargetInViewportCordinates.X = Movement_Target.X - Viewport.X
+                    MovementTargetInViewportCordinates.Y = Movement_Target.Y - Viewport.Y
+
+                    'Draw Movement Target
+                    goBuf1.DrawRectangle(Pens.Red, New Rectangle(MovementTargetInViewportCordinates, New Drawing.Size(10, 10)))
+
+                    'Draw buffer to the screen.
                     e.Graphics.DrawImageUnscaled(Buffer1_Bitmap, 0, 0)
 
                 End Using
@@ -510,6 +521,15 @@ Public Class Form1
 
                     Draw_Paused_Screen(goBuf2)
 
+                    'Transform the movement targets level coordinates into viewport coordinates.
+                    Dim MovementTargetInViewportCordinates As Point
+                    MovementTargetInViewportCordinates.X = Movement_Target.X - Viewport.X
+                    MovementTargetInViewportCordinates.Y = Movement_Target.Y - Viewport.Y
+
+                    'Draw Movement Target
+                    goBuf2.DrawRectangle(Pens.Red, New Rectangle(MovementTargetInViewportCordinates, New Drawing.Size(10, 10)))
+
+                    'Draw the buffer to the screen.
                     e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
 
                 End Using
@@ -1242,29 +1262,100 @@ Public Class Form1
                 OurHero.Initiative = False
             End If
             '*******************************************
-            If MoveLeft = True Then
 
-                Move_Hero_Left()
+            If Mouse_Down = True Then
+                'MousePosition.Offset(Me.Location.X - PictureBox1.Location.X, Me.Location.Y - PictureBox1.Location.Y)
+
+                Dim MouseInClientCoordinates As Point = PictureBox1.PointToClient(MousePosition)
+                Dim MouseXInVieportCoordinates As Integer = MouseInClientCoordinates.X + Viewport.X
+                Dim MouseYInVieportCoordinates As Integer = MouseInClientCoordinates.Y + Viewport.Y
+
+
+                Movement_Target.X = MouseXInVieportCoordinates
+                Movement_Target.Y = MouseYInVieportCoordinates
+
+                'Keep target on the level.
+                If Movement_Target.X < Level.Rec.X Then
+                    Movement_Target.X = Level.Rec.X
+                End If
+                If Movement_Target.X > Level.Rec.Width Then
+                    Movement_Target.X = Level.Rec.Width
+                End If
+                If Movement_Target.Y < Level.Rec.Y Then
+                    Movement_Target.Y = Level.Rec.Y
+                End If
+                If Movement_Target.Y > Level.Rec.Height Then
+                    Movement_Target.Y = Level.Rec.Height
+                End If
 
             End If
 
-            If MoveRight = True Then
+            Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
 
-                Move_Hero_Right()
+            'Is the hero centered with the movement target horizontally?
+            If Hero_Center_X <> Movement_Target.X Then
+                'No, the hero is not centered horizontally with the movement target.
+
+                'Is the hero to the right of the movement target?
+                If Hero_Center_X > Movement_Target.X Then
+                    'Yes, the hero is to the right of the movement target.
+
+                    Move_Hero_Left()
+
+                Else
+                    'No, the hero is to the left of the movement target.
+
+                    Move_Hero_Right()
+
+                End If
 
             End If
 
-            If MoveUp = True Then
+            Dim Hero_Center_Y As Integer = OurHero.Rec.Y + OurHero.Rec.Height \ 2
 
-                Move_Hero_Up()
+            'Is the hero centered with the movement target vertically?
+            If Hero_Center_Y <> Movement_Target.Y Then
+                'No, the hero is not centered vertically with the movement target.
+
+                'Is the hero below the movement target?
+                If Hero_Center_Y > Movement_Target.Y Then
+                    'Yes, the hero is below the movement target.
+
+                    Move_Hero_Up()
+
+                Else
+                    'No, the hero is above the movement target.
+
+                    Move_Hero_Down()
+
+                End If
 
             End If
 
-            If MoveDown = True Then
 
-                Move_Hero_Down()
+            'If MoveLeft = True Then
 
-            End If
+            '    Move_Hero_Left()
+
+            'End If
+
+            'If MoveRight = True Then
+
+            '    Move_Hero_Right()
+
+            'End If
+
+            'If MoveUp = True Then
+
+            '    Move_Hero_Up()
+
+            'End If
+
+            'If MoveDown = True Then
+
+            '    Move_Hero_Down()
+
+            'End If
 
             Do_Hero_Shots()
 
@@ -1274,6 +1365,22 @@ Public Class Form1
             'No, the hero is dead.
 
         End If
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     End Sub
 
@@ -1318,7 +1425,25 @@ Public Class Form1
 
     Private Sub Move_Hero_Right()
 
-        MoveHero(DirectionEnum.Right)
+        'Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
+        Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
+
+        'Move Hero Right **************************************************************
+        'Proximity based speed controller. - Fixes Bug: The hero sometimes oscillates.
+        'Is the hero close to the movement target?
+        If Horizontal_Distance(Hero_Center_X, Movement_Target.X) > 8 Then
+            'No, the hero is not close to the movement target.
+
+            'Move the hero to the right fast.
+            OurHero.Rec.X += OurHero.Speed
+
+        Else
+            'Yes, the hero is close to the movement target.
+
+            'Move the hero to the right slowly.
+            OurHero.Rec.X += 1
+
+        End If
 
         'Play hero moving sound.
         If GS.IsPlaying("Hero_Move") = False Then
@@ -1377,6 +1502,7 @@ Public Class Form1
                     'Wall Collision Handler - Moving Right*****************
                     If Walls IsNot Nothing Then
                         For index = 0 To UBound(Walls)
+
                             'Is the monster touching a wall?
                             If Monster.IntersectsWith(Walls(index).Rec) = True Then
                                 'Yes, the monster is touching a wall.
@@ -1388,6 +1514,7 @@ Public Class Form1
                                 OurHero.Rec.X = Monster.X - Monster.Width - 16
 
                             End If
+
                         Next
                     End If
                     '************************************************
@@ -1395,27 +1522,45 @@ Public Class Form1
             End If
         End If
 
-        'Fallow the hero.
-        'Is the hero about to walk off screen?
-        If OurHero.Rec.X > Viewport.X + Viewport.Width - OurHero.Rec.Width * 4 Then
-            'Yes, the hero is about to walk off screen.
+        ''Fallow the hero.
+        ''Is the hero about to walk off screen?
+        'If OurHero.Rec.X > Viewport.X + Viewport.Width - OurHero.Rec.Width * 4 Then
+        '    'Yes, the hero is about to walk off screen.
 
 
-            If Viewport.X < Level.Rec.Width - Viewport.Width Then
-                'Move viewport to the right.
-                Viewport.X += OurHero.Speed
-            Else
+        '    If Viewport.X < Level.Rec.Width - Viewport.Width Then
+        '        'Move viewport to the right.
+        '        Viewport.X += OurHero.Speed
+        '    Else
 
-                Viewport.X = Level.Rec.Width - Viewport.Width
+        '        Viewport.X = Level.Rec.Width - Viewport.Width
 
-            End If
+        '    End If
 
-            If OurHero.Rec.X > Level.Rec.Width - OurHero.Rec.Width Then
+        '    If OurHero.Rec.X > Level.Rec.Width - OurHero.Rec.Width Then
 
-                OurHero.Rec.X = Level.Rec.Width - OurHero.Rec.Width
+        '        OurHero.Rec.X = Level.Rec.Width - OurHero.Rec.Width
 
-            End If
-        End If
+        '    End If
+        'End If
+
+        'Center viewport on the hero.
+        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        ''Keep viewport on the level.
+        'If Viewport.X < Level.Rec.X Then
+        '    Viewport.X = Level.Rec.X
+        'End If
+        'If Viewport.X + Viewport.Width > Level.Rec.Width Then
+        '    Viewport.X = Level.Rec.Width - Viewport.Width
+        'End If
+        'If Viewport.Y < Level.Rec.Y Then
+        '    Viewport.Y = Level.Rec.Y
+        'End If
+        'If Viewport.Y + Viewport.Height > Level.Rec.Height Then
+        '    Viewport.Y = Level.Rec.Height - Viewport.Height
+        'End If
 
     End Sub
 
@@ -1539,7 +1684,26 @@ Public Class Form1
 
     Private Sub Move_Hero_Left()
 
-        MoveHero(DirectionEnum.Left)
+        'MoveHero(DirectionEnum.Left)
+
+        Dim Hero_Center_X As Integer = OurHero.Rec.X + OurHero.Rec.Width \ 2
+
+        'Move Hero Left **************************************************************
+        'Proximity based speed controller. - Fixes Bug: The hero sometimes oscillates.
+        'Is the hero close to the movement target?
+        If Horizontal_Distance(Hero_Center_X, Movement_Target.X) > 8 Then
+            'No, the hero is not close to the movement target.
+
+            'Move the hero to the left fast.
+            OurHero.Rec.X -= OurHero.Speed
+
+        Else
+            'Yes, the hero is close to the movement target.
+
+            'Move the hero to the left slowly.
+            OurHero.Rec.X -= 1
+
+        End If
 
         'Play hero moving sound.
         If GS.IsPlaying("Hero_Move") = False Then
@@ -1615,29 +1779,47 @@ Public Class Form1
             End If
         End If
 
-        'Fallow the hero.
-        'Is the hero about to walk off screen?
-        If OurHero.Rec.X < Viewport.X + OurHero.Rec.Width * 4 Then
-            'Yes, the hero is about to walk off screen.
+        ''Fallow the hero.
+        ''Is the hero about to walk off screen?
+        'If OurHero.Rec.X < Viewport.X + OurHero.Rec.Width * 4 Then
+        '    'Yes, the hero is about to walk off screen.
 
-            If Viewport.X > Level.Rec.X Then
+        '    If Viewport.X > Level.Rec.X Then
 
-                'Move viewport to the right.
-                Viewport.X -= OurHero.Speed
+        '        'Move viewport to the right.
+        '        Viewport.X -= OurHero.Speed
 
-            Else
+        '    Else
 
-                Viewport.X = Level.Rec.X
+        '        Viewport.X = Level.Rec.X
 
-            End If
+        '    End If
 
-            If OurHero.Rec.X < Level.Rec.X Then
+        '    If OurHero.Rec.X < Level.Rec.X Then
 
-                OurHero.Rec.X = Level.Rec.X
+        '        OurHero.Rec.X = Level.Rec.X
 
-            End If
+        '    End If
 
-        End If
+        'End If
+
+        'Center viewport on the hero.
+        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        ''Keep viewport on the level.
+        'If Viewport.X < Level.Rec.X Then
+        '    Viewport.X = Level.Rec.X
+        'End If
+        'If Viewport.X + Viewport.Width > Level.Rec.Width Then
+        '    Viewport.X = Level.Rec.Width - Viewport.Width
+        'End If
+        'If Viewport.Y < Level.Rec.Y Then
+        '    Viewport.Y = Level.Rec.Y
+        'End If
+        'If Viewport.Y + Viewport.Height > Level.Rec.Height Then
+        '    Viewport.Y = Level.Rec.Height - Viewport.Height
+        'End If
 
     End Sub
 
@@ -1759,7 +1941,28 @@ Public Class Form1
 
     Private Sub Move_Hero_Up()
 
-        MoveHero(DirectionEnum.Up)
+        'MoveHero(DirectionEnum.Up)
+
+        Dim Hero_Center_Y As Integer = OurHero.Rec.Y + OurHero.Rec.Height \ 2
+
+        'Move Hero Up **************************************************************
+        'Proximity based speed controller. - Fixes Bug: The hero sometimes oscillates.
+        'Is the hero close to the movement target?
+        If Vertical_Distance(Hero_Center_Y, Movement_Target.Y) > 8 Then
+            'No, the hero is not close to the movement target.
+
+            'Move the hero up fast.
+            OurHero.Rec.Y -= OurHero.Speed
+
+        Else
+            'Yes, the hero is close to the movement target.
+
+            'Move the hero up slowly.
+            OurHero.Rec.Y -= 1
+
+        End If
+
+
 
         'Play hero moving sound.
         If GS.IsPlaying("Hero_Move") = False Then
@@ -1784,37 +1987,52 @@ Public Class Form1
         'Is the monster alive?
         If Monster_Life > 0 Then
             'Yes, the monster is alive.
+
             'Is the hero touching the monster?
             If OurHero.Rec.IntersectsWith(Monster) = True Then
                 'Yes, the hero is touching the monster.
+
                 'Push the hero below the monster.
                 OurHero.Rec.Y = Monster.Y + Monster.Height + 1
+
                 If OurHero.Initiative = True Then
+
                     Monster_Hit = True
+
+                    'Play monster hit sound.
+                    If GS.IsPlaying("Undead_Hit") = False Then
+                        GS.Play("Undead_Hit")
+                    End If
+
                     'Attack the monsters life points directly.
                     Monster_Life -= OurHero.Attack
-
                     If Monster_Life < 0 Then
                         Monster_Life = 0
                     End If
+
                     'Knock monster above the hero.
                     Monster.Y = OurHero.Rec.Y - Monster.Height - 32
 
                     'Wall Collision Handler - Monster moving up *************************
                     If Walls IsNot Nothing Then
                         For index = 0 To UBound(Walls)
+
                             'Is the monster touching the wall?
                             If Monster.IntersectsWith(Walls(index).Rec) = True Then
                                 'Yes, the monster is touching the wall.
 
-                                'Push the hero below the wall.
-                                Monster.Y = Walls(index).Rec.Y + (Walls(index).Rec.Height - 1)
+                                'Push the monster below the wall.
+                                Monster.Y = Walls(index).Rec.Y + (Walls(index).Rec.Height + 1)
 
-                                'If GS.IsPlaying("Undead_Move") = True Then
-                                '    GS.Pause("Undead_Move")
-                                'End If
+
+                                'Knock the hero below the monster.
+                                OurHero.Rec.Y = Monster.Y + Monster.Height + 16
+
+                                'Movement_Target.Y = Monster.Y + Monster.Height - 16
+
 
                             End If
+
                         Next
                     End If
                     '************************************************
@@ -1823,29 +2041,48 @@ Public Class Form1
             End If
         End If
 
-        'Fallow the hero.
-        'Is the hero about to walk off screen?
-        If OurHero.Rec.Y < Viewport.Y + OurHero.Rec.Height * 4 Then
-            'Yes, the hero is about to walk off screen.
+        ''Fallow the hero.
+        ''Is the hero about to walk off screen?
+        'If OurHero.Rec.Y < Viewport.Y + OurHero.Rec.Height * 2 Then
+        '    'Yes, the hero is about to walk off screen.
 
-            If Viewport.Y > Level.Rec.Y Then
+        '    If Viewport.Y > Level.Rec.Y Then
 
-                'Move viewport to the up.
-                Viewport.Y -= OurHero.Speed
+        '        'Move viewport up.
+        '        Viewport.Y -= OurHero.Speed
 
-            Else
+        '    Else
 
-                Viewport.Y = Level.Rec.Y
+        '        Viewport.Y = Level.Rec.Y
 
-            End If
+        '    End If
 
-            If OurHero.Rec.Y < Level.Rec.Y Then
+        '    If OurHero.Rec.Y < Level.Rec.Y Then
 
-                OurHero.Rec.Y = Level.Rec.Y
+        '        OurHero.Rec.Y = Level.Rec.Y
 
-            End If
+        '    End If
 
-        End If
+        'End If
+
+        'Center viewport on the hero.
+        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        ''Keep viewport on the level.
+        'If Viewport.X < Level.Rec.X Then
+        '    Viewport.X = Level.Rec.X
+        'End If
+        'If Viewport.X + Viewport.Width > Level.Rec.Width Then
+        '    Viewport.X = Level.Rec.Width - Viewport.Width
+        'End If
+        'If Viewport.Y < Level.Rec.Y Then
+        '    Viewport.Y = Level.Rec.Y
+        'End If
+        'If Viewport.Y + Viewport.Height > Level.Rec.Height Then
+        '    Viewport.Y = Level.Rec.Height - Viewport.Height
+        'End If
+
     End Sub
 
     Private Sub Move_Monster_Up()
@@ -1963,7 +2200,26 @@ Public Class Form1
 
     Private Sub Move_Hero_Down()
 
-        MoveHero(DirectionEnum.Down)
+        'MoveHero(DirectionEnum.Down)
+
+        Dim Hero_Center_Y As Integer = OurHero.Rec.Y + OurHero.Rec.Height \ 2
+
+        'Move Hero Down **************************************************************
+        'Proximity based speed controller. - Fixes Bug: The hero sometimes oscillates.
+        'Is the hero close to the movement target?
+        If Vertical_Distance(Hero_Center_Y, Movement_Target.Y) > 8 Then
+            'No, the hero is not close to the movement target.
+
+            'Move the hero down fast.
+            OurHero.Rec.Y += OurHero.Speed
+
+        Else
+            'Yes, the hero is close to the movement target.
+
+            'Move the hero down slowly.
+            OurHero.Rec.Y += 1
+
+        End If
 
         'Play hero moving sound.
         If GS.IsPlaying("Hero_Move") = False Then
@@ -2039,27 +2295,45 @@ Public Class Form1
             End If
         End If
 
-        'Fallow the hero.
-        'Is the hero about to walk off screen?
-        If OurHero.Rec.Y > Viewport.Y + Viewport.Height - OurHero.Rec.Height * 4 Then
-            'Yes, the hero is about to walk off screen.
+        ''Fallow the hero.
+        ''Is the hero about to walk off screen?
+        'If OurHero.Rec.Y > Viewport.Y + Viewport.Height - OurHero.Rec.Height * 3 Then
+        '    'Yes, the hero is about to walk off screen.
 
-            If Viewport.Y < Level.Rec.Height - Viewport.Height Then
-                'Move viewport to the right.
-                Viewport.Y += OurHero.Speed
-            Else
+        '    If Viewport.Y < Level.Rec.Height - Viewport.Height Then
+        '        'Move viewport to the right.
+        '        Viewport.Y += OurHero.Speed
+        '    Else
 
-                Viewport.Y = Level.Rec.Height - Viewport.Height
+        '        Viewport.Y = Level.Rec.Height - Viewport.Height
 
-            End If
+        '    End If
 
-            If OurHero.Rec.Y > Level.Rec.Height - OurHero.Rec.Height Then
+        '    If OurHero.Rec.Y > Level.Rec.Height - OurHero.Rec.Height Then
 
-                OurHero.Rec.Y = Level.Rec.Height - OurHero.Rec.Height
+        '        OurHero.Rec.Y = Level.Rec.Height - OurHero.Rec.Height
 
-            End If
+        '    End If
 
-        End If
+        'End If
+
+        'Center viewport on the hero.
+        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        ''Keep viewport on the level.
+        'If Viewport.X < Level.Rec.X Then
+        '    Viewport.X = Level.Rec.X
+        'End If
+        'If Viewport.X + Viewport.Width > Level.Rec.Width Then
+        '    Viewport.X = Level.Rec.Width - Viewport.Width
+        'End If
+        'If Viewport.Y < Level.Rec.Y Then
+        '    Viewport.Y = Level.Rec.Y
+        'End If
+        'If Viewport.Y + Viewport.Height > Level.Rec.Height Then
+        '    Viewport.Y = Level.Rec.Height - Viewport.Height
+        'End If
 
     End Sub
 
@@ -3039,19 +3313,19 @@ Public Class Form1
             Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
             Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
 
-            'Keep viewport on the level.
-            If Viewport.X < Level.Rec.X Then
-                Viewport.X = Level.Rec.X
-            End If
-            If Viewport.X + Viewport.Width > Level.Rec.Width Then
-                Viewport.X = Level.Rec.Width - Viewport.Width
-            End If
-            If Viewport.Y < Level.Rec.Y Then
-                Viewport.Y = Level.Rec.Y
-            End If
-            If Viewport.Y + Viewport.Height > Level.Rec.Height Then
-                Viewport.Y = Level.Rec.Height - Viewport.Height
-            End If
+            ''Keep viewport on the level.
+            'If Viewport.X < Level.Rec.X Then
+            '    Viewport.X = Level.Rec.X
+            'End If
+            'If Viewport.X + Viewport.Width > Level.Rec.Width Then
+            '    Viewport.X = Level.Rec.Width - Viewport.Width
+            'End If
+            'If Viewport.Y < Level.Rec.Y Then
+            '    Viewport.Y = Level.Rec.Y
+            'End If
+            'If Viewport.Y + Viewport.Height > Level.Rec.Height Then
+            '    Viewport.Y = Level.Rec.Height - Viewport.Height
+            'End If
 
         End If
 
@@ -3179,6 +3453,35 @@ Public Class Form1
 
             Mouse_Down = True
 
+        Else
+            'No, the editor is off. The gane is running. - Game On
+
+            'Mouse_Down = True
+
+            'Movement_Target = e.Location
+            Movement_Target.X = e.X + Viewport.X
+            Movement_Target.Y = e.Y + Viewport.Y
+
+            'Keep target on the level.
+            If Movement_Target.X < Level.Rec.X Then
+                Movement_Target.X = Level.Rec.X
+            End If
+            If Movement_Target.X > Level.Rec.Width Then
+                Movement_Target.X = Level.Rec.Width
+            End If
+            If Movement_Target.Y < Level.Rec.Y Then
+                Movement_Target.Y = Level.Rec.Y
+            End If
+            If Movement_Target.Y > Level.Rec.Height Then
+                Movement_Target.Y = Level.Rec.Height
+            End If
+
+            Mouse_Down = True
+
+
+
+            '+ Viewport.X
+
         End If
 
     End Sub
@@ -3206,6 +3509,9 @@ Public Class Form1
 
                 End If
             End If
+        Else
+
+            Mouse_Down = False
 
         End If
 
