@@ -233,12 +233,6 @@ Public Class Form1
     Private drawBrush As New SolidBrush(Color.White)
     Dim drawString As String = "Sample Text"
 
-    Private Blur_BMP1 As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
-    Private goBlur1 As Graphics = Graphics.FromImage(Blur_BMP1)
-
-    Private Blur_BMP2 As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
-    Private goBlur2 As Graphics = Graphics.FromImage(Blur_BMP2)
-
     Dim cm As New Drawing.Imaging.ColorMatrix
     Dim atr As New Drawing.Imaging.ImageAttributes
 
@@ -258,8 +252,11 @@ Public Class Form1
         Level.BackgroundColor = Color.FromArgb(255, 20, 20, 20)
         Level.Rec.X = 0
         Level.Rec.Y = 0
-        Level.Rec.Width = 5300
-        Level.Rec.Height = 5300
+        'Level.Rec.Width = 5300
+
+
+        Level.Rec.Width = 6500
+        Level.Rec.Height = 5490
 
         MenuItemShowHideRulers.Checked = True
 
@@ -336,14 +333,14 @@ Public Class Form1
         GS.AddSound("Not_Enough_Magic", Application.StartupPath & "not_enough_magic.mp3")
 
         'Set set volume 
-        GS.SetVolume("Music", 200)
+        GS.SetVolume("Music", 150)
         GS.SetVolume("Magic", 500)
         GS.SetVolume("Monster", 900)
         GS.SetVolume("Undead_Move", 500)
         GS.SetVolume("Undead_Attack", 400)
         GS.SetVolume("Potion_Pickup", 1000)
         GS.SetVolume("Undead_Death", 300)
-        GS.SetVolume("Hero_Move", 200)
+        GS.SetVolume("Hero_Move", 210)
         GS.SetVolume("Undead_Hit", 800)
         GS.SetVolume("Hero_Death", 400)
         GS.SetVolume("Not_Enough_Magic", 400)
@@ -439,35 +436,15 @@ Public Class Form1
 
                     Draw_Map(goBuf1, Viewport.Width - Map.Width - 10, 40, 9)
 
-                    'If Editor_On = False Then
-
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
                     Draw_Hero_Magic_Bar(goBuf1, Magic_Bar_Frame)
 
                     Draw_Instructions(goBuf1)
 
-                    'If Instructions_On = True Then
+                    Draw_Dead_Screen(goBuf1)
 
-                    '    Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
-                    '    goBuf1.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
-
-                    'End If
-
-                    'End If
-
-                    'Draw die screen.
-                    If OurHero.Life < 1 And Timer2.Enabled = True Then
-                        goBuf1.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
-                        goBuf1.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
-                    End If
-
-
-                    'Draw paused screen.
-                    If Timer2.Enabled = False Then
-                        goBuf1.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport.Width, Viewport.Height)
-                        goBuf1.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
-                    End If
+                    Draw_Paused_Screen(goBuf1)
 
                     e.Graphics.DrawImageUnscaled(Buffer1_Bitmap, 0, 0)
 
@@ -523,31 +500,42 @@ Public Class Form1
 
                     Draw_Map(goBuf2, Viewport.Width - Map.Width - 10, 40, 9)
 
-                    'If Editor_On = False Then
                     Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
 
                     Draw_Hero_Magic_Bar(goBuf2, Magic_Bar_Frame)
 
-                    'Draw_Instructions
-
                     Draw_Instructions(goBuf2)
 
-                    'End If
+                    Draw_Dead_Screen(goBuf2)
 
-                    If OurHero.Life < 1 And Timer2.Enabled = True Then
-                        goBuf2.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
-                        goBuf2.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
-                    End If
-
-                    If Timer2.Enabled = False Then
-                        goBuf2.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport.Width, Viewport.Height)
-                        goBuf2.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
-                    End If
+                    Draw_Paused_Screen(goBuf2)
 
                     e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
 
                 End Using
             End Using
+        End If
+
+    End Sub
+
+    Private Sub Draw_Paused_Screen(g As Graphics)
+
+        If Timer2.Enabled = False Then
+
+            g.FillRectangle(Fifty_Percent_Black_Brush, 0, 0, Viewport.Width, Viewport.Height)
+            g.DrawString("Paused", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
+
+        End If
+
+    End Sub
+
+    Private Sub Draw_Dead_Screen(g As Graphics)
+
+        If OurHero.Life < 1 And Timer2.Enabled = True Then
+
+            g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Red)), 0, 0, Viewport.Width, Viewport.Height)
+            g.DrawString("Died", PauseFont, drawBrush, Viewport.Width \ 2, Viewport.Height \ 2, Center_String)
+
         End If
 
     End Sub
@@ -571,27 +559,50 @@ Public Class Form1
 
         If Editor_On = True Then
 
-            'Vertical lines
+            'Draw Vertical Lines
+            'Go thru the width of the level 100 pixels at a time.
             For index = 0 To Level.Rec.Width Step 100
-                g.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
 
-                If Show_Rulers = True Then
-                    If index <> Level.Rec.Width Then
-                        g.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+                If index >= Viewport.X And index <= Viewport.X + Viewport.Width Then
+
+                    'Draw grid line.
+                    g.DrawLine(New Pen(Color.Cyan, 1), New Point(index - Viewport.X, Level.Rec.Y - Viewport.Y), New Point(index - Viewport.X, Level.Rec.Height - Viewport.Y))
+
+                    If Show_Rulers = True Then
+
+                        If index <> Level.Rec.Width Then
+
+                            'Draw vertical position text.
+                            g.DrawString(index.ToString, Life_Bar_Font, drawBrush, index - Viewport.X, Level.Rec.Y - Viewport.Y)
+
+                        End If
+
                     End If
+
                 End If
 
             Next
 
-            'Horizontal lines
-            For index = 0 To Level.Rec.Width Step 100
+            'Draw Horizontal Lines
+            'Go thru the height of the level 100 pixels at a time.
+            For index = 0 To Level.Rec.Height Step 100
 
-                g.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
+                If index >= Viewport.Y And index <= Viewport.Y + Viewport.Height Then
 
-                If Show_Rulers = True Then
-                    If index <> 0 And index <> Level.Rec.Width Then
-                        g.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+                    'Draw grid line.
+                    g.DrawLine(New Pen(Color.Cyan, 1), New Point(Level.Rec.X - Viewport.X, index - Viewport.Y), New Point(Level.Rec.Width - Viewport.X, index - Viewport.Y))
+
+                    If Show_Rulers = True Then
+
+                        If index <> 0 And index <> Level.Rec.Height Then
+
+                            'Draw horizontal position text.
+                            g.DrawString(index.ToString, Life_Bar_Font, drawBrush, Level.Rec.X - Viewport.X, index - Viewport.Y)
+
+                        End If
+
                     End If
+
                 End If
 
             Next

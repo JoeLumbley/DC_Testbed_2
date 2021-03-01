@@ -111,6 +111,7 @@ Partial Class Form1
         Me.ClientSize = New System.Drawing.Size(900, 518)
         Me.Controls.Add(Me.PictureBox1)
         Me.Controls.Add(Me.MenuStrip1)
+        Me.KeyPreview = True
         Me.MainMenuStrip = Me.MenuStrip1
         Me.Name = "Form1"
         Me.Text = "Form1"
