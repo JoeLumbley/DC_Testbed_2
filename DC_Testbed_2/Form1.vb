@@ -1,6 +1,6 @@
 ﻿Option Strict On
 
-'Dungeon Crawl
+'Dungeon Crawler
 'A work in progress...
 'This is a simple action role-playing game in which the hero navigates a labyrinth,
 'battles various monsters, avoids traps, solves puzzles, and loots any treasure that is found.
@@ -207,7 +207,7 @@ Public Class Form1
     Private Magic_Frame_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 119))
     Private Magic_Bar_Frame As Rectangle
 
-    Private Instruction_Text As String = "Use arrow keys to move. Bump to attack. Use Ctrl + arrow keys to cast spells. Press P to pause, M for map and I to hide/show instructions."
+    Private Instruction_Text As String = "Use mouse to move and attack. Use Ctrl + arrow keys to cast spells. Press P to pause, M for map and I to hide/show instructions."
     Private Instruction_Font As New Font("Arial", 14)
 
     Private Instructions_On As Boolean = True
