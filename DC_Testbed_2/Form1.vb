@@ -7,10 +7,10 @@
 'Coded by Joseph Lumbley. Copyright 2021
 
 Imports System.Math
-Imports System.Drawing
+'Imports System.Drawing
 Imports System.Drawing.Drawing2D
 Imports System.Runtime.InteropServices
-Imports System.ComponentModel
+'Imports System.ComponentModel
 Imports System.IO
 
 Public Structure HeroInfo
@@ -127,6 +127,10 @@ Public Class Form1
     Private OurHero As HeroInfo
 
     Private Movement_Target As Point = New Point(0, 0)
+
+    Private Magic_Target As Point = New Point(0, 0)
+
+
 
     'Create and Initialize editor state data.
     Private Editor_On As Boolean = False
@@ -3371,14 +3375,14 @@ Public Class Form1
                 Else
                     'Yes, a wall is selected.
 
-                    'Is the mouse pointer selecting a control handle?
+                    'Control Handle Selection
                     Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-
                     Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.X - 10, Walls(Selected_Index).Rec.Y - 10, 20, 20)
-
                     Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.Right - 10, Walls(Selected_Index).Rec.Bottom - 10, 20, 20)
 
+                    'Is the user selecting the top-left control handle?
                     If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
+                        'Yes, the user is selecting the top-left control handle.
 
                         TopLeftControlHandle_Selected = True
 
@@ -3386,12 +3390,15 @@ Public Class Form1
                         Wall_Origin.Y = Walls(Selected_Index).Rec.Bottom
 
                     Else
+                        'No, the user is not selecting the top-left control handle.
 
                         TopLeftControlHandle_Selected = False
 
                     End If
 
+                    'Is the user selecting the botton-right control handle?
                     If MousePointerRec.IntersectsWith(BottomRightControlHandleRec) = True Then
+                        'Yes, the user is selecting the botton-right control handle.
 
                         BottomRightControlHandle_Selected = True
 
@@ -3399,6 +3406,7 @@ Public Class Form1
                         Wall_Origin.Y = Walls(Selected_Index).Rec.Y
 
                     Else
+                        'No, the user is not selecting the botton-right control handle.
 
                         BottomRightControlHandle_Selected = False
 
@@ -3412,11 +3420,15 @@ Public Class Form1
                         'Is there at least one wall?
                         If Walls IsNot Nothing Then
                             'Yes, there is at least one wall.
-                            Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                            'Go thru every wall in walls in reverse z order.
+
+                            'Transform the mouses viewport coordinates into level coordinates.
+                            Dim MousePointerInLevelCoordinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+
+                            'Go thru every wall in walls in reverse order.
                             For Index = UBound(Walls) To 0 Step -1
+
                                 'Was a wall selected?
-                                If MousePointerInViewPortCooridinates.IntersectsWith(Walls(Index).Rec) Then
+                                If MousePointerInLevelCoordinates.IntersectsWith(Walls(Index).Rec) Then
                                     'Yes, a wall was selected.
 
                                     Selected_Index = Index
@@ -3454,33 +3466,57 @@ Public Class Form1
             Mouse_Down = True
 
         Else
-            'No, the editor is off. The gane is running. - Game On
+            'No, the editor is off. The game is running. - Game On
 
-            'Mouse_Down = True
+            'Did the player push down the left mouse button?
+            If e.Button = MouseButtons.Left Then
+                'Yes, the player pushed the left mouse button down.
 
-            'Movement_Target = e.Location
-            Movement_Target.X = e.X + Viewport.X
-            Movement_Target.Y = e.Y + Viewport.Y
+                'Set the movement target to the mouse postion in level coordinates.
+                Movement_Target.X = e.X + Viewport.X
+                Movement_Target.Y = e.Y + Viewport.Y
 
-            'Keep target on the level.
-            If Movement_Target.X < Level.Rec.X Then
-                Movement_Target.X = Level.Rec.X
+                'Keep target on the level.
+                If Movement_Target.X < Level.Rec.X Then
+                    Movement_Target.X = Level.Rec.X
+                End If
+                If Movement_Target.X > Level.Rec.Width Then
+                    Movement_Target.X = Level.Rec.Width
+                End If
+                If Movement_Target.Y < Level.Rec.Y Then
+                    Movement_Target.Y = Level.Rec.Y
+                End If
+                If Movement_Target.Y > Level.Rec.Height Then
+                    Movement_Target.Y = Level.Rec.Height
+                End If
+
+                Mouse_Down = True
+
+                'Did the player push down the right mouse button?
+            ElseIf e.Button = MouseButtons.Right Then
+                'Yes, the player pushed the right mouse button down.
+
+                'Set the magic target to the mouse postion in level coordinates.
+                Magic_Target.X = e.X + Viewport.X
+                Magic_Target.Y = e.Y + Viewport.Y
+
+                'Keep target on the level.
+                If Magic_Target.X < Level.Rec.X Then
+                    Magic_Target.X = Level.Rec.X
+                End If
+                If Magic_Target.X > Level.Rec.Width Then
+                    Magic_Target.X = Level.Rec.Width
+                End If
+                If Magic_Target.Y < Level.Rec.Y Then
+                    Magic_Target.Y = Level.Rec.Y
+                End If
+                If Magic_Target.Y > Level.Rec.Height Then
+                    Magic_Target.Y = Level.Rec.Height
+                End If
+
+                Mouse_Down = True
+
             End If
-            If Movement_Target.X > Level.Rec.Width Then
-                Movement_Target.X = Level.Rec.Width
-            End If
-            If Movement_Target.Y < Level.Rec.Y Then
-                Movement_Target.Y = Level.Rec.Y
-            End If
-            If Movement_Target.Y > Level.Rec.Height Then
-                Movement_Target.Y = Level.Rec.Height
-            End If
-
-            Mouse_Down = True
-
-
-
-            '+ Viewport.X
 
         End If
 
