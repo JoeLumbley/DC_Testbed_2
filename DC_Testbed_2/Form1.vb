@@ -741,8 +741,8 @@ Public Class Form1
         MonsterInViewportCoordinates.Y = Monster.Y - Viewport.Y
 
         If Monster_Life > 0 And Monster_Hit = True Then
-            g.FillRectangle(Life_Frame_Brush, MonsterInViewportCoordinates.X, MonsterInViewportCoordinates.Y - 10, MonsterInViewportCoordinates.Width, 6)
-            g.FillRectangle(Life_Brush, MonsterInViewportCoordinates.X, MonsterInViewportCoordinates.Y - 10, CInt(MonsterInViewportCoordinates.Width / Monster_LifeMAX * Monster_Life), 6)
+            g.FillRectangle(Brushes.Black, MonsterInViewportCoordinates.X - 1, MonsterInViewportCoordinates.Y - 11, MonsterInViewportCoordinates.Width + 2, 8)
+            g.FillRectangle(Brushes.Red, MonsterInViewportCoordinates.X, MonsterInViewportCoordinates.Y - 10, CInt(MonsterInViewportCoordinates.Width / Monster_LifeMAX * Monster_Life), 6)
         End If
 
     End Sub
