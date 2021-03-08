@@ -118,6 +118,8 @@ End Enum
 
 Public Class Form1
 
+    Const Rad2Deg As Double = 180.0 / Math.PI
+
     Private Viewport As New Rectangle(0, 0, 640, 480)
 
     Private Swap_Buffer As Boolean = True
@@ -129,8 +131,6 @@ Public Class Form1
     Private Movement_Target As Point = New Point(0, 0)
 
     Private Magic_Target As Point = New Point(0, 0)
-
-
 
     'Create and Initialize editor state data.
     Private Editor_On As Boolean = False
@@ -172,11 +172,12 @@ Public Class Form1
     Private MoveDown As Boolean = False
 
     Private Projectile As New Rectangle(0, 0, 75, 75)
+    Private Projectile_Origin As New Point(0, 0)
     Private ProjectileInflight As Boolean = False
     Private Projectile_Brush As New SolidBrush(Color.Yellow)
     Private Projectile_Max_Distance As Integer = 300
     Private Projectile_Attack As Integer = 12
-    Private Projectile_Speed As Integer = 50
+    Private Projectile_Speed As Integer = 30
     Private Projectile_Direction As DirectionEnum
 
     Private ShootLeft As Boolean = False
@@ -186,34 +187,26 @@ Public Class Form1
 
     Private CtrlDown As Boolean = False
 
-    Private Mouse_Down As Boolean = False
+    Private Mouse_Down_Left As Boolean = False
+    Private Mouse_Down_Right As Boolean = False
 
     Private Life_Brush As New SolidBrush(Color.FromArgb(255, 113, 9, 14))
-
     Private Life_Outline_Pen As New Pen(Color.FromArgb(255, 255, 0, 0), 1)
-
     Private Life_Frame_Brush As New SolidBrush(Color.FromArgb(255, 83, 6, 11))
-
     Private Life_Blink_Brush As New SolidBrush(Color.FromArgb(255, 170, 0, 0))
-
     Dim Life_Blink_Counter As Integer = 0
-
     Private Life_Bar_Frame As Rectangle
     Private Life_Bar_Font As New Font("Arial", 15)
 
     Private Magic_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 145))
     Private Magic_Blink_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 227))
-
     Dim Magic_Blink_Counter As Integer = 0
-
     Private Magic_Outline_Pen As New Pen(Color.FromArgb(255, 0, 128, 255), 1)
-
     Private Magic_Frame_Brush As New SolidBrush(Color.FromArgb(255, 0, 0, 119))
     Private Magic_Bar_Frame As Rectangle
 
-    Private Instruction_Text As String = "Use mouse to move and attack. Use Ctrl + arrow keys to cast spells. Press P to pause, M for map and I to hide/show instructions."
+    Private Instruction_Text As String = "Use left mouse button to move and attack. Use right mouse button to cast spells. Press P to pause, M for map and I for instructions."
     Private Instruction_Font As New Font("Arial", 14)
-
     Private Instructions_On As Boolean = True
 
     Private Fifty_Percent_Black_Brush As New SolidBrush(Color.FromArgb(128, Color.Black))
@@ -452,13 +445,11 @@ Public Class Form1
 
                     Draw_Paused_Screen(goBuf1)
 
-                    'Transform the movement targets level coordinates into viewport coordinates.
-                    Dim MovementTargetInViewportCordinates As Point
-                    MovementTargetInViewportCordinates.X = Movement_Target.X - Viewport.X
-                    MovementTargetInViewportCordinates.Y = Movement_Target.Y - Viewport.Y
+                    Draw_Movement_Target(goBuf1)
 
-                    'Draw Movement Target
-                    goBuf1.DrawRectangle(Pens.Red, New Rectangle(MovementTargetInViewportCordinates, New Drawing.Size(10, 10)))
+                    Draw_Magic_Target(goBuf1)
+
+                    Draw_Projectile_Origin(goBuf1)
 
                     'Draw buffer to the screen.
                     e.Graphics.DrawImageUnscaled(Buffer1_Bitmap, 0, 0)
@@ -525,13 +516,13 @@ Public Class Form1
 
                     Draw_Paused_Screen(goBuf2)
 
-                    'Transform the movement targets level coordinates into viewport coordinates.
-                    Dim MovementTargetInViewportCordinates As Point
-                    MovementTargetInViewportCordinates.X = Movement_Target.X - Viewport.X
-                    MovementTargetInViewportCordinates.Y = Movement_Target.Y - Viewport.Y
+                    Draw_Movement_Target(goBuf2)
 
-                    'Draw Movement Target
-                    goBuf2.DrawRectangle(Pens.Red, New Rectangle(MovementTargetInViewportCordinates, New Drawing.Size(10, 10)))
+                    Draw_Magic_Target(goBuf2)
+
+                    'Draw_Projectile_Center(goBuf2)
+
+                    Draw_Projectile_Origin(goBuf2)
 
                     'Draw the buffer to the screen.
                     e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
@@ -539,6 +530,63 @@ Public Class Form1
                 End Using
             End Using
         End If
+
+    End Sub
+
+    Private Sub Draw_Movement_Target(g As Graphics)
+
+        'Transform the movement targets level coordinates into viewport coordinates.
+        Dim MovementTargetInViewportCordinates As Point
+        MovementTargetInViewportCordinates.X = Movement_Target.X - Viewport.X
+        MovementTargetInViewportCordinates.Y = Movement_Target.Y - Viewport.Y
+
+        'Draw Movement Target
+        g.DrawRectangle(Pens.Red, New Rectangle(MovementTargetInViewportCordinates, New Drawing.Size(10, 10)))
+
+
+    End Sub
+
+    Private Sub Draw_Magic_Target(g As Graphics)
+
+        'Transform the magic targets level coordinates into viewport coordinates.
+        Dim MagicTargetInViewportCordinates As Point
+        MagicTargetInViewportCordinates.X = Magic_Target.X - Viewport.X
+        MagicTargetInViewportCordinates.Y = Magic_Target.Y - Viewport.Y
+
+        'Draw magic Target
+        g.DrawRectangle(Pens.Blue, New Rectangle(MagicTargetInViewportCordinates, New Drawing.Size(10, 10)))
+
+
+    End Sub
+
+    Private Sub Draw_Projectile_Center(g As Graphics)
+
+
+        Dim ProjectileCenter As Point
+        ProjectileCenter.X = Projectile.X + Projectile.Width \ 2
+        ProjectileCenter.Y = Projectile.Y + Projectile.Height \ 2
+
+        'Transform the magic targets level coordinates into viewport coordinates.
+        Dim ProjectileCenterInViewportCordinates As Point
+        ProjectileCenterInViewportCordinates.X = ProjectileCenter.X - Viewport.X
+        ProjectileCenterInViewportCordinates.Y = ProjectileCenter.Y - Viewport.Y
+
+        'Draw magic Target
+        g.DrawRectangle(Pens.Green, New Rectangle(ProjectileCenterInViewportCordinates, New Drawing.Size(10, 10)))
+
+
+    End Sub
+
+    Private Sub Draw_Projectile_Origin(g As Graphics)
+
+        'Transform the magic targets level coordinates into viewport coordinates.
+        Dim ProjectileOriginInViewportCordinates As Point
+        ProjectileOriginInViewportCordinates.X = Projectile_Origin.X - Viewport.X
+        ProjectileOriginInViewportCordinates.Y = Projectile_Origin.Y - Viewport.Y
+
+        'Draw magic Target
+        g.DrawRectangle(Pens.YellowGreen, New Rectangle(ProjectileOriginInViewportCordinates, New Drawing.Size(10, 10)))
+
 
     End Sub
 
@@ -570,7 +618,7 @@ Public Class Form1
 
             If Instructions_On = True Then
 
-                Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 940, 200)
+                Dim Instruction_Rec As New Rectangle(6, Viewport.Height - 60, 1000, 200)
                 goBuf2.DrawString(Instruction_Text, Instruction_Font, New SolidBrush(Color.White), Instruction_Rec)
 
             End If
@@ -923,7 +971,7 @@ Public Class Form1
 
         If Editor_On = True Then
             If Selected_Tool = ToolsEnum.Wall Then
-                If Mouse_Down = True Then
+                If Mouse_Down_Left = True Then
 
                     'Draw Wall
                     g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
@@ -1267,7 +1315,8 @@ Public Class Form1
             End If
             '*******************************************
 
-            If Mouse_Down = True Then
+            'Is the left mouse button down?
+            If Mouse_Down_Left = True Then
                 'MousePosition.Offset(Me.Location.X - PictureBox1.Location.X, Me.Location.Y - PictureBox1.Location.Y)
 
                 Dim MouseInClientCoordinates As Point = PictureBox1.PointToClient(MousePosition)
@@ -2566,67 +2615,86 @@ Public Class Form1
             'Yes, the hero has enough magic to cast.
 
             'Does the player want to cast a spell and isn't already casting a spell.
-            If CtrlDown = True And ProjectileInflight = False Then
+            If Mouse_Down_Right = True And ProjectileInflight = False Then
                 'Yes, the player wants to cast a spell and isn't already casting a spell.
+
+                Dim HeroCenter As Point
+                HeroCenter.X = OurHero.Rec.X + OurHero.Rec.Width \ 2
+                HeroCenter.Y = OurHero.Rec.Y + OurHero.Rec.Height \ 2
+
+                'Position the projectile under the hero. Make the projectile the same size as the hero.
+                Projectile = OurHero.Rec
+
+                Projectile_Origin = HeroCenter
+
+                'Find casting angle.
+                Dim radians As Double = Math.Atan2((Projectile_Origin.Y - Magic_Target.Y), (Magic_Target.X - Projectile_Origin.X))
+                Dim Degrees As Integer = CInt(radians * 180 / Math.PI)
+
+                If Degrees < 0 Then
+                    Degrees += 360
+                End If
+
                 'Determine the hero's direction of fire.**************************
-                If MoveRight = True Then
-                    If MoveUp = True Then
-                        Projectile_Direction = DirectionEnum.RightUP
-                    ElseIf MoveDown = True Then
-                        Projectile_Direction = DirectionEnum.RightDown
-                    Else
-                        Projectile_Direction = DirectionEnum.Right
-                    End If
-                ElseIf MoveLeft = True Then
-                    If MoveUp = True Then
-                        Projectile_Direction = DirectionEnum.LeftUp
-                    ElseIf MoveDown = True Then
-                        Projectile_Direction = DirectionEnum.LeftDown
-                    Else
-                        Projectile_Direction = DirectionEnum.Left
-                    End If
-                ElseIf MoveUp = True Then
+                'Fire Right - 0° {0° - 22°, 338° - 360°}
+                If Degrees >= 0 And Degrees <= 22 Or Degrees >= 338 And Degrees <= 360 Then
+                    Projectile_Direction = DirectionEnum.Right
+                End If
+                'Fire Right Up - 45° {23° - 67°}
+                If Degrees >= 23 And Degrees <= 67 Then
+                    Projectile_Direction = DirectionEnum.RightUP
+                End If
+                'Fire Up - 90° {68° - 112°}
+                If Degrees >= 68 And Degrees <= 112 Then
                     Projectile_Direction = DirectionEnum.Up
-                ElseIf MoveDown = True Then
+                End If
+                'Fire Left Up - 135° {113° - 157°}
+                If Degrees >= 113 And Degrees <= 157 Then
+                    Projectile_Direction = DirectionEnum.LeftUp
+                End If
+                'Fire Left - 180° {158° - 202°}
+                If Degrees >= 158 And Degrees <= 202 Then
+                    Projectile_Direction = DirectionEnum.Left
+                End If
+                'Fire Left Down - 225° {203° - 247°}
+                If Degrees >= 203 And Degrees <= 247 Then
+                    Projectile_Direction = DirectionEnum.LeftDown
+                End If
+                'Fire Down - 270° {248° - 292°}
+                If Degrees >= 248 And Degrees <= 292 Then
                     Projectile_Direction = DirectionEnum.Down
-                Else
-                    Projectile_Direction = DirectionEnum.None
                 End If
-                '*************************************************************
-                'Fire**************************************************
-                If Projectile_Direction <> DirectionEnum.None Then
-
-                    'Position the projectile under the hero. Make the projectile the same size as the hero.
-                    Projectile = OurHero.Rec
-
-                    'Loose the projectile.
-                    ProjectileInflight = True
-
-                    'Subtract the cost of magic.
-                    OurHero.Magic -= 15
-                    If OurHero.Magic < 1 Then
-                        OurHero.Magic = 0
-                    End If
-
-                    'Play projectile in flight sound.
-                    GS.Play("Magic")
-
+                'Fire Right Down - 315° {293° - 337°}
+                If Degrees >= 293 And Degrees <= 337 Then
+                    Projectile_Direction = DirectionEnum.RightDown
                 End If
-                '******************************************************
+
+                'Loose the projectile.
+                ProjectileInflight = True
+
+                'Subtract the cost of magic.
+                OurHero.Magic -= 15
+                If OurHero.Magic < 1 Then
+                    OurHero.Magic = 0
+                End If
+
+                'Play projectile in flight sound.
+                GS.Play("Magic")
+
             End If
         Else
             'No, the hero doesn't have enough magic to cast.
 
             'Does the player want to cast a spell?
-            If CtrlDown = True Then
-                If MoveLeft = True Or MoveRight = True Or MoveUp = True Or MoveDown = True Then
-                    'Yes, the player wants to cast a spell.
+            If Mouse_Down_Right = True Then
+                'If MoveLeft = True Or MoveRight = True Or MoveUp = True Or MoveDown = True Then
+                'Yes, the player wants to cast a spell.
 
-                    'Play not enough magic dialogue.
-                    If GS.IsPlaying("Not_Enough_Magic") = False Then
-                        GS.Play("Not_Enough_Magic")
-                    End If
+                'Play not enough magic dialogue.
+                If GS.IsPlaying("Not_Enough_Magic") = False Then
+                    GS.Play("Not_Enough_Magic")
                 End If
+
             End If
 
         End If
@@ -2635,17 +2703,21 @@ Public Class Form1
         'Has the player cast a spell?
         If ProjectileInflight = True Then
             'Yes the player has cast a spell.
+
+            Dim ProjectileCenter As Point
+            ProjectileCenter.X = Projectile.X + Projectile.Width \ 2
+            ProjectileCenter.Y = Projectile.Y + Projectile.Height \ 2
+
             'Is the projectile within it's range?
-            If Distance_Between_Points(Projectile.Location, OurHero.Rec.Location) < Projectile_Max_Distance Then
+            If Distance_Between_Points(ProjectileCenter, Projectile_Origin) < Projectile_Max_Distance Then
                 'Yes, the projectile is within it's range.
+
                 'What direction is the player casting in?
                 Select Case Projectile_Direction
                     Case DirectionEnum.Right
                         'The player is casting to the right.
                         'Move the projectile to the right.
                         Projectile.X += Projectile_Speed
-
-
 
                         'ToDo: 'Go thur the monsters one by one, start to end.
                         'ToDo: If Monsters IsNot Nothing Then
@@ -2685,8 +2757,8 @@ Public Class Form1
 
                             End If
                         End If
-                        'ToDo: Next
-                        'ToDo: End if
+                    'ToDo: Next
+                    'ToDo: End if
 
                     Case DirectionEnum.Left
                         'Move projectile to the left.
@@ -3045,10 +3117,10 @@ Public Class Form1
                             End If
                         End If
                 End Select
-            Else
-                'No, the projectile is outside it's range.
 
-                'Stop the projectile.
+            Else
+                'No, the projectile is beyond it's range.
+
                 ProjectileInflight = False
 
             End If
@@ -3228,8 +3300,6 @@ Public Class Form1
 
     End Sub
 
-
-
     Private Sub Form1_KeyUp(sender As Object, e As KeyEventArgs) Handles MyBase.KeyUp
 
         Select Case e.KeyValue
@@ -3286,11 +3356,6 @@ Public Class Form1
 
     End Sub
 
-
-
-
-
-
     Private Sub MenuItemEditorOn_Click(sender As Object, e As EventArgs) Handles MenuItemEditorOn.Click
 
         'Toggle Editor On/Off *****************************************
@@ -3339,80 +3404,17 @@ Public Class Form1
 
         If Editor_On = True Then
 
-            'Is the pointer the selected tool?
-            If Selected_Tool = ToolsEnum.Pointer Then
-                'Yes, the pointer is the selected tool.
+            'Did the user push down the left mouse button?
+            If e.Button = MouseButtons.Left Then
+                'Yes, the user pushed the left mouse button down.
 
-                'Has a wall been selected?
-                If IsSelected <> True Then
-                    'No wall is selected.
+                'Is the pointer the selected tool?
+                If Selected_Tool = ToolsEnum.Pointer Then
+                    'Yes, the pointer is the selected tool.
 
-                    'Set pointer origin to the current mouse location.
-                    Pointer_Origin = e.Location
-
-                    'Is there at least one wall?
-                    If Walls IsNot Nothing Then
-                        'Yes, there is at least one wall.
-                        Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                        'Go thru every wall in walls in reverse z order.
-                        For Index = UBound(Walls) To 0 Step -1
-                            'Was a wall selected?
-                            If MousePointerInViewPortCooridinates.IntersectsWith(Walls(Index).Rec) Then
-                                'Yes, a wall was selected.
-
-                                Selected_Index = Index
-                                IsSelected = True
-                                Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
-                                Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
-                                Exit For
-
-                            End If
-                            IsSelected = False
-                            Selected_Index = -1
-                        Next
-                    End If
-
-                Else
-                    'Yes, a wall is selected.
-
-                    'Control Handle Selection
-                    Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                    Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.X - 10, Walls(Selected_Index).Rec.Y - 10, 20, 20)
-                    Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.Right - 10, Walls(Selected_Index).Rec.Bottom - 10, 20, 20)
-
-                    'Is the user selecting the top-left control handle?
-                    If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
-                        'Yes, the user is selecting the top-left control handle.
-
-                        TopLeftControlHandle_Selected = True
-
-                        Wall_Origin.X = Walls(Selected_Index).Rec.Right
-                        Wall_Origin.Y = Walls(Selected_Index).Rec.Bottom
-
-                    Else
-                        'No, the user is not selecting the top-left control handle.
-
-                        TopLeftControlHandle_Selected = False
-
-                    End If
-
-                    'Is the user selecting the botton-right control handle?
-                    If MousePointerRec.IntersectsWith(BottomRightControlHandleRec) = True Then
-                        'Yes, the user is selecting the botton-right control handle.
-
-                        BottomRightControlHandle_Selected = True
-
-                        Wall_Origin.X = Walls(Selected_Index).Rec.X
-                        Wall_Origin.Y = Walls(Selected_Index).Rec.Y
-
-                    Else
-                        'No, the user is not selecting the botton-right control handle.
-
-                        BottomRightControlHandle_Selected = False
-
-                    End If
-
-                    If TopLeftControlHandle_Selected = False And BottomRightControlHandle_Selected = False Then
+                    'Has a wall been selected?
+                    If IsSelected <> True Then
+                        'No wall is selected.
 
                         'Set pointer origin to the current mouse location.
                         Pointer_Origin = e.Location
@@ -3420,15 +3422,11 @@ Public Class Form1
                         'Is there at least one wall?
                         If Walls IsNot Nothing Then
                             'Yes, there is at least one wall.
-
-                            'Transform the mouses viewport coordinates into level coordinates.
-                            Dim MousePointerInLevelCoordinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-
-                            'Go thru every wall in walls in reverse order.
+                            Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                            'Go thru every wall in walls in reverse z order.
                             For Index = UBound(Walls) To 0 Step -1
-
                                 'Was a wall selected?
-                                If MousePointerInLevelCoordinates.IntersectsWith(Walls(Index).Rec) Then
+                                If MousePointerInViewPortCooridinates.IntersectsWith(Walls(Index).Rec) Then
                                     'Yes, a wall was selected.
 
                                     Selected_Index = Index
@@ -3443,27 +3441,100 @@ Public Class Form1
                             Next
                         End If
 
+                    Else
+                        'Yes, a wall is selected.
+
+                        'Control Handle Selection
+                        Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                        Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.X - 10, Walls(Selected_Index).Rec.Y - 10, 20, 20)
+                        Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.Right - 10, Walls(Selected_Index).Rec.Bottom - 10, 20, 20)
+
+                        'Is the user selecting the top-left control handle?
+                        If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
+                            'Yes, the user is selecting the top-left control handle.
+
+                            TopLeftControlHandle_Selected = True
+
+                            Wall_Origin.X = Walls(Selected_Index).Rec.Right
+                            Wall_Origin.Y = Walls(Selected_Index).Rec.Bottom
+
+                        Else
+                            'No, the user is not selecting the top-left control handle.
+
+                            TopLeftControlHandle_Selected = False
+
+                        End If
+
+                        'Is the user selecting the botton-right control handle?
+                        If MousePointerRec.IntersectsWith(BottomRightControlHandleRec) = True Then
+                            'Yes, the user is selecting the botton-right control handle.
+
+                            BottomRightControlHandle_Selected = True
+
+                            Wall_Origin.X = Walls(Selected_Index).Rec.X
+                            Wall_Origin.Y = Walls(Selected_Index).Rec.Y
+
+                        Else
+                            'No, the user is not selecting the botton-right control handle.
+
+                            BottomRightControlHandle_Selected = False
+
+                        End If
+
+                        If TopLeftControlHandle_Selected = False And BottomRightControlHandle_Selected = False Then
+
+                            'Set pointer origin to the current mouse location.
+                            Pointer_Origin = e.Location
+
+                            'Is there at least one wall?
+                            If Walls IsNot Nothing Then
+                                'Yes, there is at least one wall.
+
+                                'Transform the mouses viewport coordinates into level coordinates.
+                                Dim MousePointerInLevelCoordinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+
+                                'Go thru every wall in walls in reverse order.
+                                For Index = UBound(Walls) To 0 Step -1
+
+                                    'Was a wall selected?
+                                    If MousePointerInLevelCoordinates.IntersectsWith(Walls(Index).Rec) Then
+                                        'Yes, a wall was selected.
+
+                                        Selected_Index = Index
+                                        IsSelected = True
+                                        Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
+                                        Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
+                                        Exit For
+
+                                    End If
+                                    IsSelected = False
+                                    Selected_Index = -1
+                                Next
+                            End If
+
+                        End If
+
                     End If
+                End If
+
+                If Selected_Tool = ToolsEnum.Wall Then
+
+                    IsSelected = False
+                    Selected_Index = -1
+
+                    'Define a wall.
+                    Wall.Rec.Width = 0
+                    Wall.Rec.Height = 0
+
+                    'Wall_Origin = e.Location
+                    Wall_Origin.X = e.X + Viewport.X
+                    Wall_Origin.Y = e.Y + Viewport.Y
 
                 End If
-            End If
 
-            If Selected_Tool = ToolsEnum.Wall Then
-
-                IsSelected = False
-                Selected_Index = -1
-
-                'Define a wall.
-                Wall.Rec.Width = 0
-                Wall.Rec.Height = 0
-
-                'Wall_Origin = e.Location
-                Wall_Origin.X = e.X + Viewport.X
-                Wall_Origin.Y = e.Y + Viewport.Y
+                Mouse_Down_Left = True
 
             End If
-
-            Mouse_Down = True
 
         Else
             'No, the editor is off. The game is running. - Game On
@@ -3490,31 +3561,43 @@ Public Class Form1
                     Movement_Target.Y = Level.Rec.Height
                 End If
 
-                Mouse_Down = True
+                Mouse_Down_Left = True
 
-                'Did the player push down the right mouse button?
-            ElseIf e.Button = MouseButtons.Right Then
+
+            End If
+
+
+            'Did the player push down the right mouse button?
+            If e.Button = MouseButtons.Right Then
                 'Yes, the player pushed the right mouse button down.
 
-                'Set the magic target to the mouse postion in level coordinates.
-                Magic_Target.X = e.X + Viewport.X
-                Magic_Target.Y = e.Y + Viewport.Y
+                If ProjectileInflight = False Then
 
-                'Keep target on the level.
-                If Magic_Target.X < Level.Rec.X Then
-                    Magic_Target.X = Level.Rec.X
-                End If
-                If Magic_Target.X > Level.Rec.Width Then
-                    Magic_Target.X = Level.Rec.Width
-                End If
-                If Magic_Target.Y < Level.Rec.Y Then
-                    Magic_Target.Y = Level.Rec.Y
-                End If
-                If Magic_Target.Y > Level.Rec.Height Then
-                    Magic_Target.Y = Level.Rec.Height
+
+                    'Set the magic target to the mouse postion in level coordinates.
+                    Magic_Target.X = e.X + Viewport.X
+                    Magic_Target.Y = e.Y + Viewport.Y
+
+                    'Keep target on the level.
+                    If Magic_Target.X < Level.Rec.X Then
+                        Magic_Target.X = Level.Rec.X
+                    End If
+                    If Magic_Target.X > Level.Rec.Width Then
+                        Magic_Target.X = Level.Rec.Width
+                    End If
+                    If Magic_Target.Y < Level.Rec.Y Then
+                        Magic_Target.Y = Level.Rec.Y
+                    End If
+                    If Magic_Target.Y > Level.Rec.Height Then
+                        Magic_Target.Y = Level.Rec.Height
+                    End If
+
+                    Mouse_Down_Right = True
+
+
+
                 End If
 
-                Mouse_Down = True
 
             End If
 
@@ -3526,7 +3609,7 @@ Public Class Form1
 
         If Editor_On = True Then
 
-            Mouse_Down = False
+            Mouse_Down_Left = False
 
             If Selected_Tool = ToolsEnum.Wall Then
                 'Has the mouse moved?
@@ -3547,7 +3630,22 @@ Public Class Form1
             End If
         Else
 
-            Mouse_Down = False
+
+            'Did the player let the left mouse button up?
+            If e.Button = MouseButtons.Left Then
+                'Yes, the player let the left mouse button up.
+
+                Mouse_Down_Left = False
+
+            End If
+
+            'Did the player let the right mouse button up?
+            If e.Button = MouseButtons.Right Then
+                'Yes, the player let the right mouse button up.
+
+                Mouse_Down_Right = False
+
+            End If
 
         End If
 
@@ -3557,7 +3655,7 @@ Public Class Form1
 
         If Editor_On = True Then
 
-            If Mouse_Down = True Then
+            If Mouse_Down_Left = True Then
                 If Selected_Tool = ToolsEnum.Pointer Then
                     If Walls IsNot Nothing Then
                         If Selected_Index > -1 Then
@@ -3640,8 +3738,6 @@ Public Class Form1
         End If
 
     End Sub
-
-
 
     Private Sub MenuItemShowHideRulers_Click(sender As Object, e As EventArgs) Handles MenuItemShowHideRulers.Click
 
