@@ -262,6 +262,9 @@ Public Class Form1
 
     Dim drawFormat As New StringFormat
 
+    Dim DistanceToHero As Integer
+
+
     Private Sub Form1_Load(sender As System.Object, e As System.EventArgs) Handles MyBase.Load
 
         CreateSoundFileFromResource()
@@ -431,6 +434,8 @@ Public Class Form1
 
                     goBuf1.Clear(Level.BackgroundColor)
 
+                    Draw_Light(goBuf1)
+
                     Draw_Hero_Light(goBuf1, OurHero.Rec)
 
                     Draw_Grid(goBuf1)
@@ -469,6 +474,13 @@ Public Class Form1
 
                     Draw_Projectile_Origin(goBuf1)
 
+
+                    'DistanceToHero
+                    'goBuf1.DrawString(DistanceToHero.ToString, Life_Bar_Font, drawBrush, Monster.X - Viewport.X, Monster.Y - Viewport.Y)
+
+
+
+
                     'Draw buffer to the screen.
                     e.Graphics.DrawImageUnscaled(Buffer1_Bitmap, 0, 0)
 
@@ -501,6 +513,8 @@ Public Class Form1
                     End With
 
                     goBuf2.Clear(Level.BackgroundColor)
+
+                    Draw_Light(goBuf2)
 
                     Draw_Hero_Light(goBuf2, OurHero.Rec)
 
@@ -541,6 +555,8 @@ Public Class Form1
                     'Draw_Projectile_Center(goBuf2)
 
                     Draw_Projectile_Origin(goBuf2)
+
+
 
                     'Draw the buffer to the screen.
                     e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
@@ -1115,6 +1131,57 @@ Public Class Form1
 
     End Sub
 
+    Private Sub Draw_Light(g As Graphics)
+
+        'Is the editor off?
+        If Editor_On = False Then
+            'Yes, the editor is off.
+
+            'Transform the heros level coorinates into viewport coordinates.
+            Dim LightInViewportCoordinates As Rectangle
+            LightInViewportCoordinates.X = 500 - Viewport.X
+            LightInViewportCoordinates.Y = 500 - Viewport.Y
+            LightInViewportCoordinates.Width = 500
+            LightInViewportCoordinates.Height = 500
+
+            Dim LightColor As Color = Color.FromArgb(70, Color.Yellow)
+
+            g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), 0 - Viewport.X, 0 - Viewport.Y, 2000, 2000)
+
+            'Create a graphics path.
+            Dim path As New GraphicsPath()
+
+
+            'Add an ellipse the size and position of the heros light rectangle to the path.
+            path.AddEllipse(LightInViewportCoordinates)
+
+            'Create a path gradient brush
+            Dim pgBrush As New PathGradientBrush(path)
+
+
+            'Set the center color of the path gradient brush.
+            pgBrush.CenterColor = LightColor
+
+
+            'Set the surrounding colors of the path gradient brush.
+            Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
+            pgBrush.SurroundColors = list
+
+            'Draw the heros light radius.
+            g.FillPath(pgBrush, path)
+
+
+
+        End If
+
+
+    End Sub
+
+
+
+
+
+
     Private Sub Draw_Hero_Light(g As Graphics, Rec As Rectangle)
 
         'Is the editor off?
@@ -1147,10 +1214,10 @@ Public Class Form1
                 Dim pgBrush As New PathGradientBrush(path)
 
                 'Set the center color of the path gradient brush.
-                pgBrush.CenterColor = Color.FromArgb(255, 255, 255, 255)
+                pgBrush.CenterColor = Color.FromArgb(255, Color.White)
 
                 'Set the surrounding colors of the path gradient brush.
-                Dim list As Color() = New Color() {Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+                Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
                 pgBrush.SurroundColors = list
 
                 'Draw the heros light radius.
@@ -1178,7 +1245,7 @@ Public Class Form1
                 pgBrush.CenterColor = Color.FromArgb(90, Color.White)
 
                 'Set the surrounding colors of the path gradient brush.
-                Dim list As Color() = New Color() {Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0), Color.FromArgb(0, 0, 0, 0)}
+                Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
                 pgBrush.SurroundColors = list
 
                 'Draw the heros light radius.
@@ -1189,6 +1256,10 @@ Public Class Form1
         End If
 
     End Sub
+
+
+
+
 
     Private Sub Draw_Hero(g As Graphics, Rec As Rectangle)
 
@@ -2527,9 +2598,12 @@ Public Class Form1
         If Monster_Life > 0 And OurHero.Life > 0 Then
             'Yes, the monster and the hero live.
 
+
+            DistanceToHero = CInt(Distance_Between_Points(Monster.Location, OurHero.Rec.Location))
+
             'Proximity Based Chase Behavior
             'Is the monster near the hero?
-            If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < Viewport.Width \ 3 Then
+            If Distance_Between_Points(Monster.Location, OurHero.Rec.Location) < 1100 Then
                 'Yes, the monster is near the hero.
 
                 Dim Monster_Center_X As Integer = Monster.X + Monster.Width \ 2
@@ -2647,11 +2721,10 @@ Public Class Form1
 
                 'Find casting angle.
                 Dim radians As Double = Math.Atan2((Projectile_Origin.Y - Magic_Target.Y), (Magic_Target.X - Projectile_Origin.X))
-                Dim Degrees As Integer = CInt(radians * 180 / Math.PI)
-
-                If Degrees < 0 Then
-                    Degrees += 360
-                End If
+                Dim Degrees As Integer = CInt(radians * 180 / Math.PI) 'Angles on the unit circle.
+                If Degrees < 0 Then                                    '     90
+                    Degrees += 360                                     '180     0/360
+                End If                                                 '    270
 
                 'Determine the hero's direction of fire.**************************
                 'Fire Right - 0° {0° - 22°, 338° - 360°}
@@ -2734,20 +2807,29 @@ Public Class Form1
                 Select Case Projectile_Direction
                     Case DirectionEnum.Right
                         'The player is casting to the right.
+
                         'Move the projectile to the right.
                         Projectile.X += Projectile_Speed
 
                         'ToDo: 'Go thur the monsters one by one, start to end.
                         'ToDo: If Monsters IsNot Nothing Then
                         'ToDo: For MonIndex = 0 To UBound(Monsters)
+
                         'Is the monster alive?
-                        If Monster_Life > 0 Then 'If Monsters(MonIndex).Life > 0 Then
+                        If Monster_Life > 0 Then 'ToDo: If Monsters(MonIndex).Life > 0 Then
                             'Yes, the monster is alive.
+
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then 'ToDo: If Projectile.IntersectsWith(Monsters(MonIndex).Rec) = True Then
                                 'Yes, the hero is touching the monster.
 
                                 Monster_Hit = True 'ToDo: Monsters(MonIndex).Hit = True
+
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack 'ToDo: Monsters(MonIndex).Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
@@ -2790,6 +2872,11 @@ Public Class Form1
 
                                 Monster_Hit = True
 
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
@@ -2828,6 +2915,11 @@ Public Class Form1
                                 'Yes, the hero is touching the monster.
 
                                 Monster_Hit = True
+
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
 
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
@@ -2869,6 +2961,11 @@ Public Class Form1
 
                                 Monster_Hit = True
 
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
@@ -2906,7 +3003,14 @@ Public Class Form1
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
                                 Monster_Hit = True
+
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
+
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
                                 If Monster_Life < 0 Then
@@ -2963,7 +3067,14 @@ Public Class Form1
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
                                 Monster_Hit = True
+
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
+
 
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
@@ -3021,7 +3132,13 @@ Public Class Form1
                             'Is the projectile touching the monster?
                             If Projectile.IntersectsWith(Monster) = True Then
                                 'Yes, the hero is touching the monster.
+
                                 Monster_Hit = True
+
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
 
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
@@ -3074,19 +3191,28 @@ Public Class Form1
 
                         'Move projectile to the left.
                         Projectile.X -= Projectile_Speed
+
                         'Move projectile down.
                         Projectile.Y += Projectile_Speed
 
+                        'ToDo: 'Go thur the monsters one by one, start to end.
+                        'ToDo: If Monsters IsNot Nothing Then
+                        'ToDo: For MonIndex = 0 To UBound(Monsters)
+
                         'Is the monster alive?
-                        If Monster_Life > 0 Then
+                        If Monster_Life > 0 Then 'ToDo: If Monsters(MonIndex).Life > 0 Then
                             'Yes, the monster is alive.
+
                             'Is the projectile touching the monster?
-                            If Projectile.IntersectsWith(Monster) = True Then
+                            If Projectile.IntersectsWith(Monster) = True Then 'ToDo: If Projectile.IntersectsWith(Monsters(MonIndex).Rec) = True Then
                                 'Yes, the hero is touching the monster.
 
-                                Monster_Hit = True
+                                Monster_Hit = True 'ToDo: Monsters(MonIndex).Hit = True
 
-                                'Play monster hit sound
+                                'Play monster hit sound.
+                                If GS.IsPlaying("Undead_Hit") = False Then
+                                    GS.Play("Undead_Hit")
+                                End If
 
                                 'Attack the monsters life points directly.
                                 Monster_Life -= Projectile_Attack
