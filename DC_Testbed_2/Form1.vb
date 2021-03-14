@@ -360,7 +360,7 @@ Public Class Form1
         GS.SetVolume("Undead_Attack", 400)
         GS.SetVolume("Potion_Pickup", 1000)
         GS.SetVolume("Undead_Death", 300)
-        GS.SetVolume("Hero_Move", 210)
+        GS.SetVolume("Hero_Move", 300)
         GS.SetVolume("Undead_Hit", 800)
         GS.SetVolume("Hero_Death", 400)
         GS.SetVolume("Not_Enough_Magic", 400)
@@ -450,6 +450,9 @@ Public Class Form1
 
                     Draw_Wall(goBuf1, Wall.Rec)
 
+                    Draw_Door(goBuf1, New Rectangle(2000, 2000, 100, 100))
+
+
                     Draw_Monster_Life_Bar(goBuf1)
 
                     Draw_Hero(goBuf1, OurHero.Rec)
@@ -529,6 +532,9 @@ Public Class Form1
                     Draw_Walls(goBuf2)
 
                     Draw_Wall(goBuf2, Wall.Rec)
+
+                    Draw_Door(goBuf2, New Rectangle(2000, 2000, 100, 100))
+
 
                     Draw_Monster_Life_Bar(goBuf2)
 
@@ -1017,6 +1023,50 @@ Public Class Form1
 
     End Sub
 
+
+    Private Sub Draw_Door(g As Graphics, Rec As Rectangle)
+
+        Dim DoorInViewportCoordinates As Rectangle
+
+        DoorInViewportCoordinates = Rec
+        DoorInViewportCoordinates.X = Rec.X - Viewport.X
+        DoorInViewportCoordinates.Y = Rec.Y - Viewport.Y
+
+        'Is the editor on?
+        If Editor_On = False Then
+            'No, the editor off. The game is running. - Game On
+
+            'Is the door in the heros light radius?
+            If DoorInViewportCoordinates.IntersectsWith(LightRec) = True Then
+                'Yes, the door is in the heros light radius.
+
+                'Draw door hit box.
+                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Brown)), DoorInViewportCoordinates)
+
+                'Draw door text.
+                g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+                'Draw door outline.
+                g.DrawRectangle(New Pen(Color.FromArgb(255, Color.SandyBrown), 1), DoorInViewportCoordinates)
+
+            Else
+                'No, the door is not in the heros light radius.
+
+                'Draw door hit box.
+                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Brown)), DoorInViewportCoordinates)
+
+                'Draw door text.
+                g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+                'Draw door shadow.
+                g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), DoorInViewportCoordinates)
+
+            End If
+
+        End If
+
+    End Sub
+
     Private Sub Draw_Walls(g As Graphics)
 
         'Is the editor on?
@@ -1046,6 +1096,7 @@ Public Class Form1
 
                             'Draw wall.
                             g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+
                             'Draw outline.
                             g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
@@ -1133,6 +1184,8 @@ Public Class Form1
 
     Private Sub Draw_Light(g As Graphics)
 
+        'ToDo: Add Draw floor
+
         'Is the editor off?
         If Editor_On = False Then
             'Yes, the editor is off.
@@ -1141,10 +1194,10 @@ Public Class Form1
             Dim LightInViewportCoordinates As Rectangle
             LightInViewportCoordinates.X = 500 - Viewport.X
             LightInViewportCoordinates.Y = 500 - Viewport.Y
-            LightInViewportCoordinates.Width = 500
-            LightInViewportCoordinates.Height = 500
+            LightInViewportCoordinates.Width = 300
+            LightInViewportCoordinates.Height = 300
 
-            Dim LightColor As Color = Color.FromArgb(70, Color.Yellow)
+            Dim LightColor As Color = Color.FromArgb(64, Color.White)
 
             g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), 0 - Viewport.X, 0 - Viewport.Y, 2000, 2000)
 
@@ -2672,7 +2725,7 @@ Public Class Form1
                     Potion.Rec.Y = Monster.Y + (Monster.Height - Potion.Rec.Height) \ 2
                     Potion.Active = True
 
-                    Potion.Color = Color.FromArgb(255, 95, 7, 12)
+                    Potion.Color = Color.FromArgb(255, 119, 9, 14)
                     Potion.OutlineColor = Color.FromArgb(255, 255, 0, 0)
                 Else
                     'Drop magic potion.
