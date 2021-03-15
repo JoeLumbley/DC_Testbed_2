@@ -80,6 +80,19 @@ Public Structure WallInfo
 
 End Structure
 
+
+Public Structure DoorInfo
+    Public Rec As Rectangle
+    Public Color As Color
+    Public OutlineColor As Color
+    Public Revealed As Boolean 'If true the door will be seen on the map.
+    Public MapColor As Color
+    Public MapOutlineColor As Color
+    Public IsOpen As Boolean
+
+End Structure
+
+
 Public Structure PotionInfo
 
     Public IsLife As Boolean 'If true the potion is a potion of life. If false the potion is a magical potion.
@@ -145,6 +158,10 @@ Public Class Form1
     Private Level As LevelInfo
 
     Private OurHero As HeroInfo
+
+    Private Door As DoorInfo
+
+
 
     Private Movement_Target As Point = New Point(0, 0)
 
@@ -269,14 +286,30 @@ Public Class Form1
 
         CreateSoundFileFromResource()
 
+
+        Door.Rec.X = 2000
+        Door.Rec.Y = 2000
+        Door.Rec.Width = 100
+        Door.Rec.Height = 35
+        Door.Color = Color.BurlyWood
+        Door.OutlineColor = Color.Beige
+        Door.IsOpen = False
+        Door.MapColor = Color.BurlyWood
+        Door.MapOutlineColor = Color.Beige
+        Door.Revealed = False
+
         Level.BackgroundColor = Color.FromArgb(255, 20, 20, 20)
         Level.Rec.X = 0
         Level.Rec.Y = 0
         'Level.Rec.Width = 5300
 
 
-        Level.Rec.Width = 6500
-        Level.Rec.Height = 5490
+        'Level.Rec.Width = 6500
+        'Level.Rec.Height = 5490
+
+
+        Level.Rec.Width = 17000
+        Level.Rec.Height = 8000
 
         MenuItemShowHideRulers.Checked = True
 
@@ -434,24 +467,25 @@ Public Class Form1
 
                     goBuf1.Clear(Level.BackgroundColor)
 
-                    Draw_Light(goBuf1)
+                    Draw_Floor(goBuf1)
+
+                    Draw_Floor_Light(goBuf1)
 
                     Draw_Hero_Light(goBuf1, OurHero.Rec)
 
                     Draw_Grid(goBuf1)
 
+                    Draw_Door(goBuf1)
+
                     Draw_Potion(goBuf1, Potion.Rec)
-
-                    Draw_Monster(goBuf1, Monster)
-
-                    Draw_Projectile(goBuf1)
 
                     Draw_Walls(goBuf1)
 
                     Draw_Wall(goBuf1, Wall.Rec)
 
-                    Draw_Door(goBuf1, New Rectangle(2000, 2000, 100, 100))
+                    Draw_Monster(goBuf1, Monster)
 
+                    Draw_Projectile(goBuf1)
 
                     Draw_Monster_Life_Bar(goBuf1)
 
@@ -517,24 +551,25 @@ Public Class Form1
 
                     goBuf2.Clear(Level.BackgroundColor)
 
-                    Draw_Light(goBuf2)
+                    Draw_Floor(goBuf2)
+
+                    Draw_Floor_Light(goBuf2)
 
                     Draw_Hero_Light(goBuf2, OurHero.Rec)
 
                     Draw_Grid(goBuf2)
 
+                    Draw_Door(goBuf2)
+
                     Draw_Potion(goBuf2, Potion.Rec)
-
-                    Draw_Monster(goBuf2, Monster)
-
-                    Draw_Projectile(goBuf2)
 
                     Draw_Walls(goBuf2)
 
                     Draw_Wall(goBuf2, Wall.Rec)
 
-                    Draw_Door(goBuf2, New Rectangle(2000, 2000, 100, 100))
+                    Draw_Monster(goBuf2, Monster)
 
+                    Draw_Projectile(goBuf2)
 
                     Draw_Monster_Life_Bar(goBuf2)
 
@@ -1024,44 +1059,101 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Draw_Door(g As Graphics, Rec As Rectangle)
-
-        Dim DoorInViewportCoordinates As Rectangle
-
-        DoorInViewportCoordinates = Rec
-        DoorInViewportCoordinates.X = Rec.X - Viewport.X
-        DoorInViewportCoordinates.Y = Rec.Y - Viewport.Y
+    Private Sub Draw_Door(g As Graphics)
 
         'Is the editor on?
         If Editor_On = False Then
             'No, the editor off. The game is running. - Game On
 
+            'Transform the doors level coordinates to viewport coordinates.
+            Dim DoorInViewportCoordinates As Rectangle
+            DoorInViewportCoordinates = Door.Rec
+            DoorInViewportCoordinates.X = Door.Rec.X - Viewport.X
+            DoorInViewportCoordinates.Y = Door.Rec.Y - Viewport.Y
+
             'Is the door in the heros light radius?
             If DoorInViewportCoordinates.IntersectsWith(LightRec) = True Then
                 'Yes, the door is in the heros light radius.
 
-                'Draw door hit box.
-                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Brown)), DoorInViewportCoordinates)
+                'Is the door open?
+                If Door.IsOpen = False Then
+                    'No the door is closed.
 
-                'Draw door text.
-                g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+                    'Draw door hit box.
+                    g.FillRectangle(New SolidBrush(Door.Color), DoorInViewportCoordinates)
 
-                'Draw door outline.
-                g.DrawRectangle(New Pen(Color.FromArgb(255, Color.SandyBrown), 1), DoorInViewportCoordinates)
+                    'Draw door text.
+                    g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+                    'Draw door outline.
+                    g.DrawRectangle(New Pen(Door.OutlineColor, 1), DoorInViewportCoordinates)
+
+                Else
+                    'Yes, the door is open.
+
+                    'Draw door hit box.
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(128, Door.Color)), DoorInViewportCoordinates)
+
+                    'Draw door text.
+                    'g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+                    'Draw door outline.
+                    'g.DrawRectangle(New Pen(Door.OutlineColor, 1), DoorInViewportCoordinates)
+
+
+                End If
+
 
             Else
                 'No, the door is not in the heros light radius.
 
-                'Draw door hit box.
-                g.FillRectangle(New SolidBrush(Color.FromArgb(255, Color.Brown)), DoorInViewportCoordinates)
+                'Is the door open?
+                If Door.IsOpen = False Then
+                    'No the door is closed.
 
-                'Draw door text.
-                g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+                    'Draw door hit box.
+                    g.FillRectangle(New SolidBrush(Door.Color), DoorInViewportCoordinates)
 
-                'Draw door shadow.
-                g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), DoorInViewportCoordinates)
+                    'Draw door text.
+                    g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+                    'Draw door shadow.
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), DoorInViewportCoordinates)
+
+
+                Else
+                    'Yes, the door is open.
+
+                    'Draw door hit box.
+                    g.FillRectangle(New SolidBrush(Color.FromArgb(128, Door.Color)), DoorInViewportCoordinates)
+
+                    'Draw door text.
+                    'g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+                    'Draw door shadow.
+                    'g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), DoorInViewportCoordinates)
+
+                End If
 
             End If
+
+        Else
+            'Yes, the editor is on. The game is not running. - Game Off
+
+            'Transform the doors level coordinates to viewport coordinates.
+            Dim DoorInViewportCoordinates As Rectangle
+            DoorInViewportCoordinates = Door.Rec
+            DoorInViewportCoordinates.X = Door.Rec.X - Viewport.X
+            DoorInViewportCoordinates.Y = Door.Rec.Y - Viewport.Y
+
+            'Draw door hit box.
+            g.FillRectangle(New SolidBrush(Door.Color), DoorInViewportCoordinates)
+
+            'Draw door text.
+            g.DrawString("Door", Monster_Font, New SolidBrush(Color.Black), DoorInViewportCoordinates, Center_String)
+
+            'Draw door outline.
+            g.DrawRectangle(New Pen(Door.OutlineColor, 1), DoorInViewportCoordinates)
 
         End If
 
@@ -1182,56 +1274,85 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Draw_Light(g As Graphics)
-
-        'ToDo: Add Draw floor
+    Private Sub Draw_Floor_Light(g As Graphics)
 
         'Is the editor off?
-        If Editor_On = False Then
-            'Yes, the editor is off.
+        'If Editor_On = False Then
+        'Yes, the editor is off.
 
-            'Transform the heros level coorinates into viewport coordinates.
-            Dim LightInViewportCoordinates As Rectangle
-            LightInViewportCoordinates.X = 500 - Viewport.X
-            LightInViewportCoordinates.Y = 500 - Viewport.Y
-            LightInViewportCoordinates.Width = 300
-            LightInViewportCoordinates.Height = 300
+        'Transform the floor level coorinates into viewport coordinates.
+        Dim FloorLightInViewportCoordinates As Rectangle
 
-            Dim LightColor As Color = Color.FromArgb(64, Color.White)
+        FloorLightInViewportCoordinates.X = -150 - Viewport.X
 
-            g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), 0 - Viewport.X, 0 - Viewport.Y, 2000, 2000)
+        FloorLightInViewportCoordinates.Y = -150 - Viewport.Y
 
-            'Create a graphics path.
-            Dim path As New GraphicsPath()
+        FloorLightInViewportCoordinates.Width = 300
+
+        FloorLightInViewportCoordinates.Height = 300
 
 
-            'Add an ellipse the size and position of the heros light rectangle to the path.
-            path.AddEllipse(LightInViewportCoordinates)
-
-            'Create a path gradient brush
-            Dim pgBrush As New PathGradientBrush(path)
+        Dim LightColor As Color = Color.FromArgb(64, Color.White)
 
 
-            'Set the center color of the path gradient brush.
-            pgBrush.CenterColor = LightColor
+        'Create a graphics path.
+        Dim path As New GraphicsPath()
+
+        'Add an ellipse the size and position of the heros light rectangle to the path.
+        path.AddEllipse(FloorLightInViewportCoordinates)
+
+        'Create a path gradient brush
+        Dim pgBrush As New PathGradientBrush(path)
+
+        'Set the center color of the path gradient brush.
+        pgBrush.CenterColor = LightColor
+
+        'Set the surrounding colors of the path gradient brush.
+        Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
+        pgBrush.SurroundColors = list
+
+        'Draw the heros light radius.
+        g.FillPath(pgBrush, path)
 
 
-            'Set the surrounding colors of the path gradient brush.
-            Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
-            pgBrush.SurroundColors = list
 
-            'Draw the heros light radius.
-            g.FillPath(pgBrush, path)
-
-
-
-        End If
-
+        'End If
 
     End Sub
 
 
+    Private Sub Draw_Floor(g As Graphics)
 
+        'Is the editor off?
+        If Editor_On = False Then
+            'Yes, the editor is off. The game is running. - Game On
+
+            'Transform the floors level coorinates into viewport coordinates.
+            Dim FloorInViewportCoordinates As Rectangle
+            FloorInViewportCoordinates.X = 0 - Viewport.X
+            FloorInViewportCoordinates.Y = 0 - Viewport.Y
+            FloorInViewportCoordinates.Width = 2000
+            FloorInViewportCoordinates.Height = 2000
+
+            'Draw floor.
+            g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), FloorInViewportCoordinates.X, FloorInViewportCoordinates.Y, FloorInViewportCoordinates.Width, FloorInViewportCoordinates.Height)
+
+        Else
+            'No, the editor is on. The game is not running. - Game Off
+
+            'Transform the floors level coorinates into viewport coordinates.
+            Dim FloorInViewportCoordinates As Rectangle
+            FloorInViewportCoordinates.X = 0 - Viewport.X
+            FloorInViewportCoordinates.Y = 0 - Viewport.Y
+            FloorInViewportCoordinates.Width = 2000
+            FloorInViewportCoordinates.Height = 2000
+
+            'Draw floor.
+            g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), FloorInViewportCoordinates.X, FloorInViewportCoordinates.Y, FloorInViewportCoordinates.Width, FloorInViewportCoordinates.Height)
+
+        End If
+
+    End Sub
 
 
 
@@ -1555,6 +1676,12 @@ Public Class Form1
             Do_Hero_Shots()
 
             Do_Potion_Pickup()
+
+            If OurHero.Rec.IntersectsWith(Door.Rec) = True Then
+
+                Door.IsOpen = True
+
+            End If
 
         Else
             'No, the hero is dead.
