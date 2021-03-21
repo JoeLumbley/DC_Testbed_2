@@ -30,6 +30,7 @@ Imports System.Math
 Imports System.Drawing.Drawing2D
 Imports System.Runtime.InteropServices
 Imports System.IO
+Imports System.Runtime.Serialization.Formatters.Binary
 
 Public Structure HeroInfo
 
@@ -77,6 +78,30 @@ Public Structure WallInfo
     Public Revealed As Boolean 'If true the wall will be seen on the map.
     Public MapColor As Color
     Public MapOutlineColor As Color
+
+End Structure
+
+Structure Object_Record_Info
+
+
+    Public ID As Integer
+
+    Public X As Integer
+    Public Y As Integer
+    Public Width As Integer
+    Public Height As Integer
+
+    Public Color As Integer
+    Public OutlineColor As Integer
+
+    Public MapColor As Integer
+    Public MapOutlineColor As Integer
+
+    Public Revealed As Boolean
+
+    'Public IsOpen As Boolean
+
+    '<VBFixedString(256)> Public Text As String
 
 End Structure
 
@@ -144,6 +169,20 @@ Public Enum DirectionEnum As Integer
     RightDown = 6
     LeftUp = 7
     LeftDown = 8
+
+End Enum
+
+Public Enum Object_ID_Enum As Integer
+
+    Level = 0
+    Hero = 1
+    Undead = 2
+    Wall = 3
+    Floor = 4
+    Floor_Light = 5
+    Life_Potion = 6
+    Magic_Potion = 7
+    Door = 8
 
 End Enum
 
@@ -308,7 +347,7 @@ Public Class Form1
         'Level.Rec.Height = 5490
 
 
-        Level.Rec.Width = 17000
+        Level.Rec.Width = 17100
         Level.Rec.Height = 8000
 
         MenuItemShowHideRulers.Checked = True
@@ -434,7 +473,7 @@ Public Class Form1
 
     Private Sub PictureBox1_Paint(ByVal sender As System.Object, ByVal e As System.Windows.Forms.PaintEventArgs) Handles PictureBox1.Paint
 
-        'Draw buffer one or two?
+        'Draw to buffer one or two?
         If Swap_Buffer = True Then
             'Draw to buffer one.
 
@@ -446,8 +485,8 @@ Public Class Form1
 
                     'Use these settings when drawing to the backbuffer.
                     With goBuf1
-                        .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug Fix
-                        'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
+                        .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug fix don't change.
+                        'To fix draw string error: "Parameters not valid." I set the compositing mode to source over.
                         .SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
                         .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
                         .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
@@ -491,9 +530,9 @@ Public Class Form1
 
                     Draw_Hero(goBuf1, OurHero.Rec)
 
-                    goBuf1.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
+                    goBuf1.DrawString("Level 1", Life_Bar_Font, drawBrush, Viewport.Width - 100, 6)
 
-                    Draw_Map(goBuf1, Viewport.Width - Map.Width - 10, 40, 9)
+                    Draw_Map(goBuf1, 10, 68, 9)
 
                     Draw_HeroLife_Bar(goBuf1, Life_Bar_Frame)
 
@@ -531,8 +570,8 @@ Public Class Form1
                 Using goBuf2 As Graphics = Graphics.FromImage(_Buffer2)
 
                     With goBuf2
-                        .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug Fix
-                        'To fix draw string error: "Parameters not valid." Set the compositing mode to source over.
+                        .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug fix don't change.
+                        'To fix draw string error: "Parameters not valid." I set the compositing mode to source over.
                         .SmoothingMode = Drawing2D.SmoothingMode.AntiAlias
                         .TextRenderingHint = Drawing.Text.TextRenderingHint.AntiAlias
                         .CompositingQuality = Drawing2D.CompositingQuality.AssumeLinear
@@ -575,9 +614,9 @@ Public Class Form1
 
                     Draw_Hero(goBuf2, OurHero.Rec)
 
-                    goBuf2.DrawString("Level 1", Life_Bar_Font, drawBrush, Map.X - 3, 6)
+                    goBuf2.DrawString("Level 1", Life_Bar_Font, drawBrush, Viewport.Width - 100, 6)
 
-                    Draw_Map(goBuf2, Viewport.Width - Map.Width - 10, 40, 9)
+                    Draw_Map(goBuf2, 10, 68, 9)
 
                     Draw_HeroLife_Bar(goBuf2, Life_Bar_Frame)
 
@@ -1283,9 +1322,9 @@ Public Class Form1
         'Transform the floor level coorinates into viewport coordinates.
         Dim FloorLightInViewportCoordinates As Rectangle
 
-        FloorLightInViewportCoordinates.X = -150 - Viewport.X
+        FloorLightInViewportCoordinates.X = 150 - Viewport.X
 
-        FloorLightInViewportCoordinates.Y = -150 - Viewport.Y
+        FloorLightInViewportCoordinates.Y = 150 - Viewport.Y
 
         FloorLightInViewportCoordinates.Width = 300
 
@@ -1446,6 +1485,12 @@ Public Class Form1
             If OurHero.Hit = False Then
 
                 'Draw hero.
+
+
+
+
+
+
                 g.FillRectangle(New SolidBrush(OurHero.Color), HeroInViewportCoordinates)
 
                 g.DrawString("Hero", Monster_Font, New SolidBrush(Color.Black), HeroInViewportCoordinates, Center_String)
@@ -4198,14 +4243,14 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Add_Wall(ByVal Wall As Rectangle)
+    Private Sub Add_Wall(ByVal WallRec As Rectangle)
 
         If Walls IsNot Nothing Then
             Array.Resize(Walls, Walls.Length + 1)
-            Walls(Walls.Length - 1).Rec = Wall
+            Walls(Walls.Length - 1).Rec = WallRec
         Else
             ReDim Walls(0)
-            Walls(0).Rec = Wall
+            Walls(0).Rec = WallRec
         End If
 
     End Sub
@@ -4253,6 +4298,80 @@ Public Class Form1
         End If
 
     End Sub
+
+
+    Private Sub Open_Level_File()
+
+        'Dim Object_Record As New Object_Record_Info
+        'Dim WallIndex As Integer
+        'Dim RecordIndex As Integer = 1
+        Dim File_Number As Integer = FreeFile()
+        Dim AppPath As String = Application.StartupPath
+        'Dim WallRec As Rectangle
+
+        Dim File_Path As String = AppPath & "TESTFILE.txt"
+
+        Dim Index As Integer = -1
+
+        Walls = Nothing 'Reset walls to default value.
+
+        FileOpen(File_Number, File_Path, OpenMode.Input)
+
+        Do Until EOF(File_Number)
+
+            Index += 1
+
+            ReDim Preserve Walls(Index)
+
+            With Walls(Index)
+
+                Input(File_Number, .Rec.X)
+
+                Input(File_Number, .Rec.Y)
+
+                Input(File_Number, .Rec.Width)
+
+                Input(File_Number, .Rec.Height)
+
+            End With
+
+        Loop
+
+        FileClose(File_Number)
+
+    End Sub
+
+
+    Private Sub Save_Level_File()
+
+        'Dim Object_Record As Object_Record_Info
+        Dim WallIndex As Integer = -1
+        Dim RecordIndex As Integer = 1
+        Dim File_Number As Integer = FreeFile()
+        Dim AppPath As String = Application.StartupPath
+
+        Dim File_Path As String = AppPath & "TESTFILE.txt"
+
+        If Walls IsNot Nothing Then
+
+            FileOpen(File_Number, File_Path, OpenMode.Output)
+
+            'Go thur every wall in the walls array. One by one. Start to end.
+            For WallIndex = 0 To UBound(Walls)
+
+                Write(File_Number, Walls(WallIndex).Rec.X)
+                Write(File_Number, Walls(WallIndex).Rec.Y)
+                Write(File_Number, Walls(WallIndex).Rec.Width)
+                Write(File_Number, Walls(WallIndex).Rec.Height)
+
+            Next
+
+            FileClose(File_Number)
+
+        End If
+
+    End Sub
+
 
     Private Function Distance_Between_Points(Point1 As Point, Point2 As Point) As Double
 
@@ -4369,6 +4488,19 @@ Public Class Form1
 
     End Sub
 
+    Private Sub Save_Menu_Click(sender As Object, e As EventArgs) Handles Save_Menu.Click
+
+        Save_Level_File()
+
+
+    End Sub
+
+    Private Sub Open_Menu_Click(sender As Object, e As EventArgs) Handles Open_Menu.Click
+
+        Open_Level_File()
+
+
+    End Sub
 End Class
 
 Public Enum MCI_NOTIFY As Integer

@@ -28,12 +28,15 @@ Partial Class Form1
         Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
         Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
+        Me.File_Menu = New System.Windows.Forms.ToolStripMenuItem()
+        Me.Save_Menu = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuView = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuItemShowHideRulers = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemEditorOn = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemPointer = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemWall = New System.Windows.Forms.ToolStripMenuItem()
-        Me.MenuView = New System.Windows.Forms.ToolStripMenuItem()
-        Me.MenuItemShowHideRulers = New System.Windows.Forms.ToolStripMenuItem()
+        Me.Open_Menu = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -59,12 +62,38 @@ Partial Class Form1
         'MenuStrip1
         '
         Me.MenuStrip1.ImageScalingSize = New System.Drawing.Size(22, 22)
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemTools, Me.MenuView})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.File_Menu, Me.MenuView, Me.MenuItemTools})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Size = New System.Drawing.Size(900, 31)
         Me.MenuStrip1.TabIndex = 1
         Me.MenuStrip1.Text = "Tools"
+        '
+        'File_Menu
+        '
+        Me.File_Menu.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.Save_Menu, Me.Open_Menu})
+        Me.File_Menu.Name = "File_Menu"
+        Me.File_Menu.Size = New System.Drawing.Size(51, 27)
+        Me.File_Menu.Text = "File"
+        '
+        'Save_Menu
+        '
+        Me.Save_Menu.Name = "Save_Menu"
+        Me.Save_Menu.Size = New System.Drawing.Size(144, 30)
+        Me.Save_Menu.Text = "Save"
+        '
+        'MenuView
+        '
+        Me.MenuView.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemShowHideRulers})
+        Me.MenuView.Name = "MenuView"
+        Me.MenuView.Size = New System.Drawing.Size(62, 27)
+        Me.MenuView.Text = "View"
+        '
+        'MenuItemShowHideRulers
+        '
+        Me.MenuItemShowHideRulers.Name = "MenuItemShowHideRulers"
+        Me.MenuItemShowHideRulers.Size = New System.Drawing.Size(194, 30)
+        Me.MenuItemShowHideRulers.Text = "Show Rulers"
         '
         'MenuItemTools
         '
@@ -91,18 +120,11 @@ Partial Class Form1
         Me.MenuItemWall.Size = New System.Drawing.Size(205, 30)
         Me.MenuItemWall.Text = "Wall"
         '
-        'MenuView
+        'Open_Menu
         '
-        Me.MenuView.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemShowHideRulers})
-        Me.MenuView.Name = "MenuView"
-        Me.MenuView.Size = New System.Drawing.Size(62, 27)
-        Me.MenuView.Text = "View"
-        '
-        'MenuItemShowHideRulers
-        '
-        Me.MenuItemShowHideRulers.Name = "MenuItemShowHideRulers"
-        Me.MenuItemShowHideRulers.Size = New System.Drawing.Size(194, 30)
-        Me.MenuItemShowHideRulers.Text = "Show Rulers"
+        Me.Open_Menu.Name = "Open_Menu"
+        Me.Open_Menu.Size = New System.Drawing.Size(144, 30)
+        Me.Open_Menu.Text = "Open"
         '
         'Form1
         '
@@ -134,4 +156,7 @@ Partial Class Form1
     Friend WithEvents MenuItemShowHideRulers As ToolStripMenuItem
     Friend WithEvents MenuItemPointer As ToolStripMenuItem
     Friend WithEvents MenuItemWall As ToolStripMenuItem
+    Friend WithEvents File_Menu As ToolStripMenuItem
+    Friend WithEvents Save_Menu As ToolStripMenuItem
+    Friend WithEvents Open_Menu As ToolStripMenuItem
 End Class
