@@ -81,7 +81,7 @@ Public Structure WallInfo
 
 End Structure
 
-Structure Object_Record_Info
+Structure Game_Objects_Struct
 
 
     Public ID As Integer
@@ -99,7 +99,9 @@ Structure Object_Record_Info
 
     Public Revealed As Boolean
 
-    'Public IsOpen As Boolean
+    Public Text As String
+
+    Public IsOpen As Boolean
 
     '<VBFixedString(256)> Public Text As String
 
@@ -187,6 +189,8 @@ Public Enum Object_ID_Enum As Integer
 End Enum
 
 Public Class Form1
+
+    Private Game_Objects() As Game_Objects_Struct
 
     Const Rad2Deg As Double = 180.0 / Math.PI
 
@@ -352,7 +356,8 @@ Public Class Form1
 
         MenuItemShowHideRulers.Checked = True
 
-        OurHero.Rec = New Rectangle(0, 0, 90, 90)
+        OurHero.Rec = New Rectangle(14000, 6000, 90, 90)
+        'OurHero.Rec = New Rectangle(0, 0, 90, 90)
         OurHero.Color = Color.FromArgb(255, 157, 150, 0)
         OurHero.OutlineColor = Color.FromArgb(255, 255, 242, 0)
         OurHero.MapColor = Color.FromArgb(64, 255, 242, 0)
@@ -4300,7 +4305,139 @@ Public Class Form1
     End Sub
 
 
+    Private Sub Save_Level_File()
+
+        Dim File_Path As String = Application.StartupPath & "Level.txt"
+        Dim File_Number As Integer = FreeFile()
+
+        FileOpen(File_Number, File_Path, OpenMode.Output)
+
+        'Write Walls*************************************************************
+        If Walls IsNot Nothing Then
+
+            'Go thur every wall in the walls array. One by one. Start to end.
+            For Wall_Index = 0 To UBound(Walls)
+
+                'Write wall data in game object format.
+                Write(File_Number, Object_ID_Enum.Wall)
+
+                Write(File_Number, Walls(Wall_Index).Rec.X)
+                Write(File_Number, Walls(Wall_Index).Rec.Y)
+                Write(File_Number, Walls(Wall_Index).Rec.Width)
+                Write(File_Number, Walls(Wall_Index).Rec.Height)
+
+                Write(File_Number, Walls(Wall_Index).Color.ToArgb)
+                Write(File_Number, Walls(Wall_Index).OutlineColor.ToArgb)
+
+                Write(File_Number, Walls(Wall_Index).MapColor.ToArgb)
+                Write(File_Number, Walls(Wall_Index).MapOutlineColor.ToArgb)
+
+                Write(File_Number, False) 'Revealed
+
+                Write(File_Number, "") 'Text
+
+                Write(File_Number, False) 'IsOpen
+
+            Next
+
+        End If
+        '*************************************************************************
+
+        FileClose(File_Number)
+
+    End Sub
+
     Private Sub Open_Level_File()
+
+        Dim File_Path As String = Application.StartupPath & "Level.txt"
+        Dim File_Number As Integer = FreeFile()
+
+        FileOpen(File_Number, File_Path, OpenMode.Input)
+
+        Game_Objects = Nothing 'Reset game objects to default value.
+
+        Dim Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+
+        'Go thur every game object in the level file. One by one. Start to end.
+        Do Until EOF(File_Number)
+
+            Index += 1
+
+            ReDim Preserve Game_Objects(Index) 'Resize the game objects array.
+
+            'Copy object data from file.
+            With Game_Objects(Index)
+
+                Input(File_Number, .ID)
+
+                Input(File_Number, .X)
+                Input(File_Number, .Y)
+                Input(File_Number, .Width)
+                Input(File_Number, .Height)
+
+                Input(File_Number, .Color)
+                Input(File_Number, .OutlineColor)
+
+                Input(File_Number, .MapColor)
+                Input(File_Number, .MapOutlineColor)
+
+                Input(File_Number, .Revealed)
+
+                Input(File_Number, .Text)
+
+                Input(File_Number, .IsOpen)
+
+            End With
+
+        Loop
+
+        FileClose(File_Number)
+
+
+        'Is there at least one game object?
+        If Game_Objects IsNot Nothing Then
+            'Yes, we have at least one game object.
+
+            Walls = Nothing 'Reset walls array to default value.
+
+            Dim Wall_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+
+            'Go thur every object in the game objects array. One by one. Start to end.
+            For Index = 0 To UBound(Game_Objects)
+
+                'Load Walls*************************************************************
+                'Is the game object a wall?
+                If Game_Objects(Index).ID = Object_ID_Enum.Wall Then
+                    'Yes, the game object is a wall.
+
+                    Wall_Index += 1
+
+                    ReDim Preserve Walls(Wall_Index) 'Resize the walls array.
+
+                    'Copy wall data from game object.
+                    Walls(Wall_Index).Rec.X = Game_Objects(Index).X
+                    Walls(Wall_Index).Rec.Y = Game_Objects(Index).Y
+                    Walls(Wall_Index).Rec.Width = Game_Objects(Index).Width
+                    Walls(Wall_Index).Rec.Height = Game_Objects(Index).Height
+
+                    Walls(Wall_Index).Color = Color.FromArgb(Game_Objects(Index).Color)
+                    Walls(Wall_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor)
+
+                    Walls(Wall_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor)
+                    Walls(Wall_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor)
+
+                    Walls(Wall_Index).Revealed = Game_Objects(Index).Revealed
+
+                End If
+                '*************************************************************************
+
+            Next
+
+        End If
+
+    End Sub
+
+    Private Sub Open_Test_Level_File()
 
         'Dim Object_Record As New Object_Record_Info
         'Dim WallIndex As Integer
@@ -4310,9 +4447,7 @@ Public Class Form1
         'Dim WallRec As Rectangle
 
         Dim File_Path As String = AppPath & "TESTFILE.txt"
-
         Dim Index As Integer = -1
-
         Walls = Nothing 'Reset walls to default value.
 
         FileOpen(File_Number, File_Path, OpenMode.Input)
@@ -4342,7 +4477,7 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Save_Level_File()
+    Private Sub Save_Test_Level_File()
 
         'Dim Object_Record As Object_Record_Info
         Dim WallIndex As Integer = -1
@@ -4490,12 +4625,17 @@ Public Class Form1
 
     Private Sub Save_Menu_Click(sender As Object, e As EventArgs) Handles Save_Menu.Click
 
+        'Save_Test_Level_File()
+
         Save_Level_File()
+
 
 
     End Sub
 
     Private Sub Open_Menu_Click(sender As Object, e As EventArgs) Handles Open_Menu.Click
+
+        'Open_Test_Level_File()
 
         Open_Level_File()
 
