@@ -30,13 +30,14 @@ Partial Class Form1
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
         Me.File_Menu = New System.Windows.Forms.ToolStripMenuItem()
         Me.Save_Menu = New System.Windows.Forms.ToolStripMenuItem()
+        Me.Open_Menu = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuView = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemShowHideRulers = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemTools = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemEditorOn = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemPointer = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemWall = New System.Windows.Forms.ToolStripMenuItem()
-        Me.Open_Menu = New System.Windows.Forms.ToolStripMenuItem()
+        Me.Floor_Menu = New System.Windows.Forms.ToolStripMenuItem()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
         Me.SuspendLayout()
@@ -82,6 +83,12 @@ Partial Class Form1
         Me.Save_Menu.Size = New System.Drawing.Size(144, 30)
         Me.Save_Menu.Text = "Save"
         '
+        'Open_Menu
+        '
+        Me.Open_Menu.Name = "Open_Menu"
+        Me.Open_Menu.Size = New System.Drawing.Size(144, 30)
+        Me.Open_Menu.Text = "Open"
+        '
         'MenuView
         '
         Me.MenuView.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemShowHideRulers})
@@ -97,7 +104,7 @@ Partial Class Form1
         '
         'MenuItemTools
         '
-        Me.MenuItemTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemEditorOn, Me.MenuItemPointer, Me.MenuItemWall})
+        Me.MenuItemTools.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuItemEditorOn, Me.MenuItemPointer, Me.MenuItemWall, Me.Floor_Menu})
         Me.MenuItemTools.Name = "MenuItemTools"
         Me.MenuItemTools.Size = New System.Drawing.Size(64, 27)
         Me.MenuItemTools.Text = "Tools"
@@ -120,11 +127,11 @@ Partial Class Form1
         Me.MenuItemWall.Size = New System.Drawing.Size(205, 30)
         Me.MenuItemWall.Text = "Wall"
         '
-        'Open_Menu
+        'Floor_Menu
         '
-        Me.Open_Menu.Name = "Open_Menu"
-        Me.Open_Menu.Size = New System.Drawing.Size(144, 30)
-        Me.Open_Menu.Text = "Open"
+        Me.Floor_Menu.Name = "Floor_Menu"
+        Me.Floor_Menu.Size = New System.Drawing.Size(205, 30)
+        Me.Floor_Menu.Text = "Floor"
         '
         'Form1
         '
@@ -159,4 +166,5 @@ Partial Class Form1
     Friend WithEvents File_Menu As ToolStripMenuItem
     Friend WithEvents Save_Menu As ToolStripMenuItem
     Friend WithEvents Open_Menu As ToolStripMenuItem
+    Friend WithEvents Floor_Menu As ToolStripMenuItem
 End Class

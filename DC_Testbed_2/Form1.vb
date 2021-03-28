@@ -81,8 +81,18 @@ Public Structure WallInfo
 
 End Structure
 
-Structure Game_Objects_Struct
+Public Structure Floor_Struct
 
+    Public Rec As Rectangle
+    Public Color As Color
+    Public OutlineColor As Color
+    Public Revealed As Boolean 'If true the floor will be seen on the map.
+    Public MapColor As Color
+    Public MapOutlineColor As Color
+
+End Structure
+
+Structure Game_Objects_Struct
 
     Public ID As Integer
 
@@ -143,6 +153,7 @@ Public Enum ToolsEnum As Integer
 
     Pointer = 0
     Wall = 1
+    Floor = 2
 
 End Enum
 
@@ -189,6 +200,10 @@ Public Enum Object_ID_Enum As Integer
 End Enum
 
 Public Class Form1
+
+
+
+    Private Floors() As Floor_Struct
 
     Private Game_Objects() As Game_Objects_Struct
 
@@ -356,8 +371,8 @@ Public Class Form1
 
         MenuItemShowHideRulers.Checked = True
 
-        OurHero.Rec = New Rectangle(14000, 6000, 90, 90)
-        'OurHero.Rec = New Rectangle(0, 0, 90, 90)
+        'OurHero.Rec = New Rectangle(14000, 6000, 90, 90)
+        OurHero.Rec = New Rectangle(0, 0, 90, 90)
         OurHero.Color = Color.FromArgb(255, 157, 150, 0)
         OurHero.OutlineColor = Color.FromArgb(255, 255, 242, 0)
         OurHero.MapColor = Color.FromArgb(64, 255, 242, 0)
@@ -1231,7 +1246,8 @@ Public Class Form1
                             'Yes, the wall is in the heros light radius.
 
                             'Draw wall.
-                            g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                            'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                            g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
 
                             'Draw outline.
                             g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
@@ -1239,10 +1255,11 @@ Public Class Form1
                         Else
 
                             'Draw wall.
-                            g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                            'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                            g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
 
                             'Draw shadow.
-                            g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), WallInViewportCoordinates)
+                            g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), WallInViewportCoordinates)
 
                         End If
 
@@ -3906,9 +3923,23 @@ Public Class Form1
 
                 End If
 
+                If Selected_Tool = ToolsEnum.Floor Then
+
+                    IsSelected = False
+                    Selected_Index = -1
+
+
+                End If
+
+
                 Mouse_Down_Left = True
 
             End If
+
+
+
+
+
 
         Else
             'No, the editor is off. The game is running. - Game On
@@ -4128,10 +4159,15 @@ Public Class Form1
     Private Sub MenuItemPointer_Click(sender As Object, e As EventArgs) Handles MenuItemPointer.Click
 
         Selected_Tool = ToolsEnum.Pointer
+
         MenuItemPointer.Checked = True
 
         If MenuItemWall.Checked = True Then
             MenuItemWall.Checked = False
+        End If
+
+        If Floor_Menu.Checked = True Then
+            Floor_Menu.Checked = False
         End If
 
     End Sub
@@ -4139,10 +4175,31 @@ Public Class Form1
     Private Sub MenuItemWall_Click(sender As Object, e As EventArgs) Handles MenuItemWall.Click
 
         Selected_Tool = ToolsEnum.Wall
+
         MenuItemWall.Checked = True
 
         If MenuItemPointer.Checked = True Then
             MenuItemPointer.Checked = False
+        End If
+
+        If Floor_Menu.Checked = True Then
+            Floor_Menu.Checked = False
+        End If
+
+    End Sub
+
+    Private Sub Floor_Menu_Click(sender As Object, e As EventArgs) Handles Floor_Menu.Click
+
+        Selected_Tool = ToolsEnum.Floor
+
+        Floor_Menu.Checked = True
+
+        If MenuItemPointer.Checked = True Then
+            MenuItemPointer.Checked = False
+        End If
+
+        If MenuItemWall.Checked = True Then
+            MenuItemWall.Checked = False
         End If
 
     End Sub
@@ -4304,6 +4361,61 @@ Public Class Form1
 
     End Sub
 
+    Private Sub Add_Floor(ByVal Rec As Rectangle)
+
+        If Floors IsNot Nothing Then
+            Array.Resize(Floors, Floors.Length + 1)
+            Floors(Floors.Length - 1).Rec = Rec
+        Else
+            ReDim Floors(0)
+            Floors(0).Rec = Rec
+        End If
+
+    End Sub
+
+    Private Sub Remove_Floor(IndexToRemove As Integer)
+
+        'Is this the last floor in the floors array?
+        If UBound(Floors) > 0 Then 'Arrays start at zero.
+            'No, this is not the last floor in the floors array.
+
+            'Create temporary floors array. Set to the size of the floors array minus one floor.
+            Dim TempFloors(UBound(Floors) - 1) As Floor_Struct
+
+            'Create temporary floor array index. Set the temporary array index to the first floor.
+            Dim TempIndex As Integer = LBound(Floors)
+
+            'Copy the array without the element to the temporary array.
+            'Go thur the floor array, one by one, start to end.
+            For index = LBound(Floors) To UBound(Floors)
+
+                'Is the current floor selected for removal.
+                If index <> IndexToRemove Then
+                    'No, the current floor is not selected for removal.
+
+                    'Copy the current floor from walls to the temporary walls array.
+                    TempFloors(TempIndex) = Floors(index)
+
+                    'Advance the temporary index.
+                    TempIndex += 1
+
+                End If
+            Next
+
+            'Resize the floors array to match the temporary floors array size.
+            ReDim Floors(UBound(TempFloors))
+
+            'Copy the temporary floors array back to the floors array.
+            Floors = TempFloors
+
+        Else
+            'Yes, this is the last floor in the floors array.
+
+            Floors = Nothing 'Reset floors to default value.
+
+        End If
+
+    End Sub
 
     Private Sub Save_Level_File()
 
@@ -4326,17 +4438,48 @@ Public Class Form1
                 Write(File_Number, Walls(Wall_Index).Rec.Width)
                 Write(File_Number, Walls(Wall_Index).Rec.Height)
 
-                Write(File_Number, Walls(Wall_Index).Color.ToArgb)
-                Write(File_Number, Walls(Wall_Index).OutlineColor.ToArgb)
+                Write(File_Number, Walls(Wall_Index).Color.ToArgb) 'Convert ARGB color to integer color.
+                Write(File_Number, Walls(Wall_Index).OutlineColor.ToArgb) 'Convert ARGB color to integer color.
 
-                Write(File_Number, Walls(Wall_Index).MapColor.ToArgb)
-                Write(File_Number, Walls(Wall_Index).MapOutlineColor.ToArgb)
+                Write(File_Number, Walls(Wall_Index).MapColor.ToArgb) 'Convert ARGB color to integer color.
+                Write(File_Number, Walls(Wall_Index).MapOutlineColor.ToArgb) 'Convert ARGB color to integer color.
 
-                Write(File_Number, False) 'Revealed
+                Write(File_Number, False) 'Revealed - Boolean
 
-                Write(File_Number, "") 'Text
+                Write(File_Number, "") 'Text - String
 
-                Write(File_Number, False) 'IsOpen
+                Write(File_Number, False) 'IsOpen - Boolean
+
+            Next
+
+        End If
+        '*************************************************************************
+
+        'Write Floors*************************************************************
+        If Floors IsNot Nothing Then
+
+            'Go thur every floor in the floors array. One by one. Start to end.
+            For Floor_Index = 0 To UBound(Walls)
+
+                'Write floor data in game object format.
+                Write(File_Number, Object_ID_Enum.Floor)
+
+                Write(File_Number, Floors(Floor_Index).Rec.X)
+                Write(File_Number, Floors(Floor_Index).Rec.Y)
+                Write(File_Number, Floors(Floor_Index).Rec.Width)
+                Write(File_Number, Floors(Floor_Index).Rec.Height)
+
+                Write(File_Number, Floors(Floor_Index).Color.ToArgb) 'Convert ARGB color to integer color.
+                Write(File_Number, Floors(Floor_Index).OutlineColor.ToArgb) 'Convert ARGB color to integer color.
+
+                Write(File_Number, Floors(Floor_Index).MapColor.ToArgb) 'Convert ARGB color to integer color.
+                Write(File_Number, Floors(Floor_Index).MapOutlineColor.ToArgb) 'Convert ARGB color to integer color.
+
+                Write(File_Number, False) 'Revealed - Boolean
+
+                Write(File_Number, "") 'Text - String
+
+                Write(File_Number, False) 'IsOpen - Boolean
 
             Next
 
@@ -4356,17 +4499,17 @@ Public Class Form1
 
         Game_Objects = Nothing 'Reset game objects to default value.
 
-        Dim Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+        Dim Object_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
 
         'Go thur every game object in the level file. One by one. Start to end.
         Do Until EOF(File_Number)
 
-            Index += 1
+            Object_Index += 1 'Add a object to the game objects array.
 
-            ReDim Preserve Game_Objects(Index) 'Resize the game objects array.
+            ReDim Preserve Game_Objects(Object_Index) 'Resize the game objects array.
 
             'Copy object data from file.
-            With Game_Objects(Index)
+            With Game_Objects(Object_Index)
 
                 Input(File_Number, .ID)
 
@@ -4393,7 +4536,7 @@ Public Class Form1
 
         FileClose(File_Number)
 
-
+        'Load Level***********************************************************************************
         'Is there at least one game object?
         If Game_Objects IsNot Nothing Then
             'Yes, we have at least one game object.
@@ -4401,6 +4544,10 @@ Public Class Form1
             Walls = Nothing 'Reset walls array to default value.
 
             Dim Wall_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+
+            Floors = Nothing 'Reset walls array to default value.
+
+            Dim Floor_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
 
             'Go thur every object in the game objects array. One by one. Start to end.
             For Index = 0 To UBound(Game_Objects)
@@ -4410,23 +4557,47 @@ Public Class Form1
                 If Game_Objects(Index).ID = Object_ID_Enum.Wall Then
                     'Yes, the game object is a wall.
 
-                    Wall_Index += 1
-
+                    Wall_Index += 1 'Add a wall to the walls array.
                     ReDim Preserve Walls(Wall_Index) 'Resize the walls array.
 
-                    'Copy wall data from game object.
-                    Walls(Wall_Index).Rec.X = Game_Objects(Index).X
-                    Walls(Wall_Index).Rec.Y = Game_Objects(Index).Y
-                    Walls(Wall_Index).Rec.Width = Game_Objects(Index).Width
-                    Walls(Wall_Index).Rec.Height = Game_Objects(Index).Height
+                    'Copy the wall from the game object.
+                    Walls(Wall_Index).Rec.X = Game_Objects(Index).X 'Convert coordinate to rectangle.
+                    Walls(Wall_Index).Rec.Y = Game_Objects(Index).Y 'Convert coordinate to rectangle.
+                    Walls(Wall_Index).Rec.Width = Game_Objects(Index).Width 'Convert size to rectangle.
+                    Walls(Wall_Index).Rec.Height = Game_Objects(Index).Height 'Convert size to rectangle.
 
-                    Walls(Wall_Index).Color = Color.FromArgb(Game_Objects(Index).Color)
-                    Walls(Wall_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor)
+                    Walls(Wall_Index).Color = Color.FromArgb(Game_Objects(Index).Color) 'Convert integer color to ARGB color.
+                    Walls(Wall_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor) 'Convert integer color to ARGB color.
 
-                    Walls(Wall_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor)
-                    Walls(Wall_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor)
+                    Walls(Wall_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor) 'Convert integer color to ARGB color.
+                    Walls(Wall_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor) 'Convert integer color to ARGB color.
 
                     Walls(Wall_Index).Revealed = Game_Objects(Index).Revealed
+
+                End If
+                '*************************************************************************
+
+                'Load Floors*************************************************************
+                'Is the game object a floor?
+                If Game_Objects(Index).ID = Object_ID_Enum.Floor Then
+                    'Yes, the game object is a floor.
+
+                    Floor_Index += 1 'Add a floor to the floors array.
+                    ReDim Preserve Floors(Floor_Index) 'Resize the floors array.
+
+                    'Copy the floor from the game object.
+                    Floors(Floor_Index).Rec.X = Game_Objects(Index).X 'Convert coordinate to rectangle.
+                    Floors(Floor_Index).Rec.Y = Game_Objects(Index).Y 'Convert coordinate to rectangle.
+                    Floors(Floor_Index).Rec.Width = Game_Objects(Index).Width 'Convert size to rectangle.
+                    Floors(Floor_Index).Rec.Height = Game_Objects(Index).Height 'Convert size to rectangle.
+
+                    Floors(Floor_Index).Color = Color.FromArgb(Game_Objects(Index).Color) 'Convert integer color to ARGB color.
+                    Floors(Floor_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor) 'Convert integer color to ARGB color.
+
+                    Floors(Floor_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor) 'Convert integer color to ARGB color.
+                    Floors(Floor_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor) 'Convert integer color to ARGB color.
+
+                    Floors(Floor_Index).Revealed = Game_Objects(Index).Revealed
 
                 End If
                 '*************************************************************************
@@ -4434,6 +4605,7 @@ Public Class Form1
             Next
 
         End If
+        '*********************************************************************************************
 
     End Sub
 
@@ -4641,6 +4813,9 @@ Public Class Form1
 
 
     End Sub
+
+
+
 End Class
 
 Public Enum MCI_NOTIFY As Integer
