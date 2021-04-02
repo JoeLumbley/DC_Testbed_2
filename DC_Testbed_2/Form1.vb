@@ -203,7 +203,7 @@ Public Class Form1
 
 
 
-    Private Floors() As Floor_Struct
+
 
     Private Game_Objects() As Game_Objects_Struct
 
@@ -231,8 +231,10 @@ Public Class Form1
     Private Selected_Tool As ToolsEnum = ToolsEnum.Pointer
     Private Pointer_Origin As New Point(0, 0)
     Private Pointer_Offset As New Point(0, 0)
-    Private Selected_Index As Integer = 0
-    Private IsSelected As Boolean = False
+    Private Selected_Wall_Index As Integer = 0
+    Private IsWallSelected As Boolean = False
+    Private Selected_Floor_Index As Integer = 0
+    Private IsFloorSelected As Boolean = False
     Private Selected_Pen As New Pen(Color.Blue, 5)
 
     Private BottomRightControlHandle_Selected As Boolean = False
@@ -241,6 +243,11 @@ Public Class Form1
     Private Wall As WallInfo
     Private Wall_Origin As Point
     Private Walls() As WallInfo
+
+    Private Floor As Floor_Struct
+    Private Floor_Origin As Point
+    Private Floors() As Floor_Struct
+
 
     Private Potion As PotionInfo
 
@@ -402,6 +409,11 @@ Public Class Form1
 
         Wall.MapColor = Color.FromArgb(128, 164, 164, 164)
 
+
+        Floor.Color = Color.FromArgb(128, 87, 0, 87)
+        Floor.MapColor = Color.Purple
+
+
         'Init Magic Potion
         Potion.IsLife = False
         Potion.Rec = New Rectangle(0, 0, 200, 200)
@@ -526,7 +538,9 @@ Public Class Form1
 
                     goBuf1.Clear(Level.BackgroundColor)
 
-                    Draw_Floor(goBuf1)
+                    Draw_Floors(goBuf1)
+
+                    Draw_Floor(goBuf1, Floor.Rec)
 
                     Draw_Floor_Light(goBuf1)
 
@@ -610,7 +624,9 @@ Public Class Form1
 
                     goBuf2.Clear(Level.BackgroundColor)
 
-                    Draw_Floor(goBuf2)
+                    Draw_Floors(goBuf2)
+
+                    Draw_Floor(goBuf2, Floor.Rec)
 
                     Draw_Floor_Light(goBuf2)
 
@@ -1097,15 +1113,14 @@ Public Class Form1
 
     Private Sub Draw_Wall(g As Graphics, Rec As Rectangle)
 
-        Dim WallInViewportCoordinates As Rectangle
-
-        WallInViewportCoordinates = Rec
-        WallInViewportCoordinates.X = Rec.X - Viewport.X
-        WallInViewportCoordinates.Y = Rec.Y - Viewport.Y
-
         If Editor_On = True Then
             If Selected_Tool = ToolsEnum.Wall Then
                 If Mouse_Down_Left = True Then
+
+                    Dim WallInViewportCoordinates As Rectangle
+                    WallInViewportCoordinates = Rec
+                    WallInViewportCoordinates.X = Rec.X - Viewport.X
+                    WallInViewportCoordinates.Y = Rec.Y - Viewport.Y
 
                     'Draw Wall
                     g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
@@ -1259,7 +1274,7 @@ Public Class Form1
                             g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
 
                             'Draw shadow.
-                            g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), WallInViewportCoordinates)
+                            g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), WallInViewportCoordinates)
 
                         End If
 
@@ -1299,13 +1314,13 @@ Public Class Form1
             End If
 
 
-            If IsSelected = True Then
+            If IsWallSelected = True Then
 
                 'Transform the walls level coorinates into viewport coordinates.
                 Dim WallInViewportCoordinates As Rectangle
-                WallInViewportCoordinates = Walls(Selected_Index).Rec
-                WallInViewportCoordinates.X = Walls(Selected_Index).Rec.X - Viewport.X
-                WallInViewportCoordinates.Y = Walls(Selected_Index).Rec.Y - Viewport.Y
+                WallInViewportCoordinates = Walls(Selected_Wall_Index).Rec
+                WallInViewportCoordinates.X = Walls(Selected_Wall_Index).Rec.X - Viewport.X
+                WallInViewportCoordinates.Y = Walls(Selected_Wall_Index).Rec.Y - Viewport.Y
 
                 'Draw selection outline.
                 g.DrawRectangle(New Pen(Color.White, 5), WallInViewportCoordinates)
@@ -1322,11 +1337,11 @@ Public Class Form1
                 g.FillEllipse(Brushes.Red, WallInViewportCoordinates.Right - 20 \ 2, WallInViewportCoordinates.Bottom - 20 \ 2, 20, 20)
 
                 'Draw the walls X and Y coordinates text.
-                Dim PositionString As String = Walls(Selected_Index).Rec.X.ToString & ", " & Walls(Selected_Index).Rec.Y.ToString
+                Dim PositionString As String = Walls(Selected_Wall_Index).Rec.X.ToString & ", " & Walls(Selected_Wall_Index).Rec.Y.ToString
                 g.DrawString(PositionString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.X, WallInViewportCoordinates.Y - 20), Center_String)
 
                 'Draw the walls width and height text.
-                Dim SizeString As String = Walls(Selected_Index).Rec.Width.ToString & ", " & Walls(Selected_Index).Rec.Height.ToString
+                Dim SizeString As String = Walls(Selected_Wall_Index).Rec.Width.ToString & ", " & Walls(Selected_Wall_Index).Rec.Height.ToString
                 g.DrawString(SizeString, Monster_Font, New SolidBrush(Color.White), New Point(WallInViewportCoordinates.Right, WallInViewportCoordinates.Bottom + 45), Center_String)
 
             End If
@@ -1382,34 +1397,126 @@ Public Class Form1
     End Sub
 
 
-    Private Sub Draw_Floor(g As Graphics)
+    Private Sub Draw_Floor(g As Graphics, Rec As Rectangle)
 
-        'Is the editor off?
+        'Is the editor on?
+        If Editor_On = True Then
+            'Yes, the editor is on. The game is stopped. - Editor On
+
+            If Selected_Tool = ToolsEnum.Floor Then
+                If Mouse_Down_Left = True Then
+
+                    'Transform the floors level coorinates into viewport coordinates.
+                    Dim FloorInViewportCoordinates As Rectangle
+                    FloorInViewportCoordinates = Rec
+                    FloorInViewportCoordinates.X = Rec.X - Viewport.X
+                    FloorInViewportCoordinates.Y = Rec.Y - Viewport.Y
+
+                    'Draw floor.
+                    g.FillRectangle(New SolidBrush(Floor.Color), FloorInViewportCoordinates)
+
+                End If
+            End If
+
+        End If
+
+    End Sub
+
+
+    Private Sub Draw_Floors(g As Graphics)
+
+        'Is the editor on?
         If Editor_On = False Then
-            'Yes, the editor is off. The game is running. - Game On
+            'No, the editor off. The game is running. - Game On
 
-            'Transform the floors level coorinates into viewport coordinates.
-            Dim FloorInViewportCoordinates As Rectangle
-            FloorInViewportCoordinates.X = 0 - Viewport.X
-            FloorInViewportCoordinates.Y = 0 - Viewport.Y
-            FloorInViewportCoordinates.Width = 2000
-            FloorInViewportCoordinates.Height = 2000
+            'Is there at least one floor?
+            If Floors IsNot Nothing Then
+                'Yes, we have at least one floor.
 
-            'Draw floor.
-            g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), FloorInViewportCoordinates.X, FloorInViewportCoordinates.Y, FloorInViewportCoordinates.Width, FloorInViewportCoordinates.Height)
+                'Go thur every floor in the floors array. One by one. Start to end.
+                For index = 0 To UBound(Floors)
+
+                    'Transform the floor level coorinates into viewport coordinates.
+                    Dim FloorInViewportCoordinates As Rectangle
+                    FloorInViewportCoordinates.X = Floors(index).Rec.X - Viewport.X
+                    FloorInViewportCoordinates.Y = Floors(index).Rec.Y - Viewport.Y
+                    FloorInViewportCoordinates.Width = Floors(index).Rec.Width
+                    FloorInViewportCoordinates.Height = Floors(index).Rec.Height
+
+                    'Is the floor in the viewport?
+                    If Floors(index).Rec.IntersectsWith(Viewport) = True Then
+                        'Yes, the floor is in the viewport.
+
+                        'Draw floor.
+                        'g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                        g.FillRectangle(New SolidBrush(Floors(index).Color), FloorInViewportCoordinates)
+
+                    End If
+
+                Next
+
+            End If
 
         Else
-            'No, the editor is on. The game is not running. - Game Off
+            'Yes, the editor is on. The game is stopped. - Editor On
 
-            'Transform the floors level coorinates into viewport coordinates.
-            Dim FloorInViewportCoordinates As Rectangle
-            FloorInViewportCoordinates.X = 0 - Viewport.X
-            FloorInViewportCoordinates.Y = 0 - Viewport.Y
-            FloorInViewportCoordinates.Width = 2000
-            FloorInViewportCoordinates.Height = 2000
+            'Is there at least one floor?
+            If Floors IsNot Nothing Then
+                'Yes, there is at least one floor.
 
-            'Draw floor.
-            g.FillRectangle(New SolidBrush(Color.FromArgb(255, 26, 11, 26)), FloorInViewportCoordinates.X, FloorInViewportCoordinates.Y, FloorInViewportCoordinates.Width, FloorInViewportCoordinates.Height)
+                'Go thru every floor in the floors array. One by one. Start to end.
+                For index = 0 To UBound(Floors)
+
+                    'Transform the floor level coorinates into viewport coordinates.
+                    Dim FloorInViewportCoordinates As Rectangle
+                    FloorInViewportCoordinates = Floors(index).Rec
+                    FloorInViewportCoordinates.X = Floors(index).Rec.X - Viewport.X
+                    FloorInViewportCoordinates.Y = Floors(index).Rec.Y - Viewport.Y
+
+                    'Draw floor hit box.
+                    g.FillRectangle(New SolidBrush(Floor.Color), FloorInViewportCoordinates)
+
+                    'Draw floor outline.
+                    g.DrawRectangle(New Pen(Floor.OutlineColor, 1), FloorInViewportCoordinates)
+
+                    'Draw floor number.
+                    g.DrawString(index.ToString, Monster_Font, New SolidBrush(Color.Black), FloorInViewportCoordinates, Center_String)
+
+                Next
+
+            End If
+
+            If IsFloorSelected = True Then
+
+                'Transform the floor level coorinates into viewport coordinates.
+                Dim FloorInViewportCoordinates As Rectangle
+                FloorInViewportCoordinates = Floors(Selected_Floor_Index).Rec
+                FloorInViewportCoordinates.X = Floors(Selected_Floor_Index).Rec.X - Viewport.X
+                FloorInViewportCoordinates.Y = Floors(Selected_Floor_Index).Rec.Y - Viewport.Y
+
+                'Draw selection outline.
+                g.DrawRectangle(New Pen(Color.White, 5), FloorInViewportCoordinates)
+
+                'Draw the floors outline.
+                Dim Outline_Pen As New Pen(Color.Red, 2)
+                Outline_Pen.DashStyle = DashStyle.Dash
+                g.DrawRectangle(Outline_Pen, FloorInViewportCoordinates)
+
+                'Draw the floors top-left control handle.
+                g.FillEllipse(Brushes.Red, FloorInViewportCoordinates.X - 20 \ 2, FloorInViewportCoordinates.Y - 20 \ 2, 20, 20)
+
+                'Draw the floors bottom-right control handle.
+                g.FillEllipse(Brushes.Red, FloorInViewportCoordinates.Right - 20 \ 2, FloorInViewportCoordinates.Bottom - 20 \ 2, 20, 20)
+
+                'Draw the floors X and Y coordinates text.
+                Dim PositionString As String = Floors(Selected_Floor_Index).Rec.X.ToString & ", " & Floors(Selected_Floor_Index).Rec.Y.ToString
+                g.DrawString(PositionString, Monster_Font, New SolidBrush(Color.White), New Point(FloorInViewportCoordinates.X, FloorInViewportCoordinates.Y - 20), Center_String)
+
+                'Draw the floors width and height text.
+                Dim SizeString As String = Floors(Selected_Floor_Index).Rec.Width.ToString & ", " & Floors(Selected_Floor_Index).Rec.Height.ToString
+                g.DrawString(SizeString, Monster_Font, New SolidBrush(Color.White), New Point(FloorInViewportCoordinates.Right, FloorInViewportCoordinates.Bottom + 45), Center_String)
+
+            End If
 
         End If
 
@@ -3556,9 +3663,9 @@ Public Class Form1
 
             Else
 
-                If IsSelected = True Then
+                If IsWallSelected = True Then
 
-                    Walls(Selected_Index).Rec.X -= 1
+                    Walls(Selected_Wall_Index).Rec.X -= 1
 
                 Else
 
@@ -3580,9 +3687,9 @@ Public Class Form1
 
             Else
 
-                If IsSelected = True Then
+                If IsWallSelected = True Then
 
-                    Walls(Selected_Index).Rec.X += 1
+                    Walls(Selected_Wall_Index).Rec.X += 1
 
                 Else
 
@@ -3599,9 +3706,9 @@ Public Class Form1
                 MoveUp = True
             Else
 
-                If IsSelected = True Then
+                If IsWallSelected = True Then
 
-                    Walls(Selected_Index).Rec.Y -= 1
+                    Walls(Selected_Wall_Index).Rec.Y -= 1
 
                 Else
                     MoveViewport(DirectionEnum.Up)
@@ -3615,10 +3722,10 @@ Public Class Form1
             If Editor_On = False Then
                 MoveDown = True
             Else
-                If IsSelected = True Then
+                If IsWallSelected = True Then
 
                     'Selected_Index
-                    Walls(Selected_Index).Rec.Y += 1
+                    Walls(Selected_Wall_Index).Rec.Y += 1
 
 
                 Else
@@ -3678,11 +3785,11 @@ Public Class Form1
             Case Keys.Delete
 
                 If Editor_On = True Then
-                    If IsSelected = True Then
+                    If IsWallSelected = True Then
 
-                        Remove_Wall(Selected_Index)
+                        Remove_Wall(Selected_Wall_Index)
 
-                        IsSelected = False
+                        IsWallSelected = False
 
                     End If
                 End If
@@ -3799,12 +3906,14 @@ Public Class Form1
             If e.Button = MouseButtons.Left Then
                 'Yes, the user pushed the left mouse button down.
 
+
+                'Pointer**********************************************************************************************
                 'Is the pointer the selected tool?
                 If Selected_Tool = ToolsEnum.Pointer Then
                     'Yes, the pointer is the selected tool.
 
                     'Has a wall been selected?
-                    If IsSelected <> True Then
+                    If IsWallSelected <> True Then
                         'No wall is selected.
 
                         'Set pointer origin to the current mouse location.
@@ -3820,15 +3929,15 @@ Public Class Form1
                                 If MousePointerInViewPortCooridinates.IntersectsWith(Walls(Index).Rec) Then
                                     'Yes, a wall was selected.
 
-                                    Selected_Index = Index
-                                    IsSelected = True
-                                    Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
-                                    Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
+                                    Selected_Wall_Index = Index
+                                    IsWallSelected = True
+                                    Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Wall_Index).Rec.X
+                                    Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Wall_Index).Rec.Y
                                     Exit For
 
                                 End If
-                                IsSelected = False
-                                Selected_Index = -1
+                                IsWallSelected = False
+                                Selected_Wall_Index = -1
                             Next
                         End If
 
@@ -3837,8 +3946,8 @@ Public Class Form1
 
                         'Control Handle Selection
                         Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                        Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.X - 10, Walls(Selected_Index).Rec.Y - 10, 20, 20)
-                        Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Index).Rec.Right - 10, Walls(Selected_Index).Rec.Bottom - 10, 20, 20)
+                        Dim TopLeftControlHandleRec As New Rectangle(Walls(Selected_Wall_Index).Rec.X - 10, Walls(Selected_Wall_Index).Rec.Y - 10, 20, 20)
+                        Dim BottomRightControlHandleRec As New Rectangle(Walls(Selected_Wall_Index).Rec.Right - 10, Walls(Selected_Wall_Index).Rec.Bottom - 10, 20, 20)
 
                         'Is the user selecting the top-left control handle?
                         If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
@@ -3846,8 +3955,8 @@ Public Class Form1
 
                             TopLeftControlHandle_Selected = True
 
-                            Wall_Origin.X = Walls(Selected_Index).Rec.Right
-                            Wall_Origin.Y = Walls(Selected_Index).Rec.Bottom
+                            Wall_Origin.X = Walls(Selected_Wall_Index).Rec.Right
+                            Wall_Origin.Y = Walls(Selected_Wall_Index).Rec.Bottom
 
                         Else
                             'No, the user is not selecting the top-left control handle.
@@ -3862,8 +3971,8 @@ Public Class Form1
 
                             BottomRightControlHandle_Selected = True
 
-                            Wall_Origin.X = Walls(Selected_Index).Rec.X
-                            Wall_Origin.Y = Walls(Selected_Index).Rec.Y
+                            Wall_Origin.X = Walls(Selected_Wall_Index).Rec.X
+                            Wall_Origin.Y = Walls(Selected_Wall_Index).Rec.Y
 
                         Else
                             'No, the user is not selecting the botton-right control handle.
@@ -3891,15 +4000,15 @@ Public Class Form1
                                     If MousePointerInLevelCoordinates.IntersectsWith(Walls(Index).Rec) Then
                                         'Yes, a wall was selected.
 
-                                        Selected_Index = Index
-                                        IsSelected = True
-                                        Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Index).Rec.X
-                                        Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Index).Rec.Y
+                                        Selected_Wall_Index = Index
+                                        IsWallSelected = True
+                                        Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Wall_Index).Rec.X
+                                        Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Wall_Index).Rec.Y
                                         Exit For
 
                                     End If
-                                    IsSelected = False
-                                    Selected_Index = -1
+                                    IsWallSelected = False
+                                    Selected_Wall_Index = -1
                                 Next
                             End If
 
@@ -3907,11 +4016,13 @@ Public Class Form1
 
                     End If
                 End If
+                '*****************************************************************************************************
 
+                'Wall*************************************************************************************************
                 If Selected_Tool = ToolsEnum.Wall Then
 
-                    IsSelected = False
-                    Selected_Index = -1
+                    IsWallSelected = False
+                    Selected_Wall_Index = -1
 
                     'Define a wall.
                     Wall.Rec.Width = 0
@@ -3922,15 +4033,24 @@ Public Class Form1
                     Wall_Origin.Y = e.Y + Viewport.Y
 
                 End If
+                '*****************************************************************************************************
 
+                'Floor************************************************************************************************
                 If Selected_Tool = ToolsEnum.Floor Then
 
-                    IsSelected = False
-                    Selected_Index = -1
+                    IsWallSelected = False
+                    Selected_Wall_Index = -1
 
+                    'Define a wall.
+                    Floor.Rec.Width = 0
+                    Floor.Rec.Height = 0
+
+                    'Set the floor origin.
+                    Floor_Origin.X = e.X + Viewport.X
+                    Floor_Origin.Y = e.Y + Viewport.Y
 
                 End If
-
+                '*****************************************************************************************************
 
                 Mouse_Down_Left = True
 
@@ -4016,6 +4136,7 @@ Public Class Form1
 
             Mouse_Down_Left = False
 
+            'Wall*************************************************************************************************
             If Selected_Tool = ToolsEnum.Wall Then
                 'Has the mouse moved?
                 If Wall.Rec.Width > 10 And Wall.Rec.Height > 10 Then
@@ -4033,6 +4154,29 @@ Public Class Form1
 
                 End If
             End If
+            '*****************************************************************************************************
+
+            'Floor************************************************************************************************
+            If Selected_Tool = ToolsEnum.Floor Then
+                'Has the mouse moved?
+                If Floor.Rec.Width > 10 And Floor.Rec.Height > 10 Then
+                    'Yes, the mouse moved.
+
+                    Add_Floor(New Rectangle(Floor.Rec.Location, Floor.Rec.Size))
+
+                    If Floor_Menu.Checked = True Then
+                        Floor_Menu.Checked = False
+                    End If
+
+                    Selected_Tool = ToolsEnum.Pointer
+
+                    MenuItemPointer.Checked = True
+
+                End If
+            End If
+            '*****************************************************************************************************
+
+
         Else
 
 
@@ -4061,62 +4205,66 @@ Public Class Form1
         If Editor_On = True Then
 
             If Mouse_Down_Left = True Then
+
+                'Pointer**********************************************************************************************
                 If Selected_Tool = ToolsEnum.Pointer Then
                     If Walls IsNot Nothing Then
-                        If Selected_Index > -1 Then
+                        If Selected_Wall_Index > -1 Then
                             If TopLeftControlHandle_Selected = False And BottomRightControlHandle_Selected = False Then
 
                                 'Move the wall.
-                                Walls(Selected_Index).Rec.X = e.X - Pointer_Offset.X
-                                Walls(Selected_Index).Rec.Y = e.Y - Pointer_Offset.Y
+                                Walls(Selected_Wall_Index).Rec.X = e.X - Pointer_Offset.X
+                                Walls(Selected_Wall_Index).Rec.Y = e.Y - Pointer_Offset.Y
 
                             ElseIf TopLeftControlHandle_Selected = True Then
 
                                 'Move point
                                 'Which point is the top?
                                 If Wall_Origin.Y > e.Y + Viewport.Y Then
-                                    Walls(Selected_Index).Rec.Y = e.Y + Viewport.Y
+                                    Walls(Selected_Wall_Index).Rec.Y = e.Y + Viewport.Y
                                 Else
-                                    Walls(Selected_Index).Rec.Y = Wall_Origin.Y
+                                    Walls(Selected_Wall_Index).Rec.Y = Wall_Origin.Y
                                 End If
 
                                 'Which point is the left?
                                 If Wall_Origin.X > e.X + Viewport.X Then
-                                    Walls(Selected_Index).Rec.X = e.X + Viewport.X
+                                    Walls(Selected_Wall_Index).Rec.X = e.X + Viewport.X
                                 Else
-                                    Walls(Selected_Index).Rec.X = Wall_Origin.X
+                                    Walls(Selected_Wall_Index).Rec.X = Wall_Origin.X
                                 End If
 
-                                Walls(Selected_Index).Rec.Width = Abs(Wall_Origin.X - (e.X + Viewport.X))
+                                Walls(Selected_Wall_Index).Rec.Width = Abs(Wall_Origin.X - (e.X + Viewport.X))
 
-                                Walls(Selected_Index).Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
+                                Walls(Selected_Wall_Index).Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
 
                             ElseIf BottomRightControlHandle_Selected = True Then
 
                                 'Which point is the top?
                                 If Wall_Origin.Y > e.Y + Viewport.Y Then
-                                    Walls(Selected_Index).Rec.Y = e.Y + Viewport.Y
+                                    Walls(Selected_Wall_Index).Rec.Y = e.Y + Viewport.Y
                                 Else
-                                    Walls(Selected_Index).Rec.Y = Wall_Origin.Y
+                                    Walls(Selected_Wall_Index).Rec.Y = Wall_Origin.Y
                                 End If
 
                                 'Which point is the left?
                                 If Wall_Origin.X > e.X + Viewport.X Then
-                                    Walls(Selected_Index).Rec.X = e.X + Viewport.X
+                                    Walls(Selected_Wall_Index).Rec.X = e.X + Viewport.X
                                 Else
-                                    Walls(Selected_Index).Rec.X = Wall_Origin.X
+                                    Walls(Selected_Wall_Index).Rec.X = Wall_Origin.X
                                 End If
 
-                                Walls(Selected_Index).Rec.Width = Abs(Wall_Origin.X - (e.X + Viewport.X))
+                                Walls(Selected_Wall_Index).Rec.Width = Abs(Wall_Origin.X - (e.X + Viewport.X))
 
-                                Walls(Selected_Index).Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
+                                Walls(Selected_Wall_Index).Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
 
                             End If
 
                         End If
                     End If
                 End If
+                '*****************************************************************************************************
 
+                'Wall*************************************************************************************************
                 If Selected_Tool = ToolsEnum.Wall Then
 
                     'Which point is the top?
@@ -4138,6 +4286,31 @@ Public Class Form1
                     Wall.Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
 
                 End If
+                '*****************************************************************************************************
+
+                'Floor************************************************************************************************
+                If Selected_Tool = ToolsEnum.Floor Then
+
+                    'Which point is the top?
+                    If Floor_Origin.Y > e.Y + Viewport.Y Then
+                        Floor.Rec.Y = e.Y + Viewport.Y
+                    Else
+                        Floor.Rec.Y = Floor_Origin.Y
+                    End If
+
+                    'Which point is the left?
+                    If Floor_Origin.X > e.X + Viewport.X Then
+                        Floor.Rec.X = e.X + Viewport.X
+                    Else
+                        Floor.Rec.X = Floor_Origin.X
+                    End If
+
+                    Floor.Rec.Width = Abs(Floor_Origin.X - (e.X + Viewport.X))
+
+                    Floor.Rec.Height = Abs(Floor_Origin.Y - (e.Y + Viewport.Y))
+
+                End If
+                '*****************************************************************************************************
 
             End If
         End If
@@ -4310,9 +4483,17 @@ Public Class Form1
         If Walls IsNot Nothing Then
             Array.Resize(Walls, Walls.Length + 1)
             Walls(Walls.Length - 1).Rec = WallRec
+
+            Walls(Walls.Length - 1).Color = Wall.Color
+            Walls(Walls.Length - 1).OutlineColor = Wall.OutlineColor
+
         Else
             ReDim Walls(0)
             Walls(0).Rec = WallRec
+
+            Walls(0).Color = Wall.Color
+            Walls(0).OutlineColor = Wall.OutlineColor
+
         End If
 
     End Sub
@@ -4366,9 +4547,13 @@ Public Class Form1
         If Floors IsNot Nothing Then
             Array.Resize(Floors, Floors.Length + 1)
             Floors(Floors.Length - 1).Rec = Rec
+            Floors(Floors.Length - 1).Color = Floor.Color
+
         Else
             ReDim Floors(0)
             Floors(0).Rec = Rec
+            Floors(Floors.Length - 1).Color = Floor.Color
+
         End If
 
     End Sub
@@ -4459,7 +4644,7 @@ Public Class Form1
         If Floors IsNot Nothing Then
 
             'Go thur every floor in the floors array. One by one. Start to end.
-            For Floor_Index = 0 To UBound(Walls)
+            For Floor_Index = 0 To UBound(Floors)
 
                 'Write floor data in game object format.
                 Write(File_Number, Object_ID_Enum.Floor)
