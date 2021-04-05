@@ -30,7 +30,7 @@ Imports System.Math
 Imports System.Drawing.Drawing2D
 Imports System.Runtime.InteropServices
 Imports System.IO
-Imports System.Runtime.Serialization.Formatters.Binary
+'Imports System.Runtime.Serialization.Formatters.Binary
 
 Public Structure HeroInfo
 
@@ -201,10 +201,6 @@ End Enum
 
 Public Class Form1
 
-
-
-
-
     Private Game_Objects() As Game_Objects_Struct
 
     Const Rad2Deg As Double = 180.0 / Math.PI
@@ -218,8 +214,6 @@ Public Class Form1
     Private OurHero As HeroInfo
 
     Private Door As DoorInfo
-
-
 
     Private Movement_Target As Point = New Point(0, 0)
 
@@ -462,7 +456,7 @@ Public Class Form1
         'GS.SetVolume("Monster", 900)
         GS.SetVolume("Undead_Move", 500)
         GS.SetVolume("Undead_Attack", 400)
-        GS.SetVolume("Potion_Pickup", 1000)
+        GS.SetVolume("Potion_Pickup", 500)
         GS.SetVolume("Undead_Death", 300)
         GS.SetVolume("Hero_Move", 300)
         GS.SetVolume("Undead_Hit", 800)
@@ -584,25 +578,23 @@ Public Class Form1
 
                     Draw_Projectile_Origin(goBuf1)
 
-
-                    'DistanceToHero
-                    'goBuf1.DrawString(DistanceToHero.ToString, Life_Bar_Font, drawBrush, Monster.X - Viewport.X, Monster.Y - Viewport.Y)
-
-
-
-
                     'Draw buffer to the screen.
                     e.Graphics.DrawImageUnscaled(Buffer1_Bitmap, 0, 0)
 
                 End Using
+
             End Using
 
         Else
+            'Draw to buffer two.
 
-            Using _Buffer2 As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
+            'Create a bitmap for buffer two.
+            Using Buffer2_Bitmap As New Bitmap(Viewport.Width, Viewport.Height, Imaging.PixelFormat.Format32bppPArgb)
 
-                Using goBuf2 As Graphics = Graphics.FromImage(_Buffer2)
+                'Create a graphics object for the bitmap.
+                Using goBuf2 As Graphics = Graphics.FromImage(Buffer2_Bitmap)
 
+                    'Use these settings when drawing to the backbuffer.
                     With goBuf2
                         .CompositingMode = Drawing2D.CompositingMode.SourceOver 'Bug fix don't change.
                         'To fix draw string error: "Parameters not valid." I set the compositing mode to source over.
@@ -613,6 +605,7 @@ Public Class Form1
                         .PixelOffsetMode = Drawing2D.PixelOffsetMode.Half
                     End With
 
+                    'Use these settings when drawing to the screen.
                     With e.Graphics
                         .CompositingMode = Drawing2D.CompositingMode.SourceCopy
                         .SmoothingMode = Drawing2D.SmoothingMode.None
@@ -668,17 +661,15 @@ Public Class Form1
 
                     Draw_Magic_Target(goBuf2)
 
-                    'Draw_Projectile_Center(goBuf2)
-
                     Draw_Projectile_Origin(goBuf2)
 
-
-
                     'Draw the buffer to the screen.
-                    e.Graphics.DrawImageUnscaled(_Buffer2, 0, 0)
+                    e.Graphics.DrawImageUnscaled(Buffer2_Bitmap, 0, 0)
 
                 End Using
+
             End Using
+
         End If
 
     End Sub
@@ -1132,7 +1123,6 @@ Public Class Form1
 
     End Sub
 
-
     Private Sub Draw_Door(g As Graphics)
 
         'Is the editor on?
@@ -1396,7 +1386,6 @@ Public Class Form1
 
     End Sub
 
-
     Private Sub Draw_Floor(g As Graphics, Rec As Rectangle)
 
         'Is the editor on?
@@ -1421,7 +1410,6 @@ Public Class Form1
         End If
 
     End Sub
-
 
     Private Sub Draw_Floors(g As Graphics)
 
@@ -1522,8 +1510,6 @@ Public Class Form1
 
     End Sub
 
-
-
     Private Sub Draw_Hero_Light(g As Graphics, Rec As Rectangle)
 
         'Is the editor off?
@@ -1598,10 +1584,6 @@ Public Class Form1
         End If
 
     End Sub
-
-
-
-
 
     Private Sub Draw_Hero(g As Graphics, Rec As Rectangle)
 
@@ -3906,12 +3888,12 @@ Public Class Form1
             If e.Button = MouseButtons.Left Then
                 'Yes, the user pushed the left mouse button down.
 
-
                 'Pointer**********************************************************************************************
                 'Is the pointer the selected tool?
                 If Selected_Tool = ToolsEnum.Pointer Then
                     'Yes, the pointer is the selected tool.
 
+                    'Wall Selection**********************************************************************************************
                     'Has a wall been selected?
                     If IsWallSelected <> True Then
                         'No wall is selected.
@@ -4011,10 +3993,114 @@ Public Class Form1
                                     Selected_Wall_Index = -1
                                 Next
                             End If
+                        End If
+                    End If
+                    '*************************************************************************************************
+
+                    'Floor Selection**********************************************************************************************
+                    'Has a floor been selected?
+                    If IsFloorSelected <> True Then
+                        'No floor is selected.
+
+                        'Set pointer origin to the current mouse location.
+                        Pointer_Origin = e.Location
+
+                        'Is there at least one floor?
+                        If Floors IsNot Nothing Then
+                            'Yes, there is at least one floor.
+                            Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                            'Go thru every floor in floor in reverse z order.
+                            For Index = UBound(Floors) To 0 Step -1
+                                'Was a floor selected?
+                                If MousePointerInViewPortCooridinates.IntersectsWith(Floors(Index).Rec) Then
+                                    'Yes, a wall was selected.
+
+                                    Selected_Floor_Index = Index
+                                    IsFloorSelected = True
+                                    Pointer_Offset.X = Pointer_Origin.X - Floors(Selected_Floor_Index).Rec.X
+                                    Pointer_Offset.Y = Pointer_Origin.Y - Floors(Selected_Floor_Index).Rec.Y
+                                    Exit For
+
+                                End If
+                                IsFloorSelected = False
+                                Selected_Floor_Index = -1
+                            Next
+                        End If
+
+                    Else
+                        'Yes, a wall is selected.
+
+                        'Control Handle Selection
+                        Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                        Dim TopLeftControlHandleRec As New Rectangle(Floors(Selected_Floor_Index).Rec.X - 10, Floors(Selected_Floor_Index).Rec.Y - 10, 20, 20)
+                        Dim BottomRightControlHandleRec As New Rectangle(Floors(Selected_Floor_Index).Rec.Right - 10, Floors(Selected_Floor_Index).Rec.Bottom - 10, 20, 20)
+
+                        'Is the user selecting the top-left control handle?
+                        If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
+                            'Yes, the user is selecting the top-left control handle.
+
+                            TopLeftControlHandle_Selected = True
+
+                            Floor_Origin.X = Floors(Selected_Floor_Index).Rec.Right
+                            Floor_Origin.Y = Floors(Selected_Floor_Index).Rec.Bottom
+
+                        Else
+                            'No, the user is not selecting the top-left control handle.
+
+                            TopLeftControlHandle_Selected = False
 
                         End If
 
+                        'Is the user selecting the botton-right control handle?
+                        If MousePointerRec.IntersectsWith(BottomRightControlHandleRec) = True Then
+                            'Yes, the user is selecting the botton-right control handle.
+
+                            BottomRightControlHandle_Selected = True
+
+                            Floor_Origin.X = Floors(Selected_Floor_Index).Rec.X
+                            Floor_Origin.Y = Floors(Selected_Floor_Index).Rec.Y
+
+                        Else
+                            'No, the user is not selecting the botton-right control handle.
+
+                            BottomRightControlHandle_Selected = False
+
+                        End If
+
+                        If TopLeftControlHandle_Selected = False And BottomRightControlHandle_Selected = False Then
+
+                            'Set pointer origin to the current mouse location.
+                            Pointer_Origin = e.Location
+
+                            'Is there at least one floor?
+                            If Floors IsNot Nothing Then
+                                'Yes, there is at least one floor.
+
+                                'Transform the mouses viewport coordinates into level coordinates.
+                                Dim MousePointerInLevelCoordinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+
+                                'Go thru every floor in floors in reverse order.
+                                For Index = UBound(Floors) To 0 Step -1
+
+                                    'Was a floor selected?
+                                    If MousePointerInLevelCoordinates.IntersectsWith(Floors(Index).Rec) Then
+                                        'Yes, a floor was selected.
+
+                                        Selected_Floor_Index = Index
+                                        IsFloorSelected = True
+                                        Pointer_Offset.X = Pointer_Origin.X - Floors(Selected_Floor_Index).Rec.X
+                                        Pointer_Offset.Y = Pointer_Origin.Y - Floors(Selected_Floor_Index).Rec.Y
+                                        Exit For
+
+                                    End If
+                                    IsFloorSelected = False
+                                    Selected_Floor_Index = -1
+                                Next
+                            End If
+                        End If
                     End If
+                    '*************************************************************************************************
+
                 End If
                 '*****************************************************************************************************
 
@@ -4056,11 +4142,6 @@ Public Class Form1
 
             End If
 
-
-
-
-
-
         Else
             'No, the editor is off. The game is running. - Game On
 
@@ -4088,9 +4169,7 @@ Public Class Form1
 
                 Mouse_Down_Left = True
 
-
             End If
-
 
             'Did the player push down the right mouse button?
             If e.Button = MouseButtons.Right Then
@@ -4119,10 +4198,7 @@ Public Class Form1
 
                     Mouse_Down_Right = True
 
-
-
                 End If
-
 
             End If
 
@@ -4680,117 +4756,127 @@ Public Class Form1
         Dim File_Path As String = Application.StartupPath & "Level.txt"
         Dim File_Number As Integer = FreeFile()
 
-        FileOpen(File_Number, File_Path, OpenMode.Input)
+        'Does the file exists?
+        If My.Computer.FileSystem.FileExists(File_Path) = True Then
+            'Yes, the file exists.
 
-        Game_Objects = Nothing 'Reset game objects to default value.
+            FileOpen(File_Number, File_Path, OpenMode.Input)
 
-        Dim Object_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+            Game_Objects = Nothing 'Reset game objects to default value.
 
-        'Go thur every game object in the level file. One by one. Start to end.
-        Do Until EOF(File_Number)
+            Dim Object_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
 
-            Object_Index += 1 'Add a object to the game objects array.
+            'Go thur every game object in the level file. One by one. Start to end.
+            Do Until EOF(File_Number)
 
-            ReDim Preserve Game_Objects(Object_Index) 'Resize the game objects array.
+                Object_Index += 1 'Add a object to the game objects array.
 
-            'Copy object data from file.
-            With Game_Objects(Object_Index)
+                ReDim Preserve Game_Objects(Object_Index) 'Resize the game objects array.
 
-                Input(File_Number, .ID)
+                'Copy object data from file.
+                With Game_Objects(Object_Index)
 
-                Input(File_Number, .X)
-                Input(File_Number, .Y)
-                Input(File_Number, .Width)
-                Input(File_Number, .Height)
+                    Input(File_Number, .ID)
 
-                Input(File_Number, .Color)
-                Input(File_Number, .OutlineColor)
+                    Input(File_Number, .X)
+                    Input(File_Number, .Y)
+                    Input(File_Number, .Width)
+                    Input(File_Number, .Height)
 
-                Input(File_Number, .MapColor)
-                Input(File_Number, .MapOutlineColor)
+                    Input(File_Number, .Color)
+                    Input(File_Number, .OutlineColor)
 
-                Input(File_Number, .Revealed)
+                    Input(File_Number, .MapColor)
+                    Input(File_Number, .MapOutlineColor)
 
-                Input(File_Number, .Text)
+                    Input(File_Number, .Revealed)
 
-                Input(File_Number, .IsOpen)
+                    Input(File_Number, .Text)
 
-            End With
+                    Input(File_Number, .IsOpen)
 
-        Loop
+                End With
 
-        FileClose(File_Number)
+            Loop
 
-        'Load Level***********************************************************************************
-        'Is there at least one game object?
-        If Game_Objects IsNot Nothing Then
-            'Yes, we have at least one game object.
+            FileClose(File_Number)
 
-            Walls = Nothing 'Reset walls array to default value.
+            'Load Level***********************************************************************************
+            'Is there at least one game object?
+            If Game_Objects IsNot Nothing Then
+                'Yes, we have at least one game object.
 
-            Dim Wall_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+                Walls = Nothing 'Reset walls array to default value.
 
-            Floors = Nothing 'Reset walls array to default value.
+                Dim Wall_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
 
-            Dim Floor_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
+                Floors = Nothing 'Reset walls array to default value.
 
-            'Go thur every object in the game objects array. One by one. Start to end.
-            For Index = 0 To UBound(Game_Objects)
+                Dim Floor_Index As Integer = -1 'Arrays start at zero so one before zero is -1.
 
-                'Load Walls*************************************************************
-                'Is the game object a wall?
-                If Game_Objects(Index).ID = Object_ID_Enum.Wall Then
-                    'Yes, the game object is a wall.
+                'Go thur every object in the game objects array. One by one. Start to end.
+                For Index = 0 To UBound(Game_Objects)
 
-                    Wall_Index += 1 'Add a wall to the walls array.
-                    ReDim Preserve Walls(Wall_Index) 'Resize the walls array.
+                    'Load Walls*************************************************************
+                    'Is the game object a wall?
+                    If Game_Objects(Index).ID = Object_ID_Enum.Wall Then
+                        'Yes, the game object is a wall.
 
-                    'Copy the wall from the game object.
-                    Walls(Wall_Index).Rec.X = Game_Objects(Index).X 'Convert coordinate to rectangle.
-                    Walls(Wall_Index).Rec.Y = Game_Objects(Index).Y 'Convert coordinate to rectangle.
-                    Walls(Wall_Index).Rec.Width = Game_Objects(Index).Width 'Convert size to rectangle.
-                    Walls(Wall_Index).Rec.Height = Game_Objects(Index).Height 'Convert size to rectangle.
+                        Wall_Index += 1 'Add a wall to the walls array.
+                        ReDim Preserve Walls(Wall_Index) 'Resize the walls array.
 
-                    Walls(Wall_Index).Color = Color.FromArgb(Game_Objects(Index).Color) 'Convert integer color to ARGB color.
-                    Walls(Wall_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor) 'Convert integer color to ARGB color.
+                        'Copy the wall from the game object.
+                        Walls(Wall_Index).Rec.X = Game_Objects(Index).X 'Convert coordinate to rectangle.
+                        Walls(Wall_Index).Rec.Y = Game_Objects(Index).Y 'Convert coordinate to rectangle.
+                        Walls(Wall_Index).Rec.Width = Game_Objects(Index).Width 'Convert size to rectangle.
+                        Walls(Wall_Index).Rec.Height = Game_Objects(Index).Height 'Convert size to rectangle.
 
-                    Walls(Wall_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor) 'Convert integer color to ARGB color.
-                    Walls(Wall_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor) 'Convert integer color to ARGB color.
+                        Walls(Wall_Index).Color = Color.FromArgb(Game_Objects(Index).Color) 'Convert integer color to ARGB color.
+                        Walls(Wall_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor) 'Convert integer color to ARGB color.
 
-                    Walls(Wall_Index).Revealed = Game_Objects(Index).Revealed
+                        Walls(Wall_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor) 'Convert integer color to ARGB color.
+                        Walls(Wall_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor) 'Convert integer color to ARGB color.
 
-                End If
-                '*************************************************************************
+                        Walls(Wall_Index).Revealed = Game_Objects(Index).Revealed
 
-                'Load Floors*************************************************************
-                'Is the game object a floor?
-                If Game_Objects(Index).ID = Object_ID_Enum.Floor Then
-                    'Yes, the game object is a floor.
+                    End If
+                    '*************************************************************************
 
-                    Floor_Index += 1 'Add a floor to the floors array.
-                    ReDim Preserve Floors(Floor_Index) 'Resize the floors array.
+                    'Load Floors*************************************************************
+                    'Is the game object a floor?
+                    If Game_Objects(Index).ID = Object_ID_Enum.Floor Then
+                        'Yes, the game object is a floor.
 
-                    'Copy the floor from the game object.
-                    Floors(Floor_Index).Rec.X = Game_Objects(Index).X 'Convert coordinate to rectangle.
-                    Floors(Floor_Index).Rec.Y = Game_Objects(Index).Y 'Convert coordinate to rectangle.
-                    Floors(Floor_Index).Rec.Width = Game_Objects(Index).Width 'Convert size to rectangle.
-                    Floors(Floor_Index).Rec.Height = Game_Objects(Index).Height 'Convert size to rectangle.
+                        Floor_Index += 1 'Add a floor to the floors array.
+                        ReDim Preserve Floors(Floor_Index) 'Resize the floors array.
 
-                    Floors(Floor_Index).Color = Color.FromArgb(Game_Objects(Index).Color) 'Convert integer color to ARGB color.
-                    Floors(Floor_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor) 'Convert integer color to ARGB color.
+                        'Copy the floor from the game object.
+                        Floors(Floor_Index).Rec.X = Game_Objects(Index).X 'Convert coordinate to rectangle.
+                        Floors(Floor_Index).Rec.Y = Game_Objects(Index).Y 'Convert coordinate to rectangle.
+                        Floors(Floor_Index).Rec.Width = Game_Objects(Index).Width 'Convert size to rectangle.
+                        Floors(Floor_Index).Rec.Height = Game_Objects(Index).Height 'Convert size to rectangle.
 
-                    Floors(Floor_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor) 'Convert integer color to ARGB color.
-                    Floors(Floor_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor) 'Convert integer color to ARGB color.
+                        Floors(Floor_Index).Color = Color.FromArgb(Game_Objects(Index).Color) 'Convert integer color to ARGB color.
+                        Floors(Floor_Index).OutlineColor = Color.FromArgb(Game_Objects(Index).OutlineColor) 'Convert integer color to ARGB color.
 
-                    Floors(Floor_Index).Revealed = Game_Objects(Index).Revealed
+                        Floors(Floor_Index).MapColor = Color.FromArgb(Game_Objects(Index).MapColor) 'Convert integer color to ARGB color.
+                        Floors(Floor_Index).MapOutlineColor = Color.FromArgb(Game_Objects(Index).MapOutlineColor) 'Convert integer color to ARGB color.
 
-                End If
-                '*************************************************************************
+                        Floors(Floor_Index).Revealed = Game_Objects(Index).Revealed
 
-            Next
+                    End If
+                    '*************************************************************************
+
+                Next
+
+            End If
+            '*********************************************************************************************
+        Else
+            'No, the file doesn't exists.
+
+            MsgBox("File Not Found. Try saving before opening.", MsgBoxStyle.Critical, "Error")
 
         End If
-        '*********************************************************************************************
 
     End Sub
 
