@@ -201,6 +201,10 @@ End Enum
 
 Public Class Form1
 
+
+
+    Private Update_Properties As Boolean = False
+
     Private Game_Objects() As Game_Objects_Struct
 
     Const Rad2Deg As Double = 180.0 / Math.PI
@@ -333,8 +337,8 @@ Public Class Form1
 
     Private Const Quarter_Number As Double = 0.25
 
-    Dim x As Single = 0
-    Dim y As Single = 0
+    'Dim x As Single = 0
+    'Dim y As Single = 0
 
     Dim drawFormat As New StringFormat
 
@@ -345,6 +349,12 @@ Public Class Form1
 
         CreateSoundFileFromResource()
 
+
+
+
+
+        'Display_Wall_Properties
+        'Display_Wall_Properties()
 
         Door.Rec.X = 2000
         Door.Rec.Y = 2000
@@ -357,7 +367,7 @@ Public Class Form1
         Door.MapOutlineColor = Color.Beige
         Door.Revealed = False
 
-        Level.BackgroundColor = Color.FromArgb(255, 20, 20, 20)
+        Level.BackgroundColor = Color.FromArgb(255, 0, 0, 0)
         Level.Rec.X = 0
         Level.Rec.Y = 0
         'Level.Rec.Width = 5300
@@ -385,7 +395,7 @@ Public Class Form1
 
         OurHero.Attack = 3
         OurHero.Initiative = False
-        OurHero.Speed = 4
+        OurHero.Speed = 9
         OurHero.Hit = False
         OurHero.HitTimer = 0
         OurHero.Life = 100
@@ -404,7 +414,7 @@ Public Class Form1
         Wall.MapColor = Color.FromArgb(128, 164, 164, 164)
 
 
-        Floor.Color = Color.FromArgb(128, 87, 0, 87)
+        Floor.Color = Color.FromArgb(128, 36, 0, 36)
         Floor.MapColor = Color.Purple
 
 
@@ -480,6 +490,87 @@ Public Class Form1
         'Start the game timer.
         Timer2.Start()
 
+        Timer4.Interval = 300
+        Timer4.Start()
+
+    End Sub
+
+    Private Sub Display_Wall_Properties()
+
+        If Walls IsNot Nothing Then
+
+            With DataGridView1
+
+                'create datatable And columns,
+                Dim dtable = New DataTable()
+
+                'dtable.Columns.Add(New DataColumn("Property Name"))
+                'dtable.Columns.Add(New DataColumn("Property Value"))
+
+                dtable.Columns.Add(New DataColumn("Properties"))
+                dtable.Columns.Add(New DataColumn("Wall " & Selected_Wall_Index.ToString))
+
+                'dtable.Columns.IsReadOnly = True
+                dtable.Columns("Properties").ReadOnly = True
+
+                'simple way create object for rowvalues here i have given only 2 add as per your requirement
+                Dim PropertyNames(5) As String
+                Dim PropertyValues(5) As String
+
+                'assign values into row object
+                PropertyNames(0) = "X"
+                PropertyValues(0) = Walls(Selected_Wall_Index).Rec.X.ToString
+
+                PropertyNames(1) = "Y"
+                PropertyValues(1) = Walls(Selected_Wall_Index).Rec.Y.ToString
+
+                PropertyNames(2) = "Width"
+                PropertyValues(2) = Walls(Selected_Wall_Index).Rec.Width.ToString
+
+                PropertyNames(3) = "Height"
+                PropertyValues(3) = Walls(Selected_Wall_Index).Rec.Height.ToString
+
+                PropertyNames(4) = "Color"
+                'PropertyValues(4) = Color.Blue.ToArgb.ToString
+                PropertyValues(4) = Walls(Selected_Wall_Index).Color.ToArgb.ToString
+
+                dtable.Rows.Add(PropertyNames(0), PropertyValues(0))
+                dtable.Rows.Add(PropertyNames(1), PropertyValues(1))
+                dtable.Rows.Add(PropertyNames(2), PropertyValues(2))
+                dtable.Rows.Add(PropertyNames(3), PropertyValues(3))
+                dtable.Rows.Add(PropertyNames(4), PropertyValues(4))
+                dtable.AcceptChanges()
+
+                .DataSource = dtable
+
+                .ColumnHeadersVisible = True
+
+
+
+
+            End With
+
+        End If
+
+    End Sub
+    Private Sub Display_Blank_Properties()
+
+        With DataGridView1
+
+            'create datatable And columns,
+            Dim dtable = New DataTable()
+
+            dtable.Columns.Add(New DataColumn("Properties"))
+            dtable.Columns.Add(New DataColumn(" "))
+
+            dtable.AcceptChanges()
+
+            .DataSource = dtable
+
+            .ColumnHeadersVisible = True
+
+        End With
+
     End Sub
 
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
@@ -494,6 +585,8 @@ Public Class Form1
 
         'Update the display.
         PictureBox1.Invalidate()
+
+
 
     End Sub
 
@@ -1264,7 +1357,7 @@ Public Class Form1
                             g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
 
                             'Draw shadow.
-                            g.FillRectangle(New SolidBrush(Color.FromArgb(128, Color.Black)), WallInViewportCoordinates)
+                            g.FillRectangle(New SolidBrush(Color.FromArgb(200, Color.Black)), WallInViewportCoordinates)
 
                         End If
 
@@ -1530,7 +1623,7 @@ Public Class Form1
                 LightRec = HeroInViewportCoordinates
 
                 'Set the heros light rectangle to the size and position of the heros rectangle.
-                LightRec.Inflate(300, 300)
+                LightRec.Inflate(500, 500)
 
                 'Create a graphics path.
                 Dim path As New GraphicsPath()
@@ -1558,7 +1651,7 @@ Public Class Form1
                 LightRec = HeroInViewportCoordinates
 
                 'Set the heros light rectangle to the size and position of the heros rectangle.
-                LightRec.Inflate(300, 300)
+                LightRec.Inflate(400, 400)
 
                 'Create a graphics path.
                 Dim path As New GraphicsPath()
@@ -1643,21 +1736,28 @@ Public Class Form1
         If Editor_On = False Then
             'Yes, the editor is off. The game is running.
 
+
+            If Splitter1.SplitPosition < Me.ClientSize.Width - 35 Then
+
+                Splitter1.SplitPosition = Me.ClientSize.Width - 35
+
+            End If
+
             'Start the level music
             If GS.IsPlaying("Music") = False Then
-                GS.Play("Music")
-            End If
+                    GS.Play("Music")
+                End If
 
-            'Set the title bar text to playing.
-            If Me.Text <> "Dungeon Crawler - Playing" Then
-                Me.Text = "Dungeon Crawler - Playing"
-            End If
+                'Set the title bar text to playing.
+                If Me.Text <> "Dungeon Crawler - Playing" Then
+                    Me.Text = "Dungeon Crawler - Playing"
+                End If
 
-        Else
-            'No, the editor is on. The game is stopped.
+            Else
+                'No, the editor is on. The game is stopped.
 
-            'Stop the level music.
-            GS.Stop("Music")
+                'Stop the level music.
+                GS.Stop("Music")
 
             'Set the title bar text to editing.
             If Me.Text <> "Dungeon Crawler - Editing" Then
@@ -2022,9 +2122,12 @@ Public Class Form1
         '    End If
         'End If
 
+
+        Center_Viewport_on_the_Hero()
+
         'Center viewport on the hero.
-        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
-        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+        'Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        'Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
 
         ''Keep viewport on the level.
         'If Viewport.X < Level.Rec.X Then
@@ -2282,8 +2385,12 @@ Public Class Form1
         'End If
 
         'Center viewport on the hero.
-        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
-        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        Center_Viewport_on_the_Hero()
+
+
+        'Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        'Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
 
         ''Keep viewport on the level.
         'If Viewport.X < Level.Rec.X Then
@@ -2544,8 +2651,8 @@ Public Class Form1
         'End If
 
         'Center viewport on the hero.
-        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
-        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        Center_Viewport_on_the_Hero()
 
         ''Keep viewport on the level.
         'If Viewport.X < Level.Rec.X Then
@@ -2560,6 +2667,17 @@ Public Class Form1
         'If Viewport.Y + Viewport.Height > Level.Rec.Height Then
         '    Viewport.Y = Level.Rec.Height - Viewport.Height
         'End If
+
+    End Sub
+
+    Private Sub Center_Viewport_on_the_Hero()
+
+        Dim HeroCenterX As Integer = OurHero.Rec.X + (OurHero.Rec.Width \ 2)
+        Dim HeroCenterY As Integer = OurHero.Rec.Y + (OurHero.Rec.Height \ 2)
+
+        Viewport.X = HeroCenterX - (Viewport.Width \ 2)
+        Viewport.Y = HeroCenterY - (Viewport.Height \ 2)
+
 
     End Sub
 
@@ -2796,8 +2914,12 @@ Public Class Form1
         'End If
 
         'Center viewport on the hero.
-        Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
-        Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
+
+        Center_Viewport_on_the_Hero()
+
+
+        'Viewport.X = OurHero.Rec.X - Viewport.Width \ 2
+        'Viewport.Y = OurHero.Rec.Y - Viewport.Height \ 2
 
         ''Keep viewport on the level.
         'If Viewport.X < Level.Rec.X Then
@@ -3649,9 +3771,17 @@ Public Class Form1
 
                     Walls(Selected_Wall_Index).Rec.X -= 1
 
+                    'Display_Wall_Properties()
+
+                    e.Handled = True
+
+                    Update_Properties = True
+
                 Else
 
                     MoveViewport(DirectionEnum.Left)
+
+                    e.Handled = True
 
                 End If
 
@@ -3667,15 +3797,24 @@ Public Class Form1
 
                 MoveRight = True
 
+
             Else
 
                 If IsWallSelected = True Then
 
                     Walls(Selected_Wall_Index).Rec.X += 1
 
+                    e.Handled = True
+
+                    'Display_Wall_Properties()
+
+                    Update_Properties = True
+
                 Else
 
                     MoveViewport(DirectionEnum.Right)
+
+                    e.Handled = True
 
                 End If
 
@@ -3692,8 +3831,16 @@ Public Class Form1
 
                     Walls(Selected_Wall_Index).Rec.Y -= 1
 
+                    e.Handled = True
+
+                    'Display_Wall_Properties()
+
+                    Update_Properties = True
+
                 Else
                     MoveViewport(DirectionEnum.Up)
+
+                    e.Handled = True
 
                 End If
 
@@ -3706,13 +3853,19 @@ Public Class Form1
             Else
                 If IsWallSelected = True Then
 
-                    'Selected_Index
                     Walls(Selected_Wall_Index).Rec.Y += 1
 
+                    e.Handled = True
+
+                    'Display_Wall_Properties()
+
+                    Update_Properties = True
 
                 Else
 
                     MoveViewport(DirectionEnum.Down)
+
+                    e.Handled = True
 
                 End If
 
@@ -3827,6 +3980,9 @@ Public Class Form1
         Magic_Bar_Frame.Width = Viewport.Width \ 4
         Magic_Bar_Frame.Height = 20
 
+        Center_Viewport_on_the_Hero()
+
+
     End Sub
 
     Private Sub Form1_Activated(sender As Object, e As EventArgs) Handles MyBase.Activated
@@ -3882,6 +4038,16 @@ Public Class Form1
 
     Private Sub PictureBox1_MouseDown(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseDown
 
+
+
+        'PictureBox1.Focus()
+
+        'Me.Focus()
+
+        'Me.DataGridView1.ClearSelection()
+
+        '.ClearSelection()
+
         If Editor_On = True Then
 
             'Did the user push down the left mouse button?
@@ -3895,7 +4061,7 @@ Public Class Form1
 
                     'Wall Selection**********************************************************************************************
                     'Has a wall been selected?
-                    If IsWallSelected <> True Then
+                    If IsWallSelected = False Then
                         'No wall is selected.
 
                         'Set pointer origin to the current mouse location.
@@ -3915,6 +4081,9 @@ Public Class Form1
                                     IsWallSelected = True
                                     Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Wall_Index).Rec.X
                                     Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Wall_Index).Rec.Y
+
+                                    Update_Properties = True
+
                                     Exit For
 
                                 End If
@@ -3986,11 +4155,17 @@ Public Class Form1
                                         IsWallSelected = True
                                         Pointer_Offset.X = Pointer_Origin.X - Walls(Selected_Wall_Index).Rec.X
                                         Pointer_Offset.Y = Pointer_Origin.Y - Walls(Selected_Wall_Index).Rec.Y
+
+                                        Update_Properties = True
+
                                         Exit For
 
                                     End If
                                     IsWallSelected = False
                                     Selected_Wall_Index = -1
+
+                                    Update_Properties = True
+                                    'DataGridView1
                                 Next
                             End If
                         End If
@@ -3998,76 +4173,13 @@ Public Class Form1
                     '*************************************************************************************************
 
                     'Floor Selection**********************************************************************************************
-                    'Has a floor been selected?
-                    If IsFloorSelected <> True Then
-                        'No floor is selected.
 
-                        'Set pointer origin to the current mouse location.
-                        Pointer_Origin = e.Location
+                    If IsWallSelected = False Then
 
-                        'Is there at least one floor?
-                        If Floors IsNot Nothing Then
-                            'Yes, there is at least one floor.
-                            Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                            'Go thru every floor in floor in reverse z order.
-                            For Index = UBound(Floors) To 0 Step -1
-                                'Was a floor selected?
-                                If MousePointerInViewPortCooridinates.IntersectsWith(Floors(Index).Rec) Then
-                                    'Yes, a wall was selected.
 
-                                    Selected_Floor_Index = Index
-                                    IsFloorSelected = True
-                                    Pointer_Offset.X = Pointer_Origin.X - Floors(Selected_Floor_Index).Rec.X
-                                    Pointer_Offset.Y = Pointer_Origin.Y - Floors(Selected_Floor_Index).Rec.Y
-                                    Exit For
-
-                                End If
-                                IsFloorSelected = False
-                                Selected_Floor_Index = -1
-                            Next
-                        End If
-
-                    Else
-                        'Yes, a wall is selected.
-
-                        'Control Handle Selection
-                        Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-                        Dim TopLeftControlHandleRec As New Rectangle(Floors(Selected_Floor_Index).Rec.X - 10, Floors(Selected_Floor_Index).Rec.Y - 10, 20, 20)
-                        Dim BottomRightControlHandleRec As New Rectangle(Floors(Selected_Floor_Index).Rec.Right - 10, Floors(Selected_Floor_Index).Rec.Bottom - 10, 20, 20)
-
-                        'Is the user selecting the top-left control handle?
-                        If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
-                            'Yes, the user is selecting the top-left control handle.
-
-                            TopLeftControlHandle_Selected = True
-
-                            Floor_Origin.X = Floors(Selected_Floor_Index).Rec.Right
-                            Floor_Origin.Y = Floors(Selected_Floor_Index).Rec.Bottom
-
-                        Else
-                            'No, the user is not selecting the top-left control handle.
-
-                            TopLeftControlHandle_Selected = False
-
-                        End If
-
-                        'Is the user selecting the botton-right control handle?
-                        If MousePointerRec.IntersectsWith(BottomRightControlHandleRec) = True Then
-                            'Yes, the user is selecting the botton-right control handle.
-
-                            BottomRightControlHandle_Selected = True
-
-                            Floor_Origin.X = Floors(Selected_Floor_Index).Rec.X
-                            Floor_Origin.Y = Floors(Selected_Floor_Index).Rec.Y
-
-                        Else
-                            'No, the user is not selecting the botton-right control handle.
-
-                            BottomRightControlHandle_Selected = False
-
-                        End If
-
-                        If TopLeftControlHandle_Selected = False And BottomRightControlHandle_Selected = False Then
+                        'Has a floor been selected?
+                        If IsFloorSelected = False Then
+                            'No floor is selected.
 
                             'Set pointer origin to the current mouse location.
                             Pointer_Origin = e.Location
@@ -4075,16 +4187,12 @@ Public Class Form1
                             'Is there at least one floor?
                             If Floors IsNot Nothing Then
                                 'Yes, there is at least one floor.
-
-                                'Transform the mouses viewport coordinates into level coordinates.
-                                Dim MousePointerInLevelCoordinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
-
-                                'Go thru every floor in floors in reverse order.
+                                Dim MousePointerInViewPortCooridinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                                'Go thru every floor in floor in reverse z order.
                                 For Index = UBound(Floors) To 0 Step -1
-
                                     'Was a floor selected?
-                                    If MousePointerInLevelCoordinates.IntersectsWith(Floors(Index).Rec) Then
-                                        'Yes, a floor was selected.
+                                    If MousePointerInViewPortCooridinates.IntersectsWith(Floors(Index).Rec) Then
+                                        'Yes, a wall was selected.
 
                                         Selected_Floor_Index = Index
                                         IsFloorSelected = True
@@ -4097,7 +4205,80 @@ Public Class Form1
                                     Selected_Floor_Index = -1
                                 Next
                             End If
+
+                        Else
+                            'Yes, a floor is selected.
+
+                            'Control Handle Selection
+                            Dim MousePointerRec As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+                            Dim TopLeftControlHandleRec As New Rectangle(Floors(Selected_Floor_Index).Rec.X - 10, Floors(Selected_Floor_Index).Rec.Y - 10, 20, 20)
+                            Dim BottomRightControlHandleRec As New Rectangle(Floors(Selected_Floor_Index).Rec.Right - 10, Floors(Selected_Floor_Index).Rec.Bottom - 10, 20, 20)
+
+                            'Is the user selecting the top-left control handle?
+                            If MousePointerRec.IntersectsWith(TopLeftControlHandleRec) = True Then
+                                'Yes, the user is selecting the top-left control handle.
+
+                                TopLeftControlHandle_Selected = True
+
+                                Floor_Origin.X = Floors(Selected_Floor_Index).Rec.Right
+                                Floor_Origin.Y = Floors(Selected_Floor_Index).Rec.Bottom
+
+                            Else
+                                'No, the user is not selecting the top-left control handle.
+
+                                TopLeftControlHandle_Selected = False
+
+                            End If
+
+                            'Is the user selecting the botton-right control handle?
+                            If MousePointerRec.IntersectsWith(BottomRightControlHandleRec) = True Then
+                                'Yes, the user is selecting the botton-right control handle.
+
+                                BottomRightControlHandle_Selected = True
+
+                                Floor_Origin.X = Floors(Selected_Floor_Index).Rec.X
+                                Floor_Origin.Y = Floors(Selected_Floor_Index).Rec.Y
+
+                            Else
+                                'No, the user is not selecting the botton-right control handle.
+
+                                BottomRightControlHandle_Selected = False
+
+                            End If
+
+                            If TopLeftControlHandle_Selected = False And BottomRightControlHandle_Selected = False Then
+
+                                'Set pointer origin to the current mouse location.
+                                Pointer_Origin = e.Location
+
+                                'Is there at least one floor?
+                                If Floors IsNot Nothing Then
+                                    'Yes, there is at least one floor.
+
+                                    'Transform the mouses viewport coordinates into level coordinates.
+                                    Dim MousePointerInLevelCoordinates As New Rectangle(e.X + Viewport.X, e.Y + Viewport.Y, 1, 1)
+
+                                    'Go thru every floor in floors in reverse order.
+                                    For Index = UBound(Floors) To 0 Step -1
+
+                                        'Was a floor selected?
+                                        If MousePointerInLevelCoordinates.IntersectsWith(Floors(Index).Rec) Then
+                                            'Yes, a floor was selected.
+
+                                            Selected_Floor_Index = Index
+                                            IsFloorSelected = True
+                                            Pointer_Offset.X = Pointer_Origin.X - Floors(Selected_Floor_Index).Rec.X
+                                            Pointer_Offset.Y = Pointer_Origin.Y - Floors(Selected_Floor_Index).Rec.Y
+                                            Exit For
+
+                                        End If
+                                        IsFloorSelected = False
+                                        Selected_Floor_Index = -1
+                                    Next
+                                End If
+                            End If
                         End If
+
                     End If
                     '*************************************************************************************************
 
@@ -4204,6 +4385,20 @@ Public Class Form1
 
         End If
 
+        'If IsWallSelected = False And IsFloorSelected = False Then
+
+        '    If Me.DataGridView1.Visible = True Then
+        '        Me.DataGridView1.Visible = False
+        '    End If
+
+        'Else
+
+        '    If Me.DataGridView1.Visible = False Then
+        '        Me.DataGridView1.Visible = True
+        '    End If
+
+        'End If
+
     End Sub
 
     Private Sub PictureBox1_MouseUp(sender As Object, e As MouseEventArgs) Handles PictureBox1.MouseUp
@@ -4292,6 +4487,8 @@ Public Class Form1
                                 Walls(Selected_Wall_Index).Rec.X = e.X - Pointer_Offset.X
                                 Walls(Selected_Wall_Index).Rec.Y = e.Y - Pointer_Offset.Y
 
+                                Update_Properties = True
+
                             ElseIf TopLeftControlHandle_Selected = True Then
 
                                 'Move point
@@ -4313,6 +4510,8 @@ Public Class Form1
 
                                 Walls(Selected_Wall_Index).Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
 
+                                Update_Properties = True
+
                             ElseIf BottomRightControlHandle_Selected = True Then
 
                                 'Which point is the top?
@@ -4332,6 +4531,8 @@ Public Class Form1
                                 Walls(Selected_Wall_Index).Rec.Width = Abs(Wall_Origin.X - (e.X + Viewport.X))
 
                                 Walls(Selected_Wall_Index).Rec.Height = Abs(Wall_Origin.Y - (e.Y + Viewport.Y))
+
+                                Update_Properties = True
 
                             End If
 
@@ -4390,6 +4591,12 @@ Public Class Form1
 
             End If
         End If
+
+        'If IsWallSelected = True Then
+
+        'Display_Wall_Properties()
+
+        'End If
 
     End Sub
 
@@ -4731,6 +4938,7 @@ Public Class Form1
                 Write(File_Number, Floors(Floor_Index).Rec.Height)
 
                 Write(File_Number, Floors(Floor_Index).Color.ToArgb) 'Convert ARGB color to integer color.
+                'Write(File_Number, Floor.Color.ToArgb) 'Convert ARGB color to integer color.
                 Write(File_Number, Floors(Floor_Index).OutlineColor.ToArgb) 'Convert ARGB color to integer color.
 
                 Write(File_Number, Floors(Floor_Index).MapColor.ToArgb) 'Convert ARGB color to integer color.
@@ -5085,8 +5293,45 @@ Public Class Form1
 
     End Sub
 
+    Private Sub Timer4_Tick(sender As Object, e As EventArgs) Handles Timer4.Tick
+
+        If Update_Properties = True Then
 
 
+            If IsWallSelected = True Then
+
+                Display_Wall_Properties()
+
+                Me.DataGridView1.ClearSelection()
+
+            Else
+
+                Display_Blank_Properties()
+
+
+            End If
+
+            Update_Properties = False
+
+        End If
+
+        'If PictureBox1.Focus = True Then
+
+        '    Me.DataGridView1.ClearSelection()
+
+        'End If
+
+    End Sub
+
+    Private Sub Splitter1_SplitterMoved(sender As Object, e As SplitterEventArgs) Handles Splitter1.SplitterMoved
+
+        Center_Viewport_on_the_Hero()
+
+    End Sub
+
+    Private Sub PictureBox1_Resize(sender As Object, e As EventArgs) Handles PictureBox1.Resize
+
+    End Sub
 End Class
 
 Public Enum MCI_NOTIFY As Integer

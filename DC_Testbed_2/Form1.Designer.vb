@@ -38,8 +38,12 @@ Partial Class Form1
         Me.MenuItemPointer = New System.Windows.Forms.ToolStripMenuItem()
         Me.MenuItemWall = New System.Windows.Forms.ToolStripMenuItem()
         Me.Floor_Menu = New System.Windows.Forms.ToolStripMenuItem()
+        Me.DataGridView1 = New System.Windows.Forms.DataGridView()
+        Me.Splitter1 = New System.Windows.Forms.Splitter()
+        Me.Timer4 = New System.Windows.Forms.Timer(Me.components)
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
+        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Timer1
@@ -53,10 +57,10 @@ Partial Class Form1
         '
         'PictureBox1
         '
-        Me.PictureBox1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.PictureBox1.Dock = System.Windows.Forms.DockStyle.Left
         Me.PictureBox1.Location = New System.Drawing.Point(0, 31)
         Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(900, 487)
+        Me.PictureBox1.Size = New System.Drawing.Size(666, 487)
         Me.PictureBox1.TabIndex = 0
         Me.PictureBox1.TabStop = False
         '
@@ -133,11 +137,38 @@ Partial Class Form1
         Me.Floor_Menu.Size = New System.Drawing.Size(205, 30)
         Me.Floor_Menu.Text = "Floor"
         '
+        'DataGridView1
+        '
+        Me.DataGridView1.AllowUserToAddRows = False
+        Me.DataGridView1.AllowUserToDeleteRows = False
+        Me.DataGridView1.BackgroundColor = System.Drawing.SystemColors.ControlLight
+        Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.DataGridView1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.DataGridView1.Location = New System.Drawing.Point(666, 31)
+        Me.DataGridView1.Name = "DataGridView1"
+        Me.DataGridView1.RowHeadersWidth = 56
+        Me.DataGridView1.RowTemplate.Height = 32
+        Me.DataGridView1.Size = New System.Drawing.Size(234, 487)
+        Me.DataGridView1.TabIndex = 2
+        '
+        'Splitter1
+        '
+        Me.Splitter1.Location = New System.Drawing.Point(666, 31)
+        Me.Splitter1.Name = "Splitter1"
+        Me.Splitter1.Size = New System.Drawing.Size(10, 487)
+        Me.Splitter1.TabIndex = 3
+        Me.Splitter1.TabStop = False
+        '
+        'Timer4
+        '
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(9.0!, 23.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(900, 518)
+        Me.Controls.Add(Me.Splitter1)
+        Me.Controls.Add(Me.DataGridView1)
         Me.Controls.Add(Me.PictureBox1)
         Me.Controls.Add(Me.MenuStrip1)
         Me.KeyPreview = True
@@ -147,6 +178,7 @@ Partial Class Form1
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
+        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -167,4 +199,7 @@ Partial Class Form1
     Friend WithEvents Save_Menu As ToolStripMenuItem
     Friend WithEvents Open_Menu As ToolStripMenuItem
     Friend WithEvents Floor_Menu As ToolStripMenuItem
+    Friend WithEvents DataGridView1 As DataGridView
+    Friend WithEvents Splitter1 As Splitter
+    Friend WithEvents Timer4 As Timer
 End Class
