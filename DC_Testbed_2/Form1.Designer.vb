@@ -41,6 +41,7 @@ Partial Class Form1
         Me.DataGridView1 = New System.Windows.Forms.DataGridView()
         Me.Splitter1 = New System.Windows.Forms.Splitter()
         Me.Timer4 = New System.Windows.Forms.Timer(Me.components)
+        Me.ColorDialog1 = New System.Windows.Forms.ColorDialog()
         CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -202,4 +203,5 @@ Partial Class Form1
     Friend WithEvents DataGridView1 As DataGridView
     Friend WithEvents Splitter1 As Splitter
     Friend WithEvents Timer4 As Timer
+    Friend WithEvents ColorDialog1 As ColorDialog
 End Class

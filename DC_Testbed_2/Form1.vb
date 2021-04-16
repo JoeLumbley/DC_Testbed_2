@@ -532,21 +532,26 @@ Public Class Form1
 
                 PropertyNames(4) = "Color"
                 'PropertyValues(4) = Color.Blue.ToArgb.ToString
-                PropertyValues(4) = Walls(Selected_Wall_Index).Color.ToArgb.ToString
+                'PropertyValues(4) = Walls(Selected_Wall_Index).Color.ToArgb.ToString
+                PropertyValues(4) = ""
 
                 dtable.Rows.Add(PropertyNames(0), PropertyValues(0))
                 dtable.Rows.Add(PropertyNames(1), PropertyValues(1))
                 dtable.Rows.Add(PropertyNames(2), PropertyValues(2))
                 dtable.Rows.Add(PropertyNames(3), PropertyValues(3))
                 dtable.Rows.Add(PropertyNames(4), PropertyValues(4))
+
                 dtable.AcceptChanges()
 
                 .DataSource = dtable
 
                 .ColumnHeadersVisible = True
 
+                .Columns("Properties").SortMode = DataGridViewColumnSortMode.NotSortable
+                .Columns("Wall " & Selected_Wall_Index.ToString).SortMode = DataGridViewColumnSortMode.NotSortable
 
-
+                .Rows(4).Cells(1).Style.BackColor = Walls(Selected_Wall_Index).Color
+                .Rows(4).Cells(1).ReadOnly = True
 
             End With
 
@@ -1384,7 +1389,7 @@ Public Class Form1
                     WallInViewportCoordinates.Y = Walls(index).Rec.Y - Viewport.Y
 
                     'Draw wall hit box.
-                    g.FillRectangle(New SolidBrush(Wall.Color), WallInViewportCoordinates)
+                    g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
 
                     'Draw wall outline.
                     g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
@@ -3980,7 +3985,11 @@ Public Class Form1
         Magic_Bar_Frame.Width = Viewport.Width \ 4
         Magic_Bar_Frame.Height = 20
 
-        Center_Viewport_on_the_Hero()
+        If Editor_On = False Then
+
+            Center_Viewport_on_the_Hero()
+        End If
+
 
 
     End Sub
@@ -5332,6 +5341,107 @@ Public Class Form1
     Private Sub PictureBox1_Resize(sender As Object, e As EventArgs) Handles PictureBox1.Resize
 
     End Sub
+
+    Private Sub DataGridView1_CellValueChanged(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellValueChanged
+
+        If IsWallSelected = True Then
+
+            'Dim X As Integer
+            'Dim Y As Integer
+            'Dim Width As Integer
+            'Dim Height As Integer
+
+            'Dim Color As Color
+
+            If e.ColumnIndex = 1 Then
+
+                If e.RowIndex = 0 Then
+                    Try
+                        Walls(Selected_Wall_Index).Rec.X = CInt(DataGridView1.Rows(0).Cells(1).Value)
+                    Catch ex As Exception
+                        DataGridView1.Rows(0).Cells(1).Value = Walls(Selected_Wall_Index).Rec.X.ToString
+                    End Try
+                End If
+
+                If e.RowIndex = 1 Then
+                    Try
+                        Walls(Selected_Wall_Index).Rec.Y = CInt(DataGridView1.Rows(1).Cells(1).Value)
+                    Catch ex As Exception
+                        DataGridView1.Rows(1).Cells(1).Value = Walls(Selected_Wall_Index).Rec.Y
+                    End Try
+                End If
+
+                If e.RowIndex = 2 Then
+                    Try
+                        Walls(Selected_Wall_Index).Rec.Width = CInt(DataGridView1.Rows(2).Cells(1).Value)
+                    Catch ex As Exception
+                        DataGridView1.Rows(2).Cells(1).Value = Walls(Selected_Wall_Index).Rec.Width.ToString
+                    End Try
+                End If
+
+                If e.RowIndex = 3 Then
+                    Try
+                        Walls(Selected_Wall_Index).Rec.Height = CInt(DataGridView1.Rows(3).Cells(1).Value)
+                    Catch ex As Exception
+                        DataGridView1.Rows(3).Cells(1).Value = Walls(Selected_Wall_Index).Rec.Height.ToString
+                    End Try
+                End If
+
+                'If e.RowIndex = 4 Then
+                '    Try
+                '        ColorDialog1.ShowDialog()
+                '        ColorDialog1.Color = Walls(Selected_Wall_Index).Color
+
+                '        Walls(Selected_Wall_Index).Color = Color.FromArgb(CInt(DataGridView1.Rows(4).Cells(1).Value))
+                '    Catch ex As Exception
+                '        DataGridView1.Rows(4).Cells(1).Value = Walls(Selected_Wall_Index).Color.ToArgb.ToString
+                '    End Try
+                'End If
+
+            End If
+
+        End If
+
+    End Sub
+
+    Private Sub DataGridView1_CellClick(sender As Object, e As DataGridViewCellEventArgs) Handles DataGridView1.CellClick
+
+
+        If e.ColumnIndex = 1 Then
+
+            'Did the user click the color box?
+            If e.RowIndex = 4 Then
+                'Yes, the user clicked the color box.
+
+                'Deselect the cell so that the user can see the cell color and not the selection color.
+                DataGridView1.ClearSelection()
+
+                'Set the dialog color to the wall color.
+                ColorDialog1.Color = Walls(Selected_Wall_Index).Color
+
+                ColorDialog1.FullOpen = True
+
+                If ColorDialog1.ShowDialog() = DialogResult.OK Then
+
+                    Walls(Selected_Wall_Index).Color = ColorDialog1.Color
+
+                    Update_Properties = True
+
+                    'Deselect the cell so that the user can see the cell color and not the selection color.
+                    'DataGridView1.ClearSelection()
+
+                    'DataGridView1.Rows(4).Cells(0).Selected = True
+
+                End If
+
+
+
+            End If
+
+        End If
+
+    End Sub
+
 End Class
 
 Public Enum MCI_NOTIFY As Integer
