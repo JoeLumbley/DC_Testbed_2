@@ -273,8 +273,8 @@ Public Class Form1
     Private Projectile_Origin As New Point(0, 0)
     Private ProjectileInflight As Boolean = False
     Private Projectile_Brush As New SolidBrush(Color.Yellow)
-    Private Projectile_Max_Distance As Integer = 300
-    Private Projectile_Attack As Integer = 12
+    Private Projectile_Max_Distance As Integer = 700
+    Private Projectile_Attack As Integer = 5
     Private Projectile_Speed As Integer = 30
     Private Projectile_Direction As DirectionEnum
 
@@ -383,7 +383,10 @@ Public Class Form1
         MenuItemShowHideRulers.Checked = True
 
         'OurHero.Rec = New Rectangle(14000, 6000, 90, 90)
-        OurHero.Rec = New Rectangle(0, 0, 90, 90)
+        OurHero.Rec = New Rectangle(1000, 1000, 90, 90)
+        Movement_Target.X = OurHero.Rec.X
+        Movement_Target.Y = OurHero.Rec.Y
+
         OurHero.Color = Color.FromArgb(255, 157, 150, 0)
         OurHero.OutlineColor = Color.FromArgb(255, 255, 242, 0)
         OurHero.MapColor = Color.FromArgb(64, 255, 242, 0)
@@ -461,13 +464,13 @@ Public Class Form1
         GS.AddSound("Not_Enough_Magic", Application.StartupPath & "not_enough_magic.mp3")
 
         'Set set volume 
-        GS.SetVolume("Music", 150)
-        GS.SetVolume("Magic", 500)
+        GS.SetVolume("Music", 100)
+        GS.SetVolume("Magic", 300)
         'GS.SetVolume("Monster", 900)
-        GS.SetVolume("Undead_Move", 500)
-        GS.SetVolume("Undead_Attack", 400)
+        GS.SetVolume("Undead_Move", 400)
+        GS.SetVolume("Undead_Attack", 300)
         GS.SetVolume("Potion_Pickup", 500)
-        GS.SetVolume("Undead_Death", 300)
+        GS.SetVolume("Undead_Death", 200)
         GS.SetVolume("Hero_Move", 300)
         GS.SetVolume("Undead_Hit", 800)
         GS.SetVolume("Hero_Death", 400)
@@ -638,6 +641,9 @@ Public Class Form1
 
                     Draw_Hero_Light(goBuf1, OurHero.Rec)
 
+                    Draw_Projectile_Light(goBuf1)
+
+
                     Draw_Grid(goBuf1)
 
                     Draw_Door(goBuf1)
@@ -722,6 +728,9 @@ Public Class Form1
                     Draw_Floor_Light(goBuf2)
 
                     Draw_Hero_Light(goBuf2, OurHero.Rec)
+
+                    Draw_Projectile_Light(goBuf2)
+
 
                     Draw_Grid(goBuf2)
 
@@ -1620,55 +1629,106 @@ Public Class Form1
             HeroInViewportCoordinates.X = Rec.X - Viewport.X
             HeroInViewportCoordinates.Y = Rec.Y - Viewport.Y
 
+            ''Is the player casting magic?
+            'If ProjectileInflight = True Then
+            '    'Yes, the hero is casting magic.
+
+            '    'Set the heros light rectangle to the size and position of the heros rectangle.
+            '    LightRec = HeroInViewportCoordinates
+
+            '    'Set the heros light rectangle to the size and position of the heros rectangle.
+            '    LightRec.Inflate(500, 500)
+
+            '    'Create a graphics path.
+            '    Dim path As New GraphicsPath()
+
+            '    'Add an ellipse the size and position of the heros light rectangle to the path.
+            '    path.AddEllipse(LightRec)
+
+            '    'Create a path gradient brush
+            '    Dim pgBrush As New PathGradientBrush(path)
+
+            '    'Set the center color of the path gradient brush.
+            '    pgBrush.CenterColor = Color.FromArgb(255, Color.White)
+
+            '    'Set the surrounding colors of the path gradient brush.
+            '    Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
+            '    pgBrush.SurroundColors = list
+
+            '    'Draw the heros light radius.
+            '    g.FillPath(pgBrush, path)
+
+            'Else
+            'No, the player is not casting magic.
+
+            'Set the heros light rectangle to the size and position of the heros rectangle.
+            LightRec = HeroInViewportCoordinates
+
+            'Set the heros light rectangle to the size and position of the heros rectangle.
+            LightRec.Inflate(400, 400)
+
+
+            'Create a graphics path.
+            Dim path As New GraphicsPath()
+
+            'Add an ellipse the size and position of the heros light rectangle to the path.
+            path.AddEllipse(LightRec)
+
+            'Create a path gradient brush.
+            Dim pgBrush As New PathGradientBrush(path)
+
+            'Set the center color of the path gradient brush.
+            pgBrush.CenterColor = Color.FromArgb(64, Color.White)
+
+            'Set the surrounding colors of the path gradient brush.
+            Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
+            pgBrush.SurroundColors = list
+
+            'Draw the heros light radius.
+            g.FillPath(pgBrush, path)
+
+            'End If
+
+
+        End If
+
+    End Sub
+
+    Private Sub Draw_Projectile_Light(g As Graphics)
+
+        'Is the editor off?
+        If Editor_On = False Then
+            'Yes, the editor is off.
+
+            'Transform the projectiles level coorinates into viewport coordinates.
+            Dim ProjectileInViewportCoordinates As Rectangle
+            ProjectileInViewportCoordinates = Projectile
+            ProjectileInViewportCoordinates.X = Projectile.X - Viewport.X
+            ProjectileInViewportCoordinates.Y = Projectile.Y - Viewport.Y
+
             'Is the player casting magic?
             If ProjectileInflight = True Then
                 'Yes, the hero is casting magic.
 
                 'Set the heros light rectangle to the size and position of the heros rectangle.
-                LightRec = HeroInViewportCoordinates
+                'LightRec = ProjectileInViewportCoordinates
 
                 'Set the heros light rectangle to the size and position of the heros rectangle.
-                LightRec.Inflate(500, 500)
+                ProjectileInViewportCoordinates.Inflate(50, 50)
 
                 'Create a graphics path.
                 Dim path As New GraphicsPath()
 
                 'Add an ellipse the size and position of the heros light rectangle to the path.
-                path.AddEllipse(LightRec)
+                path.AddEllipse(ProjectileInViewportCoordinates)
 
                 'Create a path gradient brush
                 Dim pgBrush As New PathGradientBrush(path)
 
                 'Set the center color of the path gradient brush.
-                pgBrush.CenterColor = Color.FromArgb(255, Color.White)
+                pgBrush.CenterColor = Color.FromArgb(64, Color.Yellow)
 
-                'Set the surrounding colors of the path gradient brush.
-                Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
-                pgBrush.SurroundColors = list
 
-                'Draw the heros light radius.
-                g.FillPath(pgBrush, path)
-
-            Else
-                'No, the player is not casting magic.
-
-                'Set the heros light rectangle to the size and position of the heros rectangle.
-                LightRec = HeroInViewportCoordinates
-
-                'Set the heros light rectangle to the size and position of the heros rectangle.
-                LightRec.Inflate(400, 400)
-
-                'Create a graphics path.
-                Dim path As New GraphicsPath()
-
-                'Add an ellipse the size and position of the heros light rectangle to the path.
-                path.AddEllipse(LightRec)
-
-                'Create a path gradient brush.
-                Dim pgBrush As New PathGradientBrush(path)
-
-                'Set the center color of the path gradient brush.
-                pgBrush.CenterColor = Color.FromArgb(90, Color.White)
 
                 'Set the surrounding colors of the path gradient brush.
                 Dim list As Color() = New Color() {Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White), Color.FromArgb(0, Color.White)}
@@ -1681,7 +1741,11 @@ Public Class Form1
 
         End If
 
+
+
     End Sub
+
+
 
     Private Sub Draw_Hero(g As Graphics, Rec As Rectangle)
 
