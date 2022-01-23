@@ -71,7 +71,7 @@ Public Structure MonsterInfo
 
 End Structure
 
-Public Structure WallInfo
+Public Structure Wall_Struct
     Public Rec As Rectangle
     Public Color As Color
     Public OutlineColor As Color
@@ -238,9 +238,9 @@ Public Class Form1
     Private BottomRightControlHandle_Selected As Boolean = False
     Private TopLeftControlHandle_Selected As Boolean = False
 
-    Private Wall As WallInfo
+    Private Wall As Wall_Struct
     Private Wall_Origin As Point
-    Private Walls() As WallInfo
+    Private Walls() As Wall_Struct
 
     Private Floor As Floor_Struct
     Private Floor_Origin As Point
@@ -274,8 +274,8 @@ Public Class Form1
     Private ProjectileInflight As Boolean = False
     Private Projectile_Brush As New SolidBrush(Color.Yellow)
     Private Projectile_Max_Distance As Integer = 700
-    Private Projectile_Attack As Integer = 5
-    Private Projectile_Speed As Integer = 30
+    Private Projectile_Attack As Integer = 6
+    Private Projectile_Speed As Integer = 32
     Private Projectile_Direction As DirectionEnum
 
     Private ShootLeft As Boolean = False
@@ -1332,10 +1332,13 @@ Public Class Form1
 
     Private Sub Draw_Walls(g As Graphics)
 
+        Dim WallInViewportCoordinates As Rectangle
+
         'Is the editor on?
         If Editor_On = False Then
             'No, the editor off. The game is running. - Game On
 
+            'Draw Walls
             'Is there at least one wall?
             If Walls IsNot Nothing Then
                 'Yes, we have at least one wall.
@@ -1343,15 +1346,14 @@ Public Class Form1
                 'Go thur every wall in the walls array. One by one. Start to end.
                 For index = 0 To UBound(Walls)
 
-                    'Transform the wall level coorinates into viewport coordinates.
-                    Dim WallInViewportCoordinates As Rectangle
-                    WallInViewportCoordinates = Walls(index).Rec
-                    WallInViewportCoordinates.X = Walls(index).Rec.X - Viewport.X
-                    WallInViewportCoordinates.Y = Walls(index).Rec.Y - Viewport.Y
-
                     'Is the wall in the viewport?
                     If Walls(index).Rec.IntersectsWith(Viewport) = True Then
                         'Yes, the wall is in the viewport.
+
+                        'Transform the wall level coordinates into viewport coordinates.
+                        WallInViewportCoordinates.X = Walls(index).Rec.X - Viewport.X
+                        WallInViewportCoordinates.Y = Walls(index).Rec.Y - Viewport.Y
+                        WallInViewportCoordinates.Size = Walls(index).Rec.Size
 
                         'Is the wall in the heros light radius?
                         If WallInViewportCoordinates.IntersectsWith(LightRec) = True Then
@@ -1362,7 +1364,7 @@ Public Class Form1
                             g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
 
                             'Draw outline.
-                            g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
+                            'g.DrawRectangle(New Pen(Wall.OutlineColor, 1), WallInViewportCoordinates)
 
                         Else
 
@@ -1384,6 +1386,7 @@ Public Class Form1
         Else
             'Yes, the editor is on. The game is stopped. - Editor On
 
+            'Draw Walls
             'Is there at least one wall?
             If Walls IsNot Nothing Then
                 'Yes, there is at least one wall.
@@ -1391,11 +1394,10 @@ Public Class Form1
                 'Go thru every wall in the walls array. One by one. Start to end.
                 For index = 0 To UBound(Walls)
 
-                    'Transform the wall level coorinates into viewport coordinates.
-                    Dim WallInViewportCoordinates As Rectangle
-                    WallInViewportCoordinates = Walls(index).Rec
+                    'Transform the wall level coordinates into viewport coordinates.
                     WallInViewportCoordinates.X = Walls(index).Rec.X - Viewport.X
                     WallInViewportCoordinates.Y = Walls(index).Rec.Y - Viewport.Y
+                    WallInViewportCoordinates.Size = Walls(index).Rec.Size
 
                     'Draw wall hit box.
                     g.FillRectangle(New SolidBrush(Walls(index).Color), WallInViewportCoordinates)
@@ -1410,14 +1412,15 @@ Public Class Form1
 
             End If
 
-
+            'Draw Selected
+            'Is a wall selected?
             If IsWallSelected = True Then
+                'Yes, a wall is selected.
 
-                'Transform the walls level coorinates into viewport coordinates.
-                Dim WallInViewportCoordinates As Rectangle
-                WallInViewportCoordinates = Walls(Selected_Wall_Index).Rec
+                'Transform the walls level coordinates into viewport coordinates.
                 WallInViewportCoordinates.X = Walls(Selected_Wall_Index).Rec.X - Viewport.X
                 WallInViewportCoordinates.Y = Walls(Selected_Wall_Index).Rec.Y - Viewport.Y
+                WallInViewportCoordinates.Size = Walls(Selected_Wall_Index).Rec.Size
 
                 'Draw selection outline.
                 g.DrawRectangle(New Pen(Color.White, 5), WallInViewportCoordinates)
@@ -1814,19 +1817,19 @@ Public Class Form1
 
             'Start the level music
             If GS.IsPlaying("Music") = False Then
-                    GS.Play("Music")
-                End If
+                GS.Play("Music")
+            End If
 
-                'Set the title bar text to playing.
-                If Me.Text <> "Dungeon Crawler - Playing" Then
-                    Me.Text = "Dungeon Crawler - Playing"
-                End If
+            'Set the title bar text to playing.
+            If Me.Text <> "Dungeon Crawler - Playing" Then
+                Me.Text = "Dungeon Crawler - Playing"
+            End If
 
-            Else
-                'No, the editor is on. The game is stopped.
+        Else
+            'No, the editor is on. The game is stopped.
 
-                'Stop the level music.
-                GS.Stop("Music")
+            'Stop the level music.
+            GS.Stop("Music")
 
             'Set the title bar text to editing.
             If Me.Text <> "Dungeon Crawler - Editing" Then
@@ -3230,7 +3233,7 @@ Public Class Form1
     Private Sub Do_Hero_Shots()
 
         'Does the hero have enough magic to cast?
-        If OurHero.Magic >= 15 Then
+        If OurHero.Magic >= 10 Then
             'Yes, the hero has enough magic to cast.
 
             'Does the player want to cast a spell and isn't already casting a spell.
@@ -3291,7 +3294,7 @@ Public Class Form1
                 ProjectileInflight = True
 
                 'Subtract the cost of magic.
-                OurHero.Magic -= 15
+                OurHero.Magic -= 10
                 If OurHero.Magic < 1 Then
                     OurHero.Magic = 0
                 End If
@@ -3308,10 +3311,10 @@ Public Class Form1
                 'If MoveLeft = True Or MoveRight = True Or MoveUp = True Or MoveDown = True Then
                 'Yes, the player wants to cast a spell.
 
-                'Play not enough magic dialogue.
-                If GS.IsPlaying("Not_Enough_Magic") = False Then
-                    GS.Play("Not_Enough_Magic")
-                End If
+                ''Play not enough magic dialogue.
+                'If GS.IsPlaying("Not_Enough_Magic") = False Then
+                '    GS.Play("Not_Enough_Magic")
+                'End If
 
             End If
 
@@ -4425,9 +4428,35 @@ Public Class Form1
 
             End If
 
+
             'Did the player push down the right mouse button?
             If e.Button = MouseButtons.Right Then
                 'Yes, the player pushed the right mouse button down.
+                'The player has choosen to cast magic.
+
+                'Does our hero have enough magic to cast?
+                If OurHero.Magic >= 10 Then
+                    'Yes, the hero has enough magic to cast.
+
+                Else
+                    'No, the hero hasn't enough magic to cast.
+
+                    'Play not enough magic dialogue.
+                    If GS.IsPlaying("Not_Enough_Magic") = False Then
+                        GS.Play("Not_Enough_Magic")
+                    End If
+
+                End If
+
+
+
+
+
+
+
+
+
+
 
                 If ProjectileInflight = False Then
 
@@ -4861,7 +4890,7 @@ Public Class Form1
             'No, this is not the last wall.
 
             'Create temporary walls array. Set to the size of the walls array minus one wall.
-            Dim TempWalls(UBound(Walls) - 1) As WallInfo
+            Dim TempWalls(UBound(Walls) - 1) As Wall_Struct
 
             'Create temporary walls array index. Set the temporary array index to the first wall.
             Dim TempIndex As Integer = LBound(Walls)
